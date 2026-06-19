@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Favicon — replace with your own -->
+  <link rel="icon" type="image/png" sizes="32x32" href="static/images/logos/iiith_logo.png">
+  <link rel="shortcut icon" href="static/images/logos/iiith_logo.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="static/images/logos/iiith_logo.png">
+
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DoCoG: Mask-based Multi-Type Grounded Chain-of-Thought for Document QA</title>
+  <meta name="description"
+    content="DoCoG: a mask-based multi-type grounded step-wise Chain-of-Thought architecture for Document QA. ECCV 2026." />
+  <meta property="og:title" content="DoCoG — ECCV 2026" />
+  <meta property="og:description"
+    content="Mask-based Multi-Type Grounded Chain-of-Thought for Document QA. ECCV 2026." />
+  <meta property="og:type" content="website" />
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.4/css/bulma.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,wght@0,400;0,700;1,400&family=Noto+Sans:ital,wght@0,400;0,700;1,400&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body);"></script>
+
+  <style>
+    /* ── Base ── */
+    body { font-family: 'Noto Sans', sans-serif; }
+    .title, h1, h2, h3, h4 { font-family: 'Google Sans', 'Noto Sans', sans-serif; }
+
+    /* ── Navbar ── */
+    .navbar { border-bottom: 1px solid #f0f0f0; }
+
+    /* ── Hero / Header ── */
+    .publication-header { background: #fff; }
+    .publication-title { font-size: 2.1rem !important; font-weight: 700; line-height: 1.25; }
+    .publication-venue {
+      font-size: 1.15rem; font-weight: 700; color: #D8552B;
+      margin-bottom: 0.5rem; letter-spacing: 0.03em;
+    }
+    .author-block a { color: #363636; text-decoration: none; border-bottom: 1px dotted #aaa; }
+    .author-block a:hover { color: #D8552B; border-color: #D8552B; }
+
+    /* ── Sections ── */
+    .section-alt { background: #fafafa; }
+
+    /* ── Teaser ── */
+    .teaser { padding: 1rem 1.5rem 2.5rem; }
+    .teaser img { border-radius: 8px; box-shadow: 0 4px 24px rgba(0,0,0,0.10); }
+
+    /* ── Captions ── */
+    .fig-caption {
+      text-align: center; font-size: 0.9rem; color: #555;
+      margin-top: 0.75rem; line-height: 1.65;
+    }
+    .fig-caption strong { color: #333; }
+
+    /* ── Abstract ── */
+    #abstract .content { font-size: 1rem; line-height: 1.8; color: #363636; }
+
+    /* ── Stat boxes ── */
+    .stat-box {
+      text-align: center; background: #fff; border: 1px solid #e4e4e4;
+      border-radius: 10px; padding: 1.5rem 1rem; height: 100%;
+    }
+    .stat-box .stat-num {
+      font-size: 2rem; font-weight: 700; color: #D8552B;
+      font-family: 'Google Sans', sans-serif;
+    }
+    .stat-box .stat-lbl {
+      font-size: 0.78rem; color: #777; margin-top: 0.2rem; line-height: 1.4;
+    }
+
+    /* ── Results tables ── */
+    .result-table thead { background: #14223E; }
+    .result-table thead th { color: white; }
+    .result-table tr.ours td { font-weight: 700; color: #D8552B; background: #fdf3ef; }
+    .result-table { font-size: 0.85rem; }
+
+    .sota {
+      background: #D8552B; color: white; font-size: 0.58rem; font-weight: 700;
+      padding: 1px 5px; border-radius: 3px; letter-spacing: .05em;
+      text-transform: uppercase; vertical-align: middle; margin-left: 4px;
+    }
+
+    /* ── Method cards ── */
+    .method-card {
+      border: 1.5px solid #e8e8e8; border-radius: 10px; padding: 1.5rem;
+      background: #fff; height: 100%;
+    }
+    .method-card h4 { font-size: 1rem; font-weight: 700; margin-bottom: 0.6rem; }
+
+    /* ── Loss bars ── */
+    .loss-bar { border-left: 4px solid; padding: 0.75rem 1.1rem; border-radius: 0 8px 8px 0; }
+    .loss-bar.rust   { border-color: #D8552B; background: #fdf3ef; }
+    .loss-bar.navy   { border-color: #14223E; background: #f0f2f5; }
+    .loss-bar.green  { border-color: #48c78e; background: #f4fbf7; }
+    .loss-bar.gold   { border-color: #f5a623; background: #fffbf0; }
+    .loss-bar strong  { font-size: 0.92rem; }
+    .loss-bar p       { font-size: 0.83rem; color: #555; margin-top: 0.2rem; }
+
+    /* ── Dataset tags ── */
+    .tag-row { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.75rem; }
+
+    /* ── Coming soon badge ── */
+    .coming-soon {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      background: #fff3cd; border: 1px solid #ffc107; color: #856404;
+      font-size: 0.72rem; font-weight: 600; padding: 0.15rem 0.5rem;
+      border-radius: 4px; letter-spacing: 0.03em; text-transform: uppercase;
+      vertical-align: middle; margin-left: 4px;
+    }
+
+    /* ── BibTeX ── */
+    .bibtex-wrap { background: #f8f8f8; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; }
+    .bibtex-bar {
+      background: #14223E; color: #aaa; font-size: 0.78rem; font-family: monospace;
+      padding: 0.55rem 1rem; display: flex; justify-content: space-between; align-items: center;
+    }
+    .bibtex-bar button {
+      background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+      color: #ddd; border-radius: 4px; padding: 0.2rem 0.6rem; font-size: 0.75rem;
+      cursor: pointer; font-family: sans-serif;
+    }
+    .bibtex-bar button:hover { background: rgba(255,255,255,0.22); color: #fff; }
+    pre.bibtex-code {
+      padding: 1.25rem 1.5rem; font-size: 0.83rem; line-height: 1.75;
+      background: #f8f8f8; margin: 0; white-space: pre-wrap; word-break: break-all;
+    }
+
+    /* ── Footer ── */
+    footer.footer { background: #fafafa; border-top: 1px solid #f0f0f0; }
+    footer .content { font-size: 0.87rem; color: #777; }
+
+    /* ── Institution logos ── */
+    .institution-logos {
+      display: flex; align-items: center; justify-content: center; gap: 3rem;
+      flex-wrap: wrap; margin-top: 2rem; padding: 1.25rem 1.5rem;
+      background: #fdf8f6; border: 1px solid #f0ddd6; border-radius: 12px;
+    }
+    .institution-logos a {
+      display: inline-flex; align-items: center; opacity: 0.9;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+    .institution-logos a:hover { opacity: 1; transform: scale(1.05); }
+    .institution-logos img { height: 72px; width: auto; object-fit: contain; }
+
+    .footer-logos {
+      display: flex; align-items: center; justify-content: center; gap: 2rem;
+      flex-wrap: wrap; margin-bottom: 1.25rem;
+    }
+    .footer-logos a { display: inline-flex; align-items: center; opacity: 0.7; transition: opacity 0.2s ease; }
+    .footer-logos a:hover { opacity: 1; }
+    .footer-logos img { height: 36px; width: auto; object-fit: contain; }
+
+    /* ── Orange circled labels ── */
+    .orange-circle {
+      display: inline-flex; align-items: center; justify-content: center;
+      border: 2px solid #D8552B; color: #D8552B; border-radius: 50%;
+      font-weight: 700; font-size: 0.8rem; width: 1.4em; height: 1.4em; margin: 0 2px;
+    }
+    .orange-circle-wide {
+      display: inline-flex; align-items: center; justify-content: center;
+      border: 2px solid #D8552B; color: #D8552B; border-radius: 12px;
+      font-weight: 700; font-size: 0.8rem; padding: 0 5px; margin: 0 2px;
+    }
+
+    /* ── Table center align ── */
+    .results-table th, .results-table td { text-align: center !important; vertical-align: middle !important; }
+    .results-table th:first-child, .results-table td:first-child { text-align: left !important; }
+
+    /* ── Accent color overrides ── */
+    .accent { color: #D8552B; }
+
+    /* ── Qual boxes ── */
+    .qual-box {
+      background: #fafafa; border: 1px solid #e6e6e6; border-radius: 8px;
+      padding: 12px; display: flex; align-items: center; justify-content: center;
+    }
+    .qual-box img { max-width: 100%; height: auto; object-fit: contain; }
+
+    /* ── GIM feature cards ── */
+    .gim-card {
+      border: 1.5px solid #e4e4e4; border-radius: 10px; padding: 1.3rem;
+      text-align: center; background: #fff; height: 100%;
+    }
+    .gim-card .gim-emoji { font-size: 2rem; margin-bottom: 0.5rem; }
+    .gim-card h4 { font-weight: 700; font-size: 0.95rem; margin-bottom: 0.35rem; }
+    .gim-card p { font-size: 0.82rem; color: #666; }
+
+    .enclosure-banner {
+      text-align: center; background: #fdf3ef; border: 1px solid #f0c9b8;
+      border-radius: 8px; padding: 0.8rem 1.5rem; font-size: 1rem;
+      color: #D8552B; font-weight: 600; margin-top: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+      .publication-title { font-size: 1.5rem !important; }
+      .institution-logos { gap: 1.75rem; padding: 1rem; }
+      .institution-logos img { height: 52px; }
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- ═══════════════ NAVBAR ═══════════════ -->
+<nav class="navbar is-light" role="navigation" aria-label="main navigation">
+  <div class="container">
+    <div class="navbar-brand">
+      <a class="navbar-item has-text-weight-semibold" href="#">DoCoG</a>
+      <a role="button" class="navbar-burger" data-target="navMenu" aria-label="menu">
+        <span></span><span></span><span></span>
+      </a>
+    </div>
+    <div id="navMenu" class="navbar-menu">
+      <div class="navbar-start" style="flex-grow:1;justify-content:center;">
+        <a class="navbar-item" href="#abstract">Abstract</a>
+        <a class="navbar-item" href="#method">Method</a>
+        <a class="navbar-item" href="#results">Results</a>
+        <a class="navbar-item" href="#dataset">Dataset</a>
+        <a class="navbar-item" href="#bibtex">BibTeX</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<section class="hero publication-header">
+  <div class="hero-body">
+    <div class="container is-max-widescreen">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+
+          <p class="publication-venue">ECCV 2026</p>
+          <h1 class="title is-2 publication-title">
+            DoCoG: Mask-based Multi-Type Grounded<br>Chain-of-Thought for Document QA
+          </h1>
+
+          <!-- ── AUTHORS — update names / links ── -->
+          <div class="is-size-5 publication-authors" style="margin-top:1.25rem; line-height:2;">
+            <!-- TODO: Replace with actual author names and links -->
+            <span class="author-block">
+              <a href="#" target="_blank">Author 1</a><sup>1,*</sup>,&ensp;
+            </span>
+            <span class="author-block">
+              <a href="#" target="_blank">Author 2</a><sup>2,*</sup>,&ensp;
+            </span>
+            <span class="author-block">
+              <a href="https://www.linkedin.com/in/hrithiksagar/" target="_blank">
+                Hrithik&nbsp;Sagar&nbsp;Rachakonda</a><sup>2</sup>,&ensp;
+            </span>
+            <span class="author-block">
+              <a href="#" target="_blank">Author 4</a><sup>1,2</sup>
+            </span>
+          </div>
+
+          <div style="margin-top:0.75rem; font-size:1rem; line-height:1.6;">
+            <div style="font-weight:600;">
+              <!-- TODO: Replace with actual affiliations -->
+              <sup>1</sup> Affiliation 1 &nbsp;&nbsp;&nbsp;
+              <sup>2</sup> Affiliation 2
+            </div>
+            <div style="font-size:0.9rem; color:#666;">
+              <sup>*</sup> Equal contribution
+            </div>
+          </div>
+
+          <!-- ── BUTTONS ── -->
+          <div style="margin-top:1.75rem;">
+            <span class="button is-dark is-rounded is-outlined" style="margin:0.2rem; opacity:0.65; cursor:default;" title="Coming soon">
+              <span class="icon"><i class="fas fa-newspaper"></i></span>
+              <span>arXiv <span class="coming-soon">Soon</span></span>
+            </span>
+            <span class="button is-dark is-rounded is-outlined" style="margin:0.2rem; opacity:0.65; cursor:default;" title="Coming soon">
+              <span class="icon"><i class="fab fa-github"></i></span>
+              <span>Code <span class="coming-soon">Soon</span></span>
+            </span>
+            <span class="button is-dark is-rounded is-outlined" style="margin:0.2rem; opacity:0.65; cursor:default;" title="Coming soon">
+              <span class="icon"><i class="fas fa-database"></i></span>
+              <span>Dataset <span class="coming-soon">Soon</span></span>
+            </span>
+            <span class="button is-dark is-rounded is-outlined" style="margin:0.2rem; opacity:0.65; cursor:default;" title="Coming soon">
+              <span class="icon">🤗</span>
+              <span>Models <span class="coming-soon">Soon</span></span>
+            </span>
+          </div>
+
+          <!-- ── LOGOS — replace with actual paths ── -->
+          <div class="institution-logos">
+            <a href="https://eccv.ecva.net/" target="_blank" rel="noopener noreferrer" title="ECCV 2026">
+              <img src="static/images/logos/eccv_logo.png" alt="ECCV logo" />
+            </a>
+            <!-- TODO: Add your institution logos -->
+            <!--
+            <a href="https://www.iiit.ac.in/" target="_blank" rel="noopener noreferrer" title="IIIT Hyderabad">
+              <img src="static/images/logos/iiith_logo.png" alt="IIIT Hyderabad logo" />
+            </a>
+            -->
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ TEASER ═══════════════ -->
+<div class="teaser">
+  <div class="container is-max-desktop">
+    <img src="static/images/teaser.png" alt="DoCoG teaser figure" style="width:100%;">
+    <p class="fig-caption">
+      <strong>Mask-based Multi-type grounded CoT.</strong>
+      Each example shows a QA pair where the model interleaves
+      <code>[GND]</code> tokens within the CoT
+      (<span class="orange-circle-wide">2a</span>, <span class="orange-circle-wide">2b</span>)
+      and final answer (<span class="orange-circle-wide">2c</span>).
+      Each <code>[GND]</code> predicts a segmentation mask that localizes the evidence used
+      (<span class="orange-circle">1</span>, <span class="orange-circle">2</span>).
+      Evidence spans both text and graphical elements (e.g., flowchart connectors, nodes
+      in <span class="orange-circle">1</span>, chart lines in <span class="orange-circle">2</span>).
+    </p>
+  </div>
+</div>
+
+<!-- ═══════════════ ABSTRACT ═══════════════ -->
+<section class="section" id="abstract">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>
+            Existing methods for Visual Document Question Answering (DocVQA) often predict answers
+            without explicit intermediate analysis or produce ungrounded intermediate steps. The few
+            approaches which employ grounding produce rectangular bounding boxes which fail to
+            accurately represent complex structures such as pie-chart wedges, flowchart nodes, and
+            curved text. We present <strong>DoCoG</strong>, a mask-based multi-type grounded step-wise
+            Chain-of-Thought architecture for Document QA.
+          </p>
+          <p>
+            The model supports multi-type grounding, i.e., it localizes both textual content and
+            fine-grained graphical elements such as legends, pie slices, and flowchart nodes. It
+            generates step-wise intermediate outputs and final answers grounded through precise
+            segmentation masks, enabling consistent evidence alignment. DoCoG integrates a
+            Vision-Language Model with a promptable segmenter via a novel <strong>Grounding Interaction
+            Module (GIM)</strong>. During decoding, special <code>[GND]</code> tokens trigger mask
+            prediction, linking each step and the final answer to supporting evidence. GIM refines
+            <code>[GND]</code> tokens during decoding to improve spatial consistency and alignment.
+          </p>
+          <p>
+            We introduce <strong>DoCoG-QA</strong>, a large-scale diverse dataset comprising 325K
+            documents and 1.5M step-wise grounded QA pairs. We further release
+            <strong>DoCoG-PQA</strong> with 20K preference pairs to improve alignment using Direct
+            Preference Optimization (DPO), and <strong>DoCoG-Bench</strong>, a human-verified benchmark.
+            Experiments show that DoCoG achieves state-of-the-art performance across multiple
+            benchmarks, improving answer accuracy and grounding precision.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ METHOD ═══════════════ -->
+<section class="section section-alt" id="method">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Method</h2>
+
+    <img src="static/images/model_overview.png" alt="DoCoG architecture overview" style="width:100%;">
+    <p class="fig-caption">
+      <strong>DoCoG architecture:</strong>
+      Given a document image \(I\) and question \(q\), the VLM
+      <span class="orange-circle">1</span> encodes visual features and, through its LM head,
+      autoregressively generates step-wise outputs and the final answer interleaved with
+      <code>[GND]</code> tokens <span class="orange-circle">2</span>. The hidden states of the
+      <code>[GND]</code> tokens <span class="orange-circle">3</span> are passed to the
+      Grounding Interaction Module (GIM) <span class="orange-circle">4</span>, which refines them
+      using visual features <span class="orange-circle">6</span> from segmenter
+      <span class="orange-circle">5</span> to produce grounding-aware prompt embeddings.
+      These embeddings are then processed by the segmenter's prompt encoder
+      <span class="orange-circle">7</span> and mask decoder to generate evidence masks
+      (<span class="orange-circle-wide">2c</span>), grounding each step in the document.
+    </p>
+
+    <!-- Key ideas -->
+    <div class="columns" style="margin-top:2.5rem;">
+      <div class="column">
+        <div class="method-card">
+          <h4>🔗 Decoupled Language &amp; Spatial Grounding</h4>
+          <p style="font-size:0.9rem; color:#555; line-height:1.7;">
+            DoCoG <em>decouples</em> language modeling from spatial prediction. The VLM focuses on
+            step-wise reasoning and answer generation, while a dedicated segmentation module handles
+            fine-grained, geometry-aware mask localization — yielding cleaner text outputs and more
+            precise evidence masks.
+          </p>
+        </div>
+      </div>
+      <div class="column">
+        <div class="method-card">
+          <h4>🔄 Grounding Interaction Module (GIM)</h4>
+          <p style="font-size:0.9rem; color:#555; line-height:1.7;">
+            GIM refines <code>[GND]</code> token embeddings through self-attention and
+            cross-attention with visual features from the segmenter. This ensures grounding tokens
+            remain mutually consistent and spatially aligned with the correct document regions,
+            improving grounding fidelity.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step-wise grounding + Multi-type -->
+    <h3 class="title is-4 has-text-centered" style="margin-top:3rem;">Step-wise Multi-Type Grounding</h3>
+    <p class="has-text-centered" style="color:#666; margin-bottom:1.5rem; font-size:0.95rem;">
+      DoCoG generates intermediate reasoning steps and final answers, each grounded to supporting
+      evidence. Evidence spans both textual and graphical elements.
+    </p>
+
+    <div class="columns is-centered">
+      <div class="column is-one-third">
+        <div class="gim-card">
+          <div class="gim-emoji">📝</div>
+          <h4>Textual Evidence</h4>
+          <p>Words, lines, paragraphs, table cells, headers, and form fields</p>
+        </div>
+      </div>
+      <div class="column is-one-third">
+        <div class="gim-card">
+          <div class="gim-emoji">📊</div>
+          <h4>Graphical Elements</h4>
+          <p>Chart bars, lines, pie slices, legends, axis labels, and plot marks</p>
+        </div>
+      </div>
+      <div class="column is-one-third">
+        <div class="gim-card">
+          <div class="gim-emoji">🔀</div>
+          <h4>Structural Elements</h4>
+          <p>Flowchart nodes, connectors, arrows, and diagram components</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="enclosure-banner">
+      Step-wise CoT with <code>[GND]</code> tokens grounds each reasoning step to pixel-accurate evidence masks
+    </div>
+
+    <!-- Qualitative example figure -->
+    <div style="margin-top:2rem; text-align:center;">
+      <img src="static/images/results_figure.png"
+        alt="DoCoG qualitative examples"
+        style="width:100%; max-width:950px; display:block; margin:auto;
+               border-radius:8px; box-shadow:0 4px 18px rgba(0,0,0,0.08);">
+      <p class="fig-caption">
+        <strong>Qualitative examples (Model outputs).</strong>
+        Each example shows DoCoG's step-wise CoT with mask-based, multi-type grounding over
+        both textual and graphical elements. The outputs demonstrate how DoCoG answers complex
+        questions while grounding evidence at intermediate steps and in the final answer.
+      </p>
+    </div>
+
+    <!-- Training Objectives -->
+    <h3 class="title is-4 has-text-centered" style="margin-top:3rem;">Training</h3>
+    <p class="has-text-centered" style="color:#666; margin-bottom:0.5rem; font-size:0.95rem;">
+      DoCoG is trained in two stages: SFT on DoCoG-QA, then DPO on DoCoG-PQA.
+    </p>
+    <p class="has-text-centered" style="font-size:0.98rem; font-family:monospace; color:#333; margin-bottom:1.5rem;">
+      𝓛<sub>total</sub> = λ<sub>lm</sub>𝓛<sub>lm</sub> + λ<sub>seg</sub>𝓛<sub>seg</sub>
+      + λ<sub>anchor</sub>𝓛<sub>anchor</sub>
+    </p>
+
+    <div class="columns is-multiline">
+      <div class="column is-half">
+        <div class="loss-bar navy">
+          <strong>𝓛<sub>lm</sub> — Language Modeling</strong>
+          <p>Cross-entropy over all output tokens for accurate step-wise CoT generation and answer prediction.</p>
+        </div>
+      </div>
+      <div class="column is-half">
+        <div class="loss-bar green">
+          <strong>𝓛<sub>seg</sub> — Segmentation (Dice + BCE)</strong>
+          <p>Supervises mask predictions against pixel-level ground truth for each <code>[GND]</code> token.</p>
+        </div>
+      </div>
+      <div class="column is-half">
+        <div class="loss-bar rust">
+          <strong>𝓛<sub>anchor</sub> — Anchor Loss</strong>
+          <p>Preserves <code>[GND]</code> token compatibility with the frozen segmenter during DPO, preventing mask degradation.</p>
+        </div>
+      </div>
+      <div class="column is-half">
+        <div class="loss-bar gold">
+          <strong>DPO — Preference Optimization</strong>
+          <p>Trained on DoCoG-PQA (20K pairs) to align step quality, answer accuracy, and grounding fidelity jointly.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ DATASET ═══════════════ -->
+<section class="section" id="dataset">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">DoCoG-QA Dataset &amp; Benchmark</h2>
+
+    <div class="notification is-warning is-light has-text-centered" style="margin-top:1rem; margin-bottom:2rem;">
+      <i class="fas fa-clock"></i>&ensp;
+      <strong>Dataset release coming soon.</strong>
+      We are preparing the DoCoG-QA dataset, DoCoG-PQA preference pairs, and DoCoG-Bench for public release.
+    </div>
+
+    <div class="columns" style="margin-top:0.5rem;">
+      <!-- DoCoG-QA -->
+      <div class="column">
+        <div style="border:1.5px solid #e0e0e0; border-radius:12px; padding:2rem; background:#fff; height:100%;">
+          <h3 class="title is-4" style="color:#D8552B; margin-bottom:0.5rem;">📦 DoCoG-QA</h3>
+          <p style="font-size:0.9rem; color:#555; margin-bottom:1.5rem;">
+            Large-scale training dataset with step-wise grounded Chain-of-Thought, built through a
+            unified data engine across diverse document types with pixel-level mask supervision.
+          </p>
+          <div class="columns is-mobile is-multiline is-centered">
+            <div class="column is-one-quarter-mobile is-one-quarter">
+              <div class="stat-box"><div class="stat-num">325K</div><div class="stat-lbl">Documents</div></div>
+            </div>
+            <div class="column is-one-quarter-mobile is-one-quarter">
+              <div class="stat-box"><div class="stat-num">1.5M</div><div class="stat-lbl">QA Pairs</div></div>
+            </div>
+            <div class="column is-one-quarter-mobile is-one-quarter">
+              <div class="stat-box"><div class="stat-num">Step</div><div class="stat-lbl">wise CoT</div></div>
+            </div>
+            <div class="column is-one-quarter-mobile is-one-quarter">
+              <div class="stat-box"><div class="stat-num">Mask</div><div class="stat-lbl">Grounding</div></div>
+            </div>
+          </div>
+          <div class="tag-row" style="justify-content:center;">
+            <span class="tag is-light">Charts</span>
+            <span class="tag is-light">Tables</span>
+            <span class="tag is-light">Flowcharts</span>
+            <span class="tag is-light">Documents</span>
+            <span class="tag is-light">Curved text</span>
+            <span class="tag is-light">Forms</span>
+            <span class="tag is-light">Reports</span>
+            <span class="tag is-light">Webpages</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- DoCoG-Bench -->
+      <div class="column">
+        <div style="border:1.5px solid #e0e0e0; border-radius:12px; padding:2rem; background:#fff; height:100%;">
+          <h3 class="title is-4" style="color:#D8552B; margin-bottom:0.5rem;">📊 DoCoG-Bench</h3>
+          <p style="font-size:0.9rem; color:#555; margin-bottom:1.5rem;">
+            Human-verified benchmark for jointly evaluating answer accuracy, step-wise CoT quality,
+            and mask-level grounding fidelity across diverse document types.
+          </p>
+          <div class="columns is-mobile is-multiline is-centered">
+            <div class="column is-one-quarter-mobile is-one-quarter">
+              <div class="stat-box"><div class="stat-num">3K</div><div class="stat-lbl">Documents</div></div>
+            </div>
+            <div class="column is-one-quarter-mobile is-one-quarter">
+              <div class="stat-box"><div class="stat-num">10K</div><div class="stat-lbl">QA Pairs</div></div>
+            </div>
+            <div class="column is-one-quarter-mobile is-one-quarter">
+              <div class="stat-box"><div class="stat-num">Human</div><div class="stat-lbl">Verified</div></div>
+            </div>
+            <div class="column is-one-quarter-mobile is-one-quarter">
+              <div class="stat-box"><div class="stat-num">4</div><div class="stat-lbl">Doc Types</div></div>
+            </div>
+          </div>
+          <div class="tag-row" style="justify-content:center;">
+            <span class="tag is-info is-light">AQ (Answer Quality)</span>
+            <span class="tag is-info is-light">CQ (CoT Quality)</span>
+            <span class="tag is-info is-light">GQ (Grounding Quality)</span>
+            <span class="tag is-info is-light">G-Eval</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DoCoG-PQA -->
+    <div style="border:1.5px solid #e0e0e0; border-radius:12px; padding:1.5rem 2rem; background:#fff; margin-top:1rem; text-align:center;">
+      <h3 class="title is-5" style="color:#D8552B; margin-bottom:0.3rem;">🎯 DoCoG-PQA</h3>
+      <p style="font-size:0.9rem; color:#555;">
+        20K preference pairs for Direct Preference Optimization (DPO), constructed using a reward function
+        combining AQ, CQ, and GQ scores to select chosen/rejected samples for alignment training.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ RESULTS ═══════════════ -->
+<section class="section section-alt" id="results">
+  <div class="container is-max-widescreen">
+    <h2 class="title is-3 has-text-centered">Results</h2>
+    <p class="has-text-centered" style="color:#666; margin-bottom:2rem;">
+      DoCoG consistently outperforms both commercial and open-source baselines across all evaluated benchmarks.
+      While commercial models achieve competitive answer accuracy, their grounding quality remains substantially lower.
+    </p>
+
+    <!-- Highlight stats -->
+    <div class="columns is-centered" style="margin-bottom:2rem;">
+      <div class="column is-2">
+        <div class="stat-box"><div class="stat-num">85.8</div><div class="stat-lbl">AQ (All)<br><em>DoCoG-Bench</em></div></div>
+      </div>
+      <div class="column is-2">
+        <div class="stat-box"><div class="stat-num">82.0</div><div class="stat-lbl">CQ (All)<br><em>DoCoG-Bench</em></div></div>
+      </div>
+      <div class="column is-2">
+        <div class="stat-box"><div class="stat-num">81.9</div><div class="stat-lbl">GQ<sub>fa</sub> (All)<br><em>DoCoG-Bench</em></div></div>
+      </div>
+    </div>
+
+    <!-- ── Unified Table 6 ── -->
+    <h3 class="title is-4 has-text-centered" style="margin-top:2rem;">Unified Evaluation on DoCoG-Bench</h3>
+    <p class="has-text-centered" style="color:#666; margin-bottom:1rem; font-size:0.9rem;">
+      AQ and GQ<sub>fa</sub> per split. The "All" block reports AQ, G<sub>eval</sub>, CQ, GQ<sub>all</sub>, and GQ<sub>fa</sub>.
+    </p>
+
+    <div class="table-container">
+      <table class="table is-striped is-hoverable is-fullwidth results-table result-table" style="font-size:0.82rem;">
+        <thead>
+          <tr>
+            <th rowspan="2">Model</th>
+            <th rowspan="2">Params</th>
+            <th colspan="2">Charts</th>
+            <th colspan="2">Flowcharts</th>
+            <th colspan="2">Docs</th>
+            <th colspan="2">Tables</th>
+            <th colspan="5">All</th>
+          </tr>
+          <tr>
+            <th>AQ</th><th>GQ<sub>fa</sub></th>
+            <th>AQ</th><th>GQ<sub>fa</sub></th>
+            <th>AQ</th><th>GQ<sub>fa</sub></th>
+            <th>AQ</th><th>GQ<sub>fa</sub></th>
+            <th>AQ</th><th>G<sub>eval</sub></th><th>CQ</th><th>GQ<sub>all</sub></th><th>GQ<sub>fa</sub></th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Commercial -->
+          <tr style="background:#f7f7ff;">
+            <td>GPT-5</td><td>–</td>
+            <td>82.4</td><td>3.8</td><td>78.1</td><td>4.0</td><td>86.7</td><td>5.0</td><td>84.3</td><td>6.4</td>
+            <td>82.9</td><td><u>84.8</u></td><td><u>76.8</u></td><td>2.4</td><td>4.8</td>
+          </tr>
+          <tr style="background:#f7f7ff;">
+            <td>Sonnet 4.5</td><td>–</td>
+            <td>79.1</td><td>5.7</td><td>75.3</td><td><u>13.3</u></td><td>83.8</td><td>6.8</td><td>81.6</td><td>2.6</td>
+            <td>79.9</td><td>80.5</td><td>71.3</td><td>3.3</td><td>7.1</td>
+          </tr>
+          <tr style="background:#f7f7ff;">
+            <td>Gemini 3 Pro</td><td>–</td>
+            <td><u>83.2</u></td><td>11.2</td><td><u>79.4</u></td><td>10.1</td><td><u>88.1</u></td><td>11.7</td><td><u>86.0</u></td><td>12.6</td>
+            <td><u>84.2</u></td><td>84.1</td><td>75.2</td><td>15.4</td><td>11.4</td>
+          </tr>
+          <tr style="background:#f7f7ff;">
+            <td>Gemini 3 Flash</td><td>–</td>
+            <td>79.6</td><td><u>12.7</u></td><td>75.8</td><td>12.5</td><td>84.5</td><td><u>35.3</u></td><td>82.4</td><td><u>33.9</u></td>
+            <td>80.6</td><td>82.8</td><td>73.4</td><td><u>32.8</u></td><td><u>23.6</u></td>
+          </tr>
+          <!-- Open source -->
+          <tr style="background:#fff5f5;">
+            <td>InternVL 3.5</td><td>8B</td>
+            <td>73.4</td><td>4.1</td><td>67.2</td><td>1.5</td><td>77.1</td><td>7.2</td><td>78.0</td><td>3.2</td>
+            <td>73.9</td><td>78.2</td><td>33.2</td><td>2.9</td><td>4.0</td>
+          </tr>
+          <tr style="background:#fff5f5;">
+            <td>Qwen3-VL</td><td>8B</td>
+            <td>75.2</td><td>3.9</td><td>69.4</td><td>11.0</td><td>78.6</td><td>6.3</td><td>79.5</td><td>0.9</td>
+            <td>75.7</td><td>77.6</td><td>35.9</td><td>3.5</td><td>5.5</td>
+          </tr>
+          <tr style="background:#fff5f5;">
+            <td>VisualCoT</td><td>7B</td>
+            <td>52.3</td><td>5.5</td><td>44.6</td><td>3.9</td><td>59.7</td><td>3.6</td><td>55.4</td><td>1.0</td>
+            <td>53.0</td><td>52.1</td><td>51.2</td><td>2.4</td><td>3.5</td>
+          </tr>
+          <!-- Fine-tuned -->
+          <tr style="background:#f5f0ff;">
+            <td>InternVL 3.5 FT</td><td>8B</td>
+            <td>74.6</td><td>65.0</td><td>68.8</td><td>67.9</td><td>82.0</td><td>64.3</td><td>79.1</td><td>61.2</td>
+            <td>76.1</td><td>80.4</td><td>72.2</td><td>61.4</td><td>64.6</td>
+          </tr>
+          <tr style="background:#f5f0ff;">
+            <td>Qwen3-VL FT</td><td>8B</td>
+            <td>75.8</td><td>63.9</td><td>70.2</td><td>66.9</td><td>83.4</td><td>61.2</td><td>80.6</td><td>55.6</td>
+            <td>77.5</td><td>79.8</td><td>74.8</td><td>57.8</td><td>61.9</td>
+          </tr>
+          <!-- Ours -->
+          <tr class="ours">
+            <td><strong>DoCoG (Ours)</strong></td><td>9B</td>
+            <td><strong>83.5</strong></td><td><strong>80.3</strong></td>
+            <td><strong>82.2</strong></td><td><strong>79.2</strong></td>
+            <td><strong>89.7</strong></td><td><strong>85.4</strong></td>
+            <td><strong>87.8</strong></td><td><strong>82.7</strong></td>
+            <td><strong>85.8</strong></td><td><strong>85.2</strong></td><td><strong>82.0</strong></td>
+            <td><strong>78.2</strong></td><td><strong>81.9</strong><span class="sota">SOTA</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ── Per-domain tables ── -->
+    <h3 class="title is-4 has-text-centered" style="margin-top:3rem;">Per-Domain Benchmark Results</h3>
+
+    <div class="columns is-multiline" style="margin-top:1.5rem;">
+      <!-- Charts -->
+      <div class="column is-half">
+        <h4 class="title is-5 has-text-centered">📊 Charts</h4>
+        <div class="table-container">
+          <table class="table is-striped is-hoverable is-fullwidth results-table result-table">
+            <thead><tr><th>Model</th><th>ChartQA</th><th>CQA-Pro</th><th>ChartBench</th><th>CharXiv</th><th>Bench AQ</th></tr></thead>
+            <tbody>
+              <tr><td>GPT-5</td><td>89.0</td><td>42.7</td><td>69.4</td><td>76.3</td><td>82.4</td></tr>
+              <tr><td>Chart-R1</td><td>91.0</td><td>44.0</td><td>34.1</td><td>46.2</td><td>74.2</td></tr>
+              <tr><td>InternVL 3.5</td><td>86.7</td><td>34.7</td><td>51.4</td><td>68.8</td><td>73.4</td></tr>
+              <tr><td>Qwen3-VL</td><td>89.6</td><td>32.9</td><td>65.3</td><td>64.7</td><td>75.2</td></tr>
+              <tr class="ours"><td><strong>DoCoG</strong></td><td><strong>92.7</strong></td><td><strong>52.1</strong></td><td><strong>79.4</strong></td><td>73.1</td><td><strong>83.5</strong></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Flowcharts -->
+      <div class="column is-half">
+        <h4 class="title is-5 has-text-centered">🔀 Flowcharts</h4>
+        <div class="table-container">
+          <table class="table is-striped is-hoverable is-fullwidth results-table result-table">
+            <thead><tr><th>Model</th><th>FlowVQA</th><th>AI2D</th><th>MISS-QA</th><th>Bench AQ</th><th>Bench GQ<sub>fa</sub></th></tr></thead>
+            <tbody>
+              <tr><td>GPT-5</td><td>91.9</td><td>89.5</td><td>71.7</td><td>78.1</td><td>4.0</td></tr>
+              <tr><td>InternVL 3.5</td><td>78.4</td><td>84.0</td><td>48.5</td><td>67.2</td><td>1.5</td></tr>
+              <tr><td>Qwen3-VL</td><td>81.0</td><td>85.7</td><td>46.2</td><td>69.4</td><td>11.0</td></tr>
+              <tr class="ours"><td><strong>DoCoG</strong></td><td><strong>85.5</strong></td><td>88.3</td><td><strong>78.4</strong></td><td><strong>82.2</strong></td><td><strong>79.2</strong></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tables -->
+      <div class="column is-half">
+        <h4 class="title is-5 has-text-centered">📋 Tables</h4>
+        <div class="table-container">
+          <table class="table is-striped is-hoverable is-fullwidth results-table result-table">
+            <thead><tr><th>Model</th><th>TabFact</th><th>WTQ</th><th>TabMWP</th><th>Bench AQ</th><th>Bench GQ<sub>fa</sub></th></tr></thead>
+            <tbody>
+              <tr><td>GPT-5</td><td>87.7</td><td>78.8</td><td>93.7</td><td>84.3</td><td>6.4</td></tr>
+              <tr><td>InternVL 3.5</td><td>78.1</td><td>55.6</td><td>55.7</td><td>78.0</td><td>3.2</td></tr>
+              <tr><td>Qwen3-VL</td><td>81.8</td><td>57.4</td><td>65.6</td><td>79.5</td><td>0.9</td></tr>
+              <tr class="ours"><td><strong>DoCoG</strong></td><td><strong>89.4</strong></td><td><strong>64.4</strong></td><td>80.7</td><td><strong>87.8</strong></td><td><strong>82.7</strong></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Documents -->
+      <div class="column is-half">
+        <h4 class="title is-5 has-text-centered">📄 Documents</h4>
+        <div class="table-container">
+          <table class="table is-striped is-hoverable is-fullwidth results-table result-table">
+            <thead><tr><th>Model</th><th>DOGR F1g</th><th>MMDB IoU</th><th>VCoT</th><th>BD F1g</th><th>Bench AQ</th></tr></thead>
+            <tbody>
+              <tr><td>GPT-5</td><td>3.6</td><td>9.3</td><td>89.7</td><td>5.4</td><td>86.7</td></tr>
+              <tr><td>Gemini 3 Pro</td><td>65.3</td><td>55.4</td><td>87.4</td><td>73.5</td><td>88.1</td></tr>
+              <tr><td>Qwen3-VL</td><td>27.6</td><td>28.7</td><td>86.7</td><td>44.5</td><td>78.6</td></tr>
+              <tr class="ours"><td><strong>DoCoG</strong></td><td><strong>75.4</strong></td><td><strong>70.5</strong></td><td>88.9</td><td><strong>85.4</strong></td><td><strong>89.7</strong></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ BIBTEX ═══════════════ -->
+<section class="section" id="bibtex">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">BibTeX</h2>
+    <div class="bibtex-wrap">
+      <div class="bibtex-bar">
+        <span>bibtex</span>
+        <button onclick="navigator.clipboard.writeText(document.getElementById('bib').textContent)">
+          <i class="fas fa-copy"></i>&ensp;Copy
+        </button>
+      </div>
+      <pre class="bibtex-code" id="bib">@inproceedings{docog2026eccv,
+  title     = {DoCoG: Mask-based Multi-Type Grounded Chain-of-Thought for Document QA},
+  author    = {TODO: Add authors},
+  booktitle = {European Conference on Computer Vision (ECCV)},
+  year      = {2026}
+}</pre>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ FOOTER ═══════════════ -->
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+      <div class="footer-logos">
+        <a href="https://eccv.ecva.net/" target="_blank" rel="noopener noreferrer" title="ECCV 2026">
+          <img src="static/images/logos/eccv_logo.png" alt="ECCV logo" />
+        </a>
+        <!-- TODO: Add institution logos -->
+      </div>
+
+      <!-- Visitor Map — replace with your own Flag Counter code -->
+      <!--
+      <p style="margin-top:1rem;"><strong>Visitor Map</strong></p>
+      <a href="https://info.flagcounter.com/xxxx" target="_blank">
+        <img src="https://s01.flagcounter.com/map/xxxx/size_s/txt_000000/border_CCCCCC/pageviews_1/viewers_0/flags_0/" alt="Flag Counter">
+      </a>
+      -->
+
+      <p style="margin-top:1.5rem;">
+        This page was built using the
+        <a href="https://github.com/eliahuhorwitz/Academic-project-page-template">Academic Project Page Template</a>
+        which was adopted from the <a href="https://nerfies.github.io">Nerfies</a> project page.<br>
+        This website is licensed under a
+        <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">
+          Creative Commons Attribution-ShareAlike 4.0 International License</a>.
+      </p>
+    </div>
+  </div>
+</footer>
+
+<!-- Burger menu toggle -->
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const burger = document.querySelector('.navbar-burger');
+    const menu = document.getElementById(burger.dataset.target);
+    burger.addEventListener('click', () => {
+      burger.classList.toggle('is-active');
+      menu.classList.toggle('is-active');
+    });
+  });
+</script>
+
+</body>
+</html>

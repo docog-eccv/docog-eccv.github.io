@@ -4,6 +4,7 @@ Official project page for **DoCoG: Mask-based Multi-Type Grounded Chain-of-Thoug
 
 🌐 **Website:** [https://docog-eccv.github.io](https://docog-eccv.github.io)
 
+Files Structure: 
 ```
 docog-eccv.github.io/
 ├── index.html
@@ -17,4 +18,5 @@ docog-eccv.github.io/
             ├── eccv_logo.png
             ├── iiith_logo.png       (or .jpg)
             └── bharatgen_logo.png
+
 ```

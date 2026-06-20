@@ -65,14 +65,19 @@
     /* ── Stat boxes ── */
     .stat-box {
       text-align: center; background: #fff; border: 1px solid #e4e4e4;
-      border-radius: 10px; padding: 1.5rem 1rem; height: 100%;
+      border-radius: 10px; padding: 1.1rem 0.6rem; height: 100%;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
     }
     .stat-box .stat-num {
       font-size: 2rem; font-weight: 700; color: #D8552B;
       font-family: 'Google Sans', sans-serif;
+      word-break: break-word; line-height: 1.1; max-width: 100%;
+    }
+    .stat-box .stat-num.stat-num-text {
+      font-size: 1.3rem; line-height: 1.2;
     }
     .stat-box .stat-lbl {
-      font-size: 0.78rem; color: #777; margin-top: 0.2rem; line-height: 1.4;
+      font-size: 0.78rem; color: #777; margin-top: 0.3rem; line-height: 1.4;
     }
 
     /* ── Results tables ── */
@@ -541,10 +546,10 @@
               <div class="stat-box"><div class="stat-num">1.5M</div><div class="stat-lbl">QA Pairs</div></div>
             </div>
             <div class="column is-one-quarter-mobile is-one-quarter">
-              <div class="stat-box"><div class="stat-num">Step</div><div class="stat-lbl">wise CoT</div></div>
+              <div class="stat-box"><div class="stat-num stat-num-text">Step-wise</div><div class="stat-lbl">CoT</div></div>
             </div>
             <div class="column is-one-quarter-mobile is-one-quarter">
-              <div class="stat-box"><div class="stat-num">Mask</div><div class="stat-lbl">Grounding</div></div>
+              <div class="stat-box"><div class="stat-num stat-num-text">Mask-level</div><div class="stat-lbl">Grounding</div></div>
             </div>
           </div>
           <div class="tag-row" style="justify-content:center;">
@@ -576,7 +581,7 @@
               <div class="stat-box"><div class="stat-num">10K</div><div class="stat-lbl">QA Pairs</div></div>
             </div>
             <div class="column is-one-quarter-mobile is-one-quarter">
-              <div class="stat-box"><div class="stat-num">Human</div><div class="stat-lbl">Verified</div></div>
+              <div class="stat-box"><div class="stat-num stat-num-text">Human</div><div class="stat-lbl">Verified</div></div>
             </div>
             <div class="column is-one-quarter-mobile is-one-quarter">
               <div class="stat-box"><div class="stat-num">4</div><div class="stat-lbl">Doc Types</div></div>

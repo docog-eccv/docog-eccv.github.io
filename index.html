@@ -22,24 +22,24 @@
     onload="renderMathInElement(document.body);"></script>
 
 <style>
-/* ── Tokens ─────────────────────────────────────────── */
+/* ══════════════════════════════════════════════
+   DESIGN TOKENS
+   Single accent: indigo #4F46E5
+   No orange anywhere.
+══════════════════════════════════════════════ */
 :root {
-  /* Paper brand – used ONLY on research-result elements
-     (venue badge, "Ours" rows/bars, SOTA chip, brand initial) */
-  --r:     #D8552B;
-  --r100:  #fdf3ef;
-  --r200:  #f8d5c8;
+  /* Accent – indigo – used for ALL highlights,
+     UI chrome, "Ours" elements, badges */
+  --ink:    #4F46E5;
+  --ink50:  #EEF2FF;
+  --ink100: #E0E7FF;
+  --ink200: #C7D2FE;
+  --ink700: #3730A3;
 
-  /* Apple UI blue – every interactive chrome element */
-  --a:     #0071E3;
-  --a50:   #f0f6ff;
-  --a100:  #e1effe;
-  --a200:  #c3dffd;
+  /* Table header */
+  --navy: #14223E;
 
-  /* Neutral table-header navy */
-  --navy:  #14223E;
-
-  /* Apple typography grays */
+  /* Apple-system grays */
   --t1: #1d1d1f;
   --t2: #6e6e73;
   --t3: #aeaeb2;
@@ -53,13 +53,12 @@
   --b1: #e8e8ed;
 
   /* Shadows */
-  --s0: 0 1px 3px rgba(0,0,0,.05);
   --s1: 0 2px 8px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
   --s2: 0 8px 24px rgba(0,0,0,.08), 0 2px 6px rgba(0,0,0,.04);
-  --s3: 0 20px 60px rgba(0,0,0,.10), 0 6px 14px rgba(0,0,0,.06);
+  --s3: 0 20px 60px rgba(0,0,0,.11), 0 6px 16px rgba(0,0,0,.06);
 
   /* Radius */
-  --ra: 8px;  --rb: 14px;  --rc: 20px;
+  --ra: 8px; --rb: 14px; --rc: 20px;
 
   /* Easing */
   --e1: cubic-bezier(0.25,0.46,0.45,0.94);
@@ -71,14 +70,14 @@ html { scroll-behavior:smooth; }
 body {
   font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
   color:var(--t1); background:var(--bg); line-height:1.6;
-  -webkit-font-smoothing:antialiased;
+  -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
 }
 code {
   font-family:'JetBrains Mono',monospace; font-size:.85em;
   background:var(--bg2); padding:.1em .4em; border-radius:5px; color:var(--navy);
 }
 
-/* ── Nav ──────────────────────────────────────────── */
+/* ── Nav ── */
 .nav {
   position:sticky; top:0; z-index:100;
   backdrop-filter:saturate(180%) blur(20px);
@@ -86,218 +85,220 @@ code {
   background:rgba(255,255,255,.88);
   border-bottom:1px solid rgba(0,0,0,.07);
 }
-.nav-in {
-  max-width:1100px; margin:0 auto; padding:0 1.5rem;
-  display:flex; align-items:center; justify-content:space-between; height:52px;
-}
-.nav-brand {
-  font-weight:800; font-size:1.05rem; letter-spacing:-.02em;
-  color:var(--t1); text-decoration:none;
-}
-.nav-brand span { color:var(--r); }
+.nav-in { max-width:1100px; margin:0 auto; padding:0 1.5rem; display:flex; align-items:center; justify-content:space-between; height:52px; }
+.nav-brand { font-weight:800; font-size:1.05rem; letter-spacing:-.02em; color:var(--t1); text-decoration:none; }
+.nav-brand span { color:var(--ink); }
 .nav-links { display:flex; list-style:none; }
-.nav-links a {
-  display:block; padding:.35rem .75rem;
-  color:var(--t2); text-decoration:none;
-  font-size:.875rem; font-weight:500; border-radius:var(--ra);
-  transition:color .2s, background .2s;
-}
+.nav-links a { display:block; padding:.35rem .75rem; color:var(--t2); text-decoration:none; font-size:.875rem; font-weight:500; border-radius:var(--ra); transition:color .2s,background .2s; }
 .nav-links a:hover { color:var(--t1); background:var(--bg2); }
 .nav-burger { display:none; background:none; border:none; cursor:pointer; padding:.5rem; font-size:1.2rem; color:var(--t1); }
 
-/* ── Hero ─────────────────────────────────────────── */
+/* ── Hero ── */
 .hero { padding:5rem 1.5rem 4rem; text-align:center; position:relative; overflow:hidden; }
 .hero::before {
   content:''; position:absolute; inset:0; pointer-events:none;
   background:
-    radial-gradient(ellipse 80% 60% at 50% -15%, rgba(0,113,227,.07) 0%, transparent 60%),
-    radial-gradient(ellipse 55% 45% at 85% 85%, rgba(20,34,62,.04) 0%, transparent 50%);
+    radial-gradient(ellipse 80% 60% at 50% -15%, rgba(79,70,229,.08) 0%, transparent 60%),
+    radial-gradient(ellipse 55% 45% at 85% 85%, rgba(99,102,241,.05) 0%, transparent 50%);
 }
 .hi { max-width:860px; margin:0 auto; position:relative; }
 
-.badge {
-  display:inline-flex; align-items:center; gap:.4rem;
-  background:var(--r100); color:var(--r);
-  font-size:.77rem; font-weight:700; padding:.28rem .9rem;
-  border-radius:100px; letter-spacing:.06em; text-transform:uppercase;
-  margin-bottom:1.5rem; border:1px solid var(--r200);
-}
-.hero-title {
-  font-size:clamp(2rem,5vw,3.2rem); font-weight:800;
-  line-height:1.13; letter-spacing:-.03em; color:var(--t1); margin-bottom:1.5rem;
-}
-.hero-title .accent { color:var(--r); }
+.badge { display:inline-flex; align-items:center; gap:.4rem; background:var(--ink50); color:var(--ink); font-size:.77rem; font-weight:700; padding:.28rem .9rem; border-radius:100px; letter-spacing:.06em; text-transform:uppercase; margin-bottom:1.5rem; border:1px solid var(--ink200); }
+.hero-title { font-size:clamp(2rem,5vw,3.2rem); font-weight:800; line-height:1.13; letter-spacing:-.03em; color:var(--t1); margin-bottom:1.5rem; }
+.hero-title .accent { color:var(--ink); }
 .authors { font-size:.95rem; color:var(--t2); line-height:2.1; margin-bottom:.5rem; }
 .authors a { color:var(--t1); text-decoration:none; border-bottom:1px dotted var(--b0); transition:color .2s,border-color .2s; }
-.authors a:hover { color:var(--r); border-color:var(--r); }
-.authors sup { color:var(--r); font-size:.7em; }
+.authors a:hover { color:var(--ink); border-color:var(--ink); }
+.authors sup { color:var(--ink); font-size:.7em; }
 .affil { font-size:.88rem; color:var(--t2); margin-bottom:2rem; }
 .affil strong { color:var(--t1); }
 
-/* buttons */
 .btn-row { display:flex; flex-wrap:wrap; gap:.5rem; justify-content:center; margin-bottom:2.5rem; }
-.btn {
-  display:inline-flex; align-items:center; gap:.4rem;
-  padding:.5rem 1.15rem; border-radius:100px;
-  font-size:.875rem; font-weight:600; font-family:inherit;
-  text-decoration:none; cursor:pointer; border:none;
-  transition:transform .2s var(--e1),box-shadow .2s var(--e1);
-}
+.btn { display:inline-flex; align-items:center; gap:.4rem; padding:.5rem 1.15rem; border-radius:100px; font-size:.875rem; font-weight:600; font-family:inherit; text-decoration:none; cursor:pointer; border:none; transition:transform .2s var(--e1),box-shadow .2s var(--e1); }
 .btn:hover:not(.btn-dis) { transform:translateY(-1px); }
 .btn-dis { opacity:.5; cursor:not-allowed; background:#fff; color:var(--t2); border:1.5px solid var(--b0); }
-.cs { font-size:.61rem; font-weight:700; background:#ffc107; color:#664d00; padding:.1rem .4rem; border-radius:4px; text-transform:uppercase; letter-spacing:.05em; }
+.cs { font-size:.61rem; font-weight:700; background:#f3f4f6; color:var(--t2); padding:.1rem .4rem; border-radius:4px; text-transform:uppercase; letter-spacing:.05em; }
 
-/* logos */
-.logos {
-  display:flex; align-items:center; justify-content:center; gap:2.5rem; flex-wrap:wrap;
-  padding:1.5rem 2rem; margin-top:2.5rem;
-  background:var(--a50); border:1px solid var(--a200); border-radius:var(--rc);
-}
+.logos { display:flex; align-items:center; justify-content:center; gap:2.5rem; flex-wrap:wrap; padding:1.5rem 2rem; margin-top:2.5rem; background:var(--ink50); border:1px solid var(--ink200); border-radius:var(--rc); }
 .logos a { opacity:.8; transition:opacity .2s,transform .2s var(--e1); display:flex; }
 .logos a:hover { opacity:1; transform:scale(1.06); }
 .logos img { height:62px; width:auto; object-fit:contain; }
 
-/* ── Teaser ──────────────────────────────────────── */
+/* ── Teaser ── */
 .teaser-s { padding:0 1.5rem 3.5rem; }
 .teaser-w { max-width:920px; margin:0 auto; }
 .teaser-img { width:100%; border-radius:var(--rc); box-shadow:var(--s3); }
-.fig-cap {
-  text-align:center; font-size:.875rem; color:var(--t2);
-  margin-top:.9rem; line-height:1.75; max-width:820px; margin-inline:auto;
-}
+.fig-cap { text-align:center; font-size:.875rem; color:var(--t2); margin-top:.9rem; line-height:1.75; max-width:820px; margin-inline:auto; }
 .fig-cap strong { color:var(--t1); }
 
-/* ── Generic section ─────────────────────────────── */
+/* ── Sections ── */
 .section { padding:5rem 1.5rem; }
 .section-alt { background:var(--bg2); }
 .si  { max-width:860px;  margin:0 auto; }
 .siw { max-width:1100px; margin:0 auto; }
 
-/* Apple-style section label = BLUE */
-.s-lbl {
-  text-align:center; font-size:.72rem; font-weight:700;
-  letter-spacing:.1em; text-transform:uppercase;
-  color:var(--a);                    /* ← Apple blue */
-  margin-bottom:.4rem;
-}
-.s-title {
-  font-size:clamp(1.75rem,4vw,2.4rem); font-weight:800;
-  letter-spacing:-.03em; color:var(--t1); text-align:center; margin-bottom:1rem;
-}
+.s-lbl { text-align:center; font-size:.72rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--ink); margin-bottom:.4rem; }
+.s-title { font-size:clamp(1.75rem,4vw,2.4rem); font-weight:800; letter-spacing:-.03em; color:var(--t1); text-align:center; margin-bottom:1rem; }
 .s-sub { text-align:center; color:var(--t2); font-size:.95rem; margin-bottom:2.5rem; }
 
-/* ── Abstract ────────────────────────────────────── */
+/* ── Abstract ── */
 .abs-body { font-size:1.03rem; color:var(--t1); line-height:1.87; max-width:720px; margin:0 auto; }
 .abs-body p+p { margin-top:1.25rem; }
 .abs-body strong { color:var(--navy); }
 
-/* ── Method ──────────────────────────────────────── */
+/* ── Method ── */
 .method-img { width:100%; border-radius:var(--rb); box-shadow:var(--s2); }
 .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
-.m-card {
-  background:#fff; border:1.5px solid var(--b1); border-radius:var(--rb);
-  padding:1.5rem; box-shadow:var(--s1);
-  transition:transform .28s var(--e1),box-shadow .28s var(--e1);
-}
+.m-card { background:#fff; border:1.5px solid var(--b1); border-radius:var(--rb); padding:1.5rem; box-shadow:var(--s1); transition:transform .28s var(--e1),box-shadow .28s var(--e1); }
 .m-card:hover { transform:translateY(-4px); box-shadow:var(--s2); }
 .m-card h4 { font-size:.95rem; font-weight:700; margin-bottom:.5rem; }
 .m-card p  { font-size:.875rem; color:var(--t2); line-height:1.7; }
+
 .grid3 { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin:1.5rem 0; }
-.f-card {
-  background:#fff; border:1.5px solid var(--b1); border-radius:var(--rb);
-  padding:1.5rem; text-align:center; box-shadow:var(--s1);
-  transition:transform .28s var(--e1),box-shadow .28s var(--e1);
-}
+.f-card { background:#fff; border:1.5px solid var(--b1); border-radius:var(--rb); padding:1.5rem; text-align:center; box-shadow:var(--s1); transition:transform .28s var(--e1),box-shadow .28s var(--e1); }
 .f-card:hover { transform:translateY(-4px); box-shadow:var(--s2); }
 .f-em { font-size:2rem; margin-bottom:.5rem; }
 .f-card h4 { font-size:.88rem; font-weight:700; margin-bottom:.3rem; }
 .f-card p  { font-size:.8rem; color:var(--t2); line-height:1.6; }
-.enc {
-  text-align:center; background:var(--r100); border:1px solid var(--r200);
-  border-radius:var(--rb); padding:.95rem 2rem;
-  font-size:.95rem; color:var(--r); font-weight:600; margin:1.5rem 0;
-}
-.enc code { background:rgba(216,85,43,.12); }
+
+.enc { text-align:center; background:var(--ink50); border:1px solid var(--ink200); border-radius:var(--rb); padding:.95rem 2rem; font-size:.95rem; color:var(--ink); font-weight:600; margin:1.5rem 0; }
+.enc code { background:rgba(79,70,229,.1); color:var(--ink700); }
+
 .loss4 { display:grid; grid-template-columns:1fr 1fr; gap:.8rem; margin-top:1.5rem; }
 .lc { border-radius:var(--ra); padding:1rem 1.25rem; border-left:4px solid; transition:transform .2s var(--e1); }
 .lc:hover { transform:translateX(3px); }
-.lc.navy  { border-color:var(--navy); background:#f0f2f5; }
-.lc.green { border-color:#30d158;    background:#f4fbf7; }
-.lc.rust  { border-color:var(--r);   background:var(--r100); }
-.lc.gold  { border-color:#f5a623;    background:#fffbf0; }
+.lc.navy  { border-color:var(--navy);  background:#f0f2f5; }
+.lc.green { border-color:#30d158;      background:#f4fbf7; }
+.lc.ink   { border-color:var(--ink);   background:var(--ink50); }
+.lc.gold  { border-color:#f5a623;      background:#fffbf0; }
 .lc strong { font-size:.875rem; display:block; margin-bottom:.25rem; }
 .lc p      { font-size:.8rem; color:var(--t2); line-height:1.65; }
 .math-line { text-align:center; font-family:'JetBrains Mono',monospace; font-size:1.05rem; margin-bottom:1.5rem; }
 
-/* ── Dataset ─────────────────────────────────────── */
-.ds-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:1.5rem; }
-.ds-card {
-  background:#fff; border:1.5px solid var(--b1); border-radius:var(--rc);
-  padding:2rem; box-shadow:var(--s1);
-  transition:transform .28s var(--e1),box-shadow .28s var(--e1);
+/* ══════════════════════════════════════════════
+   QUALITATIVE CAROUSEL — Apple premium style
+══════════════════════════════════════════════ */
+.carousel-outer { max-width:980px; margin:2.5rem auto 0; }
+
+/* Stage */
+.car-stage {
+  position:relative; border-radius:18px; overflow:hidden;
+  background:#09090f;
+  box-shadow:0 32px 80px rgba(0,0,0,.22), 0 8px 24px rgba(0,0,0,.14);
+  aspect-ratio:4/3;
+  user-select:none;
 }
+.car-track {
+  display:flex; height:100%;
+  transition:transform .52s var(--e1);
+  will-change:transform;
+}
+.car-slide {
+  flex:0 0 100%; height:100%;
+  display:flex; align-items:center; justify-content:center;
+}
+.car-slide img { width:100%; height:100%; object-fit:contain; display:block; }
+
+/* Counter badge */
+.car-ctr {
+  position:absolute; top:14px; right:14px;
+  background:rgba(0,0,0,.52); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+  color:rgba(255,255,255,.9); font-size:.72rem; font-weight:700;
+  padding:.3rem .72rem; border-radius:100px; letter-spacing:.06em;
+  font-variant-numeric:tabular-nums; pointer-events:none;
+  border:1px solid rgba(255,255,255,.12);
+}
+
+/* Frosted arrows — show on stage hover */
+.car-btn {
+  position:absolute; top:50%; transform:translateY(-50%);
+  width:46px; height:46px; border-radius:50%;
+  background:rgba(255,255,255,.13); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
+  border:1px solid rgba(255,255,255,.22); color:#fff;
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+  font-size:.9rem; z-index:10;
+  opacity:0; transition:opacity .25s,background .2s,transform .2s var(--e1);
+}
+.car-stage:hover .car-btn { opacity:1; }
+.car-btn:hover { background:rgba(255,255,255,.28); transform:translateY(-50%) scale(1.08); }
+.car-btn:active { transform:translateY(-50%) scale(.96); }
+.car-btn.prev { left:14px; }
+.car-btn.next { right:14px; }
+
+/* Caption */
+.car-cap-wrap { min-height:72px; padding:1.1rem 1rem .4rem; display:flex; align-items:center; justify-content:center; }
+.car-cap-text { font-size:.9rem; color:var(--t2); line-height:1.65; text-align:center; max-width:680px; transition:opacity .28s var(--e1),transform .28s var(--e1); }
+.car-cap-text.fade { opacity:0; transform:translateY(6px); }
+.car-cap-text strong { color:var(--t1); font-weight:700; }
+
+/* Pill-dot indicator (Apple style — active dot elongates) */
+.car-dots { display:flex; gap:.45rem; justify-content:center; margin:.6rem 0 .9rem; }
+.car-dot { height:7px; width:7px; border-radius:100px; background:var(--b0); cursor:pointer; transition:width .3s var(--e2),background .25s; }
+.car-dot.on { width:22px; background:var(--ink); }
+.car-dot:hover:not(.on) { background:var(--b0); filter:brightness(.8); }
+
+/* Thumbnail strip */
+.car-thumbs { display:flex; gap:.55rem; justify-content:center; flex-wrap:wrap; }
+.car-thumb {
+  width:80px; height:56px; border-radius:9px; overflow:hidden;
+  cursor:pointer; border:2px solid transparent; opacity:.52;
+  transition:opacity .22s,border-color .22s,transform .22s var(--e1),box-shadow .22s;
+}
+.car-thumb.on { opacity:1; border-color:var(--ink); box-shadow:0 0 0 3px var(--ink100); }
+.car-thumb:hover:not(.on) { opacity:.82; transform:scale(1.05); }
+.car-thumb img { width:100%; height:100%; object-fit:cover; display:block; }
+
+/* ── Dataset ── */
+.ds-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:1.5rem; }
+.ds-card { background:#fff; border:1.5px solid var(--b1); border-radius:var(--rc); padding:2rem; box-shadow:var(--s1); transition:transform .28s var(--e1),box-shadow .28s var(--e1); }
 .ds-card:hover { transform:translateY(-3px); box-shadow:var(--s2); }
-.ds-card h3 { font-size:1.1rem; font-weight:800; color:var(--r); margin-bottom:.35rem; }
+.ds-card h3 { font-size:1.1rem; font-weight:800; color:var(--ink); margin-bottom:.35rem; }
 .ds-desc { font-size:.85rem; color:var(--t2); line-height:1.65; margin-bottom:1.25rem; }
 .mg { display:grid; grid-template-columns:repeat(4,1fr); gap:.5rem; margin-bottom:1rem; }
 .ms { background:var(--bg2); border-radius:var(--ra); padding:.7rem .4rem; text-align:center; }
-.ms .n { font-size:1.3rem; font-weight:800; color:var(--r); letter-spacing:-.02em; line-height:1; }
+.ms .n { font-size:1.3rem; font-weight:800; color:var(--ink); letter-spacing:-.02em; line-height:1; }
 .ms .l { font-size:.7rem; color:var(--t3); margin-top:.2rem; line-height:1.3; }
 .tags { display:flex; flex-wrap:wrap; gap:.3rem; }
 .tag { background:var(--bg2); border:1px solid var(--b1); color:var(--t2); font-size:.73rem; padding:.2rem .6rem; border-radius:100px; font-weight:500; }
-.tag.bl { background:var(--a50); border-color:var(--a200); color:var(--a); }
+.tag.bl { background:var(--ink50); border-color:var(--ink200); color:var(--ink); }
 .ds-solo { background:#fff; border:1.5px solid var(--b1); border-radius:var(--rc); padding:1.5rem 2rem; margin-top:1rem; text-align:center; box-shadow:var(--s1); }
-.ds-solo h3 { font-size:1rem; font-weight:800; color:var(--r); margin-bottom:.3rem; }
+.ds-solo h3 { font-size:1rem; font-weight:800; color:var(--ink); margin-bottom:.3rem; }
 .ds-solo p  { font-size:.875rem; color:var(--t2); max-width:580px; margin:0 auto; }
-.coming-note { background:#fffbeb; border:1px solid #fde68a; border-radius:var(--rb); padding:.85rem 1.25rem; font-size:.88rem; color:#92400e; display:flex; align-items:center; gap:.5rem; margin-bottom:1.5rem; }
+.coming-note { background:#f8faff; border:1px solid var(--ink200); border-radius:var(--rb); padding:.85rem 1.25rem; font-size:.88rem; color:var(--ink700); display:flex; align-items:center; gap:.5rem; margin-bottom:1.5rem; }
 
-/* ── Results: stat chips ──────────────────────────── */
+/* ── Results chips ── */
 .chips { display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; margin-bottom:3rem; }
-.chip {
-  background:#fff; border:1.5px solid var(--b1); border-radius:var(--rb);
-  padding:1.25rem 1.75rem; text-align:center; box-shadow:var(--s1); min-width:140px;
-  transition:transform .28s var(--e1),box-shadow .28s var(--e1);
-}
+.chip { background:#fff; border:1.5px solid var(--b1); border-radius:var(--rb); padding:1.25rem 1.75rem; text-align:center; box-shadow:var(--s1); min-width:140px; transition:transform .28s var(--e1),box-shadow .28s var(--e1); }
 .chip:hover { transform:translateY(-4px); box-shadow:var(--s2); }
-.chip .n { font-size:2.2rem; font-weight:800; color:var(--r); letter-spacing:-.03em; line-height:1; }
+.chip .n { font-size:2.2rem; font-weight:800; color:var(--ink); letter-spacing:-.03em; line-height:1; }
 .chip .l { font-size:.77rem; color:var(--t2); margin-top:.35rem; line-height:1.4; font-weight:500; }
 
-/* ── Main interactive chart ───────────────────────── */
-.chart-box {
-  background:#fff; border:1.5px solid var(--b1); border-radius:var(--rc);
-  overflow:hidden; box-shadow:var(--s1); margin-bottom:3rem;
-}
+/* ── Main interactive chart ── */
+.chart-box { background:#fff; border:1.5px solid var(--b1); border-radius:var(--rc); overflow:hidden; box-shadow:var(--s1); margin-bottom:3rem; }
 .chart-head { padding:1.25rem 1.5rem 0; border-bottom:1px solid var(--b1); }
 .chart-tabs { display:flex; gap:.25rem; overflow-x:auto; scrollbar-width:none; padding-bottom:1px; }
 .chart-tabs::-webkit-scrollbar { display:none; }
-.c-tab {
-  padding:.5rem 1rem; font-size:.82rem; font-weight:600;
-  color:var(--t2); background:none; border:none;
-  border-bottom:2.5px solid transparent; cursor:pointer;
-  font-family:inherit; white-space:nowrap; margin-bottom:-1px;
-  transition:color .18s,border-color .18s;
-}
+.c-tab { padding:.5rem 1rem; font-size:.82rem; font-weight:600; color:var(--t2); background:none; border:none; border-bottom:2.5px solid transparent; cursor:pointer; font-family:inherit; white-space:nowrap; margin-bottom:-1px; transition:color .18s,border-color .18s; }
 .c-tab:hover { color:var(--t1); }
-.c-tab.on { color:var(--a); border-bottom-color:var(--a); } /* ← Apple blue */
+.c-tab.on { color:var(--ink); border-bottom-color:var(--ink); }
 .c-hint { font-size:.72rem; color:var(--t3); padding:.55rem 1.5rem; font-style:italic; }
 .chart-body { padding:.5rem 1.5rem 1.5rem; }
-.c-pane { display:none; }
-.c-pane.on { display:block; }
+.c-pane { display:none; } .c-pane.on { display:block; }
 
-/* bar rows (main chart) */
+/* bar rows */
 .bar-row { display:grid; grid-template-columns:155px 1fr 50px; align-items:center; gap:.75rem; padding:.28rem 0; }
 .bar-name { font-size:.81rem; font-weight:500; color:var(--t1); text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.bar-name.ours { color:var(--r); font-weight:700; }
+.bar-name.ours { color:var(--ink); font-weight:700; }
 .bar-track { background:var(--bg2); border-radius:100px; height:22px; position:relative; overflow:hidden; }
 .bar-fill { height:100%; border-radius:100px; background:linear-gradient(90deg,#c0c0c5,#d0d0d5); width:0%; transition:width .7s var(--e2); position:relative; }
-.bar-fill.ours { background:linear-gradient(90deg,var(--r),#e8714e); box-shadow:0 2px 8px rgba(216,85,43,.35); }
+.bar-fill.ours { background:linear-gradient(90deg,var(--ink),#818cf8); box-shadow:0 2px 8px rgba(79,70,229,.38); }
 .bar-track:hover .bar-fill { filter:brightness(1.1); }
 .bar-tip { position:absolute; right:7px; top:50%; transform:translateY(-50%); font-size:.7rem; font-weight:700; color:rgba(255,255,255,.95); opacity:0; transition:opacity .15s; pointer-events:none; }
 .bar-track:hover .bar-tip { opacity:1; }
 .bar-score { font-size:.81rem; font-weight:700; color:var(--t2); }
-.bar-score.ours { color:var(--r); }
+.bar-score.ours { color:var(--ink); }
 
-/* ── Tables ──────────────────────────────────────── */
+/* ── Tables ── */
 .tbl-wrap { overflow-x:auto; border-radius:var(--rb); border:1.5px solid var(--b1); box-shadow:var(--s1); }
 table.rt { width:100%; border-collapse:collapse; font-size:.8rem; }
 .rt thead { background:var(--navy); }
@@ -308,58 +309,49 @@ table.rt { width:100%; border-collapse:collapse; font-size:.8rem; }
 .rt tbody td { padding:.5rem .75rem; color:var(--t1); text-align:center; vertical-align:middle; }
 .rt tbody td:first-child { text-align:left; font-weight:500; }
 .rt tr.comm { background:#f7f7ff; }
-.rt tr.oss  { background:#fff5f5; }
-.rt tr.ft   { background:#f5f0ff; }
-.rt tr.ours td { font-weight:700; color:var(--r); background:var(--r100); }
+.rt tr.oss  { background:#f5f5fb; }
+.rt tr.ft   { background:#f0f0ff; }
+.rt tr.ours td { font-weight:700; color:var(--ink); background:var(--ink50); }
 .rt tbody tr:hover:not(.ours) { background:var(--bg2); }
-.rt tr.ours:hover td { background:#fce8e0; }
-.sota { display:inline-block; background:var(--r); color:#fff; font-size:.53rem; font-weight:700; padding:1px 5px; border-radius:3px; letter-spacing:.06em; text-transform:uppercase; vertical-align:middle; margin-left:4px; }
+.rt tr.ours:hover td { background:var(--ink100); }
+.sota { display:inline-block; background:var(--ink); color:#fff; font-size:.53rem; font-weight:700; padding:1px 5px; border-radius:3px; letter-spacing:.06em; text-transform:uppercase; vertical-align:middle; margin-left:4px; }
 
-/* ── Domain cards (full-width, stacked) ──────────── */
+/* ── Domain cards ── */
 .dom-stack { display:flex; flex-direction:column; gap:1.5rem; margin-top:1.5rem; }
 .dom-card { background:#fff; border:1.5px solid var(--b1); border-radius:var(--rc); overflow:hidden; box-shadow:var(--s1); transition:box-shadow .28s var(--e1); }
 .dom-card:hover { box-shadow:var(--s2); }
 .dom-head { background:var(--bg2); padding:.75rem 1.25rem; font-size:.92rem; font-weight:700; border-bottom:1px solid var(--b1); color:var(--t1); }
 
-/* ── Mini charts (inside domain cards) ─────────────── */
+/* ── Mini charts ── */
 .mc-wrap { padding:.85rem 1.25rem 1rem; border-bottom:1px solid var(--b1); }
 .mc-tabs { display:flex; gap:.3rem; flex-wrap:wrap; margin-bottom:.55rem; }
-.mc-tab {
-  padding:.25rem .7rem; font-size:.72rem; font-weight:600; cursor:pointer;
-  color:var(--t2); background:var(--bg2); border:1px solid var(--b1); border-radius:100px;
-  font-family:inherit; transition:background .18s,color .18s,border-color .18s;
-}
-.mc-tab:hover { color:var(--t1); background:var(--a100); border-color:var(--a200); }
-.mc-tab.on { background:var(--a100); color:var(--a); border-color:var(--a200); } /* ← Apple blue pills */
+.mc-tab { padding:.25rem .7rem; font-size:.72rem; font-weight:600; cursor:pointer; color:var(--t2); background:var(--bg2); border:1px solid var(--b1); border-radius:100px; font-family:inherit; transition:background .18s,color .18s,border-color .18s; }
+.mc-tab:hover { color:var(--ink); background:var(--ink100); border-color:var(--ink200); }
+.mc-tab.on { background:var(--ink100); color:var(--ink); border-color:var(--ink200); font-weight:700; }
 .mc-hint { font-size:.69rem; color:var(--t3); font-style:italic; margin-bottom:.5rem; }
-.mc-pane { display:none; }
-.mc-pane.on { display:block; }
-
-/* mini bar rows */
+.mc-pane { display:none; } .mc-pane.on { display:block; }
 .mc-row { display:grid; grid-template-columns:130px 1fr 44px; align-items:center; gap:.55rem; padding:.18rem 0; }
 .mc-name { font-size:.75rem; font-weight:500; color:var(--t1); text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.mc-name.ours { color:var(--r); font-weight:700; }
+.mc-name.ours { color:var(--ink); font-weight:700; }
 .mc-track { background:var(--bg2); border-radius:100px; height:18px; position:relative; overflow:hidden; }
 .mc-fill { height:100%; border-radius:100px; background:linear-gradient(90deg,#bdbdc2,#cdcdd2); width:0%; transition:width .65s var(--e2); }
-.mc-fill.ours { background:linear-gradient(90deg,var(--r),#e8714e); box-shadow:0 1px 6px rgba(216,85,43,.3); }
+.mc-fill.ours { background:linear-gradient(90deg,var(--ink),#818cf8); box-shadow:0 1px 6px rgba(79,70,229,.32); }
 .mc-track:hover .mc-fill { filter:brightness(1.1); }
 .mc-tip { position:absolute; right:6px; top:50%; transform:translateY(-50%); font-size:.68rem; font-weight:700; color:rgba(255,255,255,.95); opacity:0; transition:opacity .15s; pointer-events:none; }
 .mc-track:hover .mc-tip { opacity:1; }
 .mc-score { font-size:.75rem; font-weight:700; color:var(--t2); }
-.mc-score.ours { color:var(--r); }
-
-/* dom-body wraps tbl-wrap inside a dom-card (remove double border/shadow) */
+.mc-score.ours { color:var(--ink); }
 .dom-card .tbl-wrap { border:none; border-radius:0; box-shadow:none; }
 
-/* ── BibTeX ──────────────────────────────────────── */
-.bib-wrap { background:#13132b; border-radius:var(--rc); overflow:hidden; box-shadow:var(--s3); }
-.bib-bar { display:flex; justify-content:space-between; align-items:center; padding:.65rem 1.25rem; background:#0d0d22; border-bottom:1px solid rgba(255,255,255,.07); }
+/* ── BibTeX ── */
+.bib-wrap { background:#0f0f1a; border-radius:var(--rc); overflow:hidden; box-shadow:var(--s3); }
+.bib-bar { display:flex; justify-content:space-between; align-items:center; padding:.65rem 1.25rem; background:#09091a; border-bottom:1px solid rgba(255,255,255,.07); }
 .bib-bar span { font-family:'JetBrains Mono',monospace; font-size:.78rem; color:#6868a0; }
 .bib-bar button { background:rgba(255,255,255,.09); border:1px solid rgba(255,255,255,.14); color:#9090b8; border-radius:7px; padding:.25rem .75rem; font-size:.75rem; font-family:inherit; cursor:pointer; display:flex; align-items:center; gap:.35rem; transition:background .2s,color .2s; }
 .bib-bar button:hover { background:rgba(255,255,255,.18); color:#fff; }
 pre.bib-code { padding:1.5rem; font-family:'JetBrains Mono',monospace; font-size:.81rem; line-height:1.8; color:#c9d1d9; margin:0; white-space:pre-wrap; word-break:break-all; }
 
-/* ── Footer ──────────────────────────────────────── */
+/* ── Footer ── */
 footer { background:var(--bg2); border-top:1px solid var(--b1); padding:3rem 1.5rem; text-align:center; }
 .foot-logos { display:flex; justify-content:center; align-items:center; gap:2rem; flex-wrap:wrap; margin-bottom:1.5rem; }
 .foot-logos a { opacity:.55; transition:opacity .2s; display:flex; }
@@ -367,23 +359,21 @@ footer { background:var(--bg2); border-top:1px solid var(--b1); padding:3rem 1.5
 .foot-logos img { height:28px; width:auto; object-fit:contain; }
 footer p { font-size:.82rem; color:var(--t3); line-height:1.75; }
 footer a { color:var(--t2); transition:color .2s; }
-footer a:hover { color:var(--a); }
+footer a:hover { color:var(--ink); }
 
-/* ── Inline labels ───────────────────────────────── */
-.circ { display:inline-flex; align-items:center; justify-content:center; border:1.5px solid var(--r); color:var(--r); border-radius:50%; font-weight:700; font-size:.73rem; width:1.35em; height:1.35em; margin:0 1px; }
-.circ-w { display:inline-flex; align-items:center; justify-content:center; border:1.5px solid var(--r); color:var(--r); border-radius:10px; font-weight:700; font-size:.73rem; padding:0 5px; margin:0 1px; }
+/* ── Labels ── */
+.circ   { display:inline-flex; align-items:center; justify-content:center; border:1.5px solid var(--ink); color:var(--ink); border-radius:50%; font-weight:700; font-size:.73rem; width:1.35em; height:1.35em; margin:0 1px; }
+.circ-w { display:inline-flex; align-items:center; justify-content:center; border:1.5px solid var(--ink); color:var(--ink); border-radius:10px; font-weight:700; font-size:.73rem; padding:0 5px; margin:0 1px; }
 
-/* ── Scroll reveal ───────────────────────────────── */
+/* ── Scroll reveal ── */
 .rv { opacity:0; transform:translateY(26px); transition:opacity .75s var(--e2),transform .75s var(--e2); }
 .rv.in { opacity:1; transform:translateY(0); }
 .rv.d1{transition-delay:.1s} .rv.d2{transition-delay:.2s} .rv.d3{transition-delay:.3s} .rv.d4{transition-delay:.4s}
-
-/* Hero entrance */
 .ha { opacity:0; transform:translateY(22px); animation:fu .8s var(--e2) forwards; }
 .ha.a2{animation-delay:.14s} .ha.a3{animation-delay:.28s} .ha.a4{animation-delay:.42s} .ha.a5{animation-delay:.56s}
 @keyframes fu { to { opacity:1; transform:translateY(0); } }
 
-/* ── Responsive ──────────────────────────────────── */
+/* ── Responsive ── */
 @media(max-width:768px){
   .nav-links{display:none} .nav-burger{display:block}
   .nav-links.open{display:flex;flex-direction:column;position:absolute;top:52px;left:0;right:0;background:rgba(255,255,255,.97);backdrop-filter:blur(20px);padding:1rem;border-bottom:1px solid var(--b1);z-index:99;}
@@ -394,10 +384,12 @@ footer a:hover { color:var(--a); }
   .logos{gap:1.5rem;padding:1.25rem} .logos img{height:48px}
   .bar-row{grid-template-columns:90px 1fr 44px} .bar-name{font-size:.73rem}
   .mc-row{grid-template-columns:100px 1fr 40px} .mc-name{font-size:.7rem}
+  .car-thumbs{gap:.4rem} .car-thumb{width:60px;height:42px}
 }
 @media(prefers-reduced-motion:reduce){
   .rv,.ha{transition:none;animation:none;opacity:1;transform:none}
-  .bar-fill,.mc-fill{transition:none}
+  .bar-fill,.mc-fill,.car-track{transition:none}
+  .car-dot{transition:none}
 }
 </style>
 </head>
@@ -465,7 +457,6 @@ footer a:hover { color:var(--a); }
       (<span class="circ-w">2a</span>, <span class="circ-w">2b</span>) and final answer (<span class="circ-w">2c</span>).
       Each <code>[GND]</code> predicts a segmentation mask that localizes the evidence used
       (<span class="circ">1</span>, <span class="circ">2</span>).
-      Evidence spans both text and graphical elements.
     </p>
   </div>
 </div>
@@ -477,8 +468,8 @@ footer a:hover { color:var(--a); }
     <h2 class="s-title rv">Abstract</h2>
     <div class="abs-body rv">
       <p>Existing methods for Visual Document Question Answering (DocVQA) often predict answers without explicit intermediate analysis or produce ungrounded intermediate steps. The few approaches which employ grounding produce rectangular bounding boxes which fail to accurately represent complex structures such as pie-chart wedges, flowchart nodes, and curved text. We present <strong>DoCoG</strong>, a mask-based multi-type grounded step-wise Chain-of-Thought architecture for Document QA.</p>
-      <p>The model supports multi-type grounding — it localizes both textual content and fine-grained graphical elements such as legends, pie slices, and flowchart nodes. It generates step-wise intermediate outputs and final answers grounded through precise segmentation masks, enabling consistent evidence alignment. DoCoG integrates a Vision-Language Model with a promptable segmenter via a novel <strong>Grounding Interaction Module (GIM)</strong>. During decoding, special <code>[GND]</code> tokens trigger mask prediction, linking each step and the final answer to supporting evidence.</p>
-      <p>We introduce <strong>DoCoG-QA</strong>, a large-scale diverse dataset comprising 325K documents and 1.5M step-wise grounded QA pairs. We further release <strong>DoCoG-PQA</strong> with 20K preference pairs for Direct Preference Optimization (DPO), and <strong>DoCoG-Bench</strong>, a human-verified benchmark. Experiments show that DoCoG achieves state-of-the-art performance across multiple benchmarks.</p>
+      <p>The model supports multi-type grounding — it localizes both textual content and fine-grained graphical elements such as legends, pie slices, and flowchart nodes. It generates step-wise intermediate outputs and final answers grounded through precise segmentation masks. DoCoG integrates a Vision-Language Model with a promptable segmenter via a novel <strong>Grounding Interaction Module (GIM)</strong>. During decoding, special <code>[GND]</code> tokens trigger mask prediction, linking each step and the final answer to supporting evidence.</p>
+      <p>We introduce <strong>DoCoG-QA</strong>, a large-scale diverse dataset comprising 325K documents and 1.5M step-wise grounded QA pairs. We further release <strong>DoCoG-PQA</strong> with 20K preference pairs for DPO alignment, and <strong>DoCoG-Bench</strong>, a human-verified benchmark. Experiments show that DoCoG achieves state-of-the-art performance across multiple benchmarks, improving both answer accuracy and grounding precision.</p>
     </div>
   </div>
 </section>
@@ -488,12 +479,14 @@ footer a:hover { color:var(--a); }
   <div class="si">
     <p class="s-lbl rv">Architecture</p>
     <h2 class="s-title rv">Method</h2>
+
     <div class="rv">
       <img class="method-img" src="static/images/model_overview.png" alt="DoCoG architecture overview">
       <p class="fig-cap">
-        <strong>DoCoG architecture:</strong> Given a document image \(I\) and question \(q\), the VLM <span class="circ">1</span> encodes visual features and autoregressively generates step-wise outputs interleaved with <code>[GND]</code> tokens <span class="circ">2</span>. Their hidden states <span class="circ">3</span> pass to the GIM <span class="circ">4</span>, which refines them via cross-attention with segmenter features <span class="circ">6</span> from <span class="circ">5</span>, producing prompt embeddings decoded by the mask decoder into evidence masks (<span class="circ-w">2c</span>).
+        <strong>DoCoG architecture:</strong> Given a document image \(I\) and question \(q\), the VLM <span class="circ">1</span> encodes visual features and autoregressively generates step-wise outputs interleaved with <code>[GND]</code> tokens <span class="circ">2</span>. Their hidden states <span class="circ">3</span> pass to GIM <span class="circ">4</span>, which refines them via cross-attention with segmenter features <span class="circ">6</span> from <span class="circ">5</span>, producing prompt embeddings decoded into evidence masks (<span class="circ-w">2c</span>).
       </p>
     </div>
+
     <div class="grid2" style="margin-top:2.5rem">
       <div class="m-card rv d1">
         <h4>🔗 Decoupled Language &amp; Spatial Grounding</h4>
@@ -514,21 +507,55 @@ footer a:hover { color:var(--a); }
     </div>
     <div class="enc rv">Step-wise CoT with <code>[GND]</code> tokens grounds each reasoning step to pixel-accurate evidence masks</div>
 
-    <div class="rv" style="text-align:center;margin-top:1.5rem">
-      <img src="static/images/results_figure.png" alt="DoCoG qualitative examples"
-        style="width:100%;max-width:950px;display:inline-block;border-radius:var(--rb);box-shadow:var(--s2)">
-      <p class="fig-cap" style="margin-top:.75rem"><strong>Qualitative examples.</strong> Each example shows DoCoG's step-wise CoT with mask-based, multi-type grounding over both textual and graphical elements.</p>
-    </div>
+    <!-- ══ QUALITATIVE RESULTS CAROUSEL ══ -->
+    <h3 class="s-title rv" style="margin-top:3.5rem;font-size:1.5rem;">Qualitative Results</h3>
+    <p class="s-sub rv" style="margin-bottom:1rem">Model outputs across charts, flowcharts, tables, and documents — each reasoning step grounded to pixel-level evidence.</p>
 
-    <h3 class="s-title rv" style="margin-top:3.5rem;font-size:1.5rem;">Training Objectives</h3>
+    <div class="carousel-outer rv" id="carouselRoot">
+
+      <!-- Stage -->
+      <div class="car-stage" id="carStage">
+        <div class="car-track" id="carTrack">
+          <!-- Slides built by JS -->
+        </div>
+        <div class="car-ctr" id="carCtr">01 / 06</div>
+        <button class="car-btn prev" id="carPrev" aria-label="Previous slide"><i class="fas fa-chevron-left"></i></button>
+        <button class="car-btn next" id="carNext" aria-label="Next slide"><i class="fas fa-chevron-right"></i></button>
+      </div>
+
+      <!-- Caption -->
+      <div class="car-cap-wrap">
+        <div class="car-cap-text" id="carCap"></div>
+      </div>
+
+      <!-- Pill dots -->
+      <div class="car-dots" id="carDots">
+        <div class="car-dot on" data-i="0"></div>
+        <div class="car-dot" data-i="1"></div>
+        <div class="car-dot" data-i="2"></div>
+        <div class="car-dot" data-i="3"></div>
+        <div class="car-dot" data-i="4"></div>
+        <div class="car-dot" data-i="5"></div>
+      </div>
+
+      <!-- Thumbnail strip -->
+      <div class="car-thumbs" id="carThumbs">
+        <!-- Built by JS -->
+      </div>
+
+    </div><!-- /carousel-outer -->
+
+    <!-- Training -->
+    <h3 class="s-title rv" style="margin-top:4rem;font-size:1.5rem;">Training Objectives</h3>
     <p class="s-sub rv" style="margin-bottom:.5rem">DoCoG is trained in two stages: SFT on DoCoG-QA, then DPO on DoCoG-PQA.</p>
     <p class="math-line rv">𝓛<sub>total</sub> = λ<sub>lm</sub>𝓛<sub>lm</sub> + λ<sub>seg</sub>𝓛<sub>seg</sub> + λ<sub>anchor</sub>𝓛<sub>anchor</sub></p>
     <div class="loss4 rv">
       <div class="lc navy"><strong>𝓛<sub>lm</sub> — Language Modeling</strong><p>Cross-entropy over all output tokens for accurate step-wise CoT generation and answer prediction.</p></div>
       <div class="lc green"><strong>𝓛<sub>seg</sub> — Segmentation (Dice + BCE)</strong><p>Supervises mask predictions against pixel-level ground truth for each <code>[GND]</code> token.</p></div>
-      <div class="lc rust"><strong>𝓛<sub>anchor</sub> — Anchor Loss</strong><p>Preserves <code>[GND]</code> token compatibility with the frozen segmenter during DPO, preventing mask degradation.</p></div>
+      <div class="lc ink"><strong>𝓛<sub>anchor</sub> — Anchor Loss</strong><p>Preserves <code>[GND]</code> token compatibility with the frozen segmenter during DPO, preventing mask degradation.</p></div>
       <div class="lc gold"><strong>DPO — Preference Optimization</strong><p>Trained on DoCoG-PQA (20K pairs) to align step quality, answer accuracy, and grounding fidelity jointly.</p></div>
     </div>
+
   </div>
 </section>
 
@@ -576,14 +603,13 @@ footer a:hover { color:var(--a); }
     <h2 class="s-title rv">Results</h2>
     <p class="s-sub rv" style="max-width:700px;margin-inline:auto">DoCoG consistently outperforms both commercial and open-source baselines. While commercial models achieve competitive answer accuracy, their grounding quality remains substantially lower.</p>
 
-    <!-- Stat chips -->
     <div class="chips rv">
       <div class="chip"><div class="n">85.8</div><div class="l">AQ (All)<br><em>DoCoG-Bench</em></div></div>
       <div class="chip"><div class="n">82.0</div><div class="l">CQ (All)<br><em>DoCoG-Bench</em></div></div>
       <div class="chip"><div class="n">81.9</div><div class="l">GQ<sub>fa</sub> (All)<br><em>DoCoG-Bench</em></div></div>
     </div>
 
-    <!-- Main interactive chart -->
+    <!-- Main chart -->
     <div class="chart-box rv" id="mainChart">
       <div class="chart-head">
         <div class="chart-tabs">
@@ -610,23 +636,12 @@ footer a:hover { color:var(--a); }
 
     <!-- Unified table -->
     <h3 class="s-title rv" style="font-size:1.35rem;margin-bottom:.5rem">Unified Evaluation on DoCoG-Bench</h3>
-    <p style="text-align:center;color:var(--t2);font-size:.85rem;margin-bottom:1rem" class="rv">
-      AQ and GQ<sub>fa</sub> per split. "All" reports AQ, G<sub>eval</sub>, CQ, GQ<sub>all</sub>, and GQ<sub>fa</sub>.
-    </p>
+    <p style="text-align:center;color:var(--t2);font-size:.85rem;margin-bottom:1rem" class="rv">AQ and GQ<sub>fa</sub> per split. "All" reports AQ, G<sub>eval</sub>, CQ, GQ<sub>all</sub>, and GQ<sub>fa</sub>.</p>
     <div class="tbl-wrap rv">
       <table class="rt">
         <thead>
-          <tr>
-            <th rowspan="2">Model</th><th rowspan="2">Params</th>
-            <th colspan="2">Charts</th><th colspan="2">Flowcharts</th>
-            <th colspan="2">Docs</th><th colspan="2">Tables</th>
-            <th colspan="5">All</th>
-          </tr>
-          <tr>
-            <th>AQ</th><th>GQ<sub>fa</sub></th><th>AQ</th><th>GQ<sub>fa</sub></th>
-            <th>AQ</th><th>GQ<sub>fa</sub></th><th>AQ</th><th>GQ<sub>fa</sub></th>
-            <th>AQ</th><th>G<sub>eval</sub></th><th>CQ</th><th>GQ<sub>all</sub></th><th>GQ<sub>fa</sub></th>
-          </tr>
+          <tr><th rowspan="2">Model</th><th rowspan="2">Params</th><th colspan="2">Charts</th><th colspan="2">Flowcharts</th><th colspan="2">Docs</th><th colspan="2">Tables</th><th colspan="5">All</th></tr>
+          <tr><th>AQ</th><th>GQ<sub>fa</sub></th><th>AQ</th><th>GQ<sub>fa</sub></th><th>AQ</th><th>GQ<sub>fa</sub></th><th>AQ</th><th>GQ<sub>fa</sub></th><th>AQ</th><th>G<sub>eval</sub></th><th>CQ</th><th>GQ<sub>all</sub></th><th>GQ<sub>fa</sub></th></tr>
         </thead>
         <tbody>
           <tr class="comm"><td>GPT-5</td><td>–</td><td>82.4</td><td>3.8</td><td>78.1</td><td>4.0</td><td>86.7</td><td>5.0</td><td>84.3</td><td>6.4</td><td>82.9</td><td><u>84.8</u></td><td><u>76.8</u></td><td>2.4</td><td>4.8</td></tr>
@@ -638,39 +653,30 @@ footer a:hover { color:var(--a); }
           <tr class="oss"><td>VisualCoT</td><td>7B</td><td>52.3</td><td>5.5</td><td>44.6</td><td>3.9</td><td>59.7</td><td>3.6</td><td>55.4</td><td>1.0</td><td>53.0</td><td>52.1</td><td>51.2</td><td>2.4</td><td>3.5</td></tr>
           <tr class="ft"><td>InternVL 3.5 FT</td><td>8B</td><td>74.6</td><td>65.0</td><td>68.8</td><td>67.9</td><td>82.0</td><td>64.3</td><td>79.1</td><td>61.2</td><td>76.1</td><td>80.4</td><td>72.2</td><td>61.4</td><td>64.6</td></tr>
           <tr class="ft"><td>Qwen3-VL FT</td><td>8B</td><td>75.8</td><td>63.9</td><td>70.2</td><td>66.9</td><td>83.4</td><td>61.2</td><td>80.6</td><td>55.6</td><td>77.5</td><td>79.8</td><td>74.8</td><td>57.8</td><td>61.9</td></tr>
-          <tr class="ours"><td><strong>DoCoG (Ours)</strong></td><td>9B</td>
-            <td><strong>83.5</strong></td><td><strong>80.3</strong></td>
-            <td><strong>82.2</strong></td><td><strong>79.2</strong></td>
-            <td><strong>89.7</strong></td><td><strong>85.4</strong></td>
-            <td><strong>87.8</strong></td><td><strong>82.7</strong></td>
-            <td><strong>85.8</strong></td><td><strong>85.2</strong></td>
-            <td><strong>82.0</strong></td><td><strong>78.2</strong></td>
-            <td><strong>81.9</strong><span class="sota">SOTA</span></td>
-          </tr>
+          <tr class="ours"><td><strong>DoCoG (Ours)</strong></td><td>9B</td><td><strong>83.5</strong></td><td><strong>80.3</strong></td><td><strong>82.2</strong></td><td><strong>79.2</strong></td><td><strong>89.7</strong></td><td><strong>85.4</strong></td><td><strong>87.8</strong></td><td><strong>82.7</strong></td><td><strong>85.8</strong></td><td><strong>85.2</strong></td><td><strong>82.0</strong></td><td><strong>78.2</strong></td><td><strong>81.9</strong><span class="sota">SOTA</span></td></tr>
         </tbody>
       </table>
     </div>
 
-    <!-- Domain-specific results -->
+    <!-- Domain tables -->
     <h3 class="s-title rv" style="font-size:1.35rem;margin-top:3rem;margin-bottom:.25rem">Domain-Specific Benchmark Results</h3>
-    <p class="s-sub rv" style="margin-bottom:1rem">Each domain chart shows a different benchmark metric. Click the pills to switch.</p>
+    <p class="s-sub rv" style="margin-bottom:1rem">Click the metric pills to switch charts. Each domain card shows detailed per-benchmark breakdowns.</p>
 
     <div class="dom-stack">
 
-      <!-- ── Charts domain ── -->
       <div class="dom-card rv">
         <div class="dom-head">📊 Charts</div>
         <div class="mc-wrap" data-mc="charts">
           <div class="mc-tabs">
-            <button class="mc-tab on"  data-d="charts" data-m="chartqa">ChartQA</button>
-            <button class="mc-tab"     data-d="charts" data-m="chartbench">ChartBench</button>
-            <button class="mc-tab"     data-d="charts" data-m="cqapro">CQA-Pro</button>
+            <button class="mc-tab on" data-d="charts" data-m="chartqa">ChartQA</button>
+            <button class="mc-tab" data-d="charts" data-m="chartbench">ChartBench</button>
+            <button class="mc-tab" data-d="charts" data-m="cqapro">CQA-Pro</button>
           </div>
           <p class="mc-hint">Hover for score · sorted high → low</p>
           <div class="mc-body">
             <div class="mc-pane on" id="mc-charts-chartqa"></div>
-            <div class="mc-pane"    id="mc-charts-chartbench"></div>
-            <div class="mc-pane"    id="mc-charts-cqapro"></div>
+            <div class="mc-pane" id="mc-charts-chartbench"></div>
+            <div class="mc-pane" id="mc-charts-cqapro"></div>
           </div>
         </div>
         <div class="tbl-wrap">
@@ -687,20 +693,19 @@ footer a:hover { color:var(--a); }
         </div>
       </div>
 
-      <!-- ── Flowcharts domain ── -->
       <div class="dom-card rv">
         <div class="dom-head">🔀 Flowcharts</div>
         <div class="mc-wrap" data-mc="flowcharts">
           <div class="mc-tabs">
-            <button class="mc-tab on"  data-d="flowcharts" data-m="missqa">MISS-QA</button>
-            <button class="mc-tab"     data-d="flowcharts" data-m="flowvqa">FlowVQA</button>
-            <button class="mc-tab"     data-d="flowcharts" data-m="gqfa">Bench GQ<sub>fa</sub></button>
+            <button class="mc-tab on" data-d="flowcharts" data-m="missqa">MISS-QA</button>
+            <button class="mc-tab" data-d="flowcharts" data-m="flowvqa">FlowVQA</button>
+            <button class="mc-tab" data-d="flowcharts" data-m="gqfa">Bench GQ<sub>fa</sub></button>
           </div>
           <p class="mc-hint">Hover for score · sorted high → low</p>
           <div class="mc-body">
             <div class="mc-pane on" id="mc-flowcharts-missqa"></div>
-            <div class="mc-pane"    id="mc-flowcharts-flowvqa"></div>
-            <div class="mc-pane"    id="mc-flowcharts-gqfa"></div>
+            <div class="mc-pane" id="mc-flowcharts-flowvqa"></div>
+            <div class="mc-pane" id="mc-flowcharts-gqfa"></div>
           </div>
         </div>
         <div class="tbl-wrap">
@@ -716,20 +721,19 @@ footer a:hover { color:var(--a); }
         </div>
       </div>
 
-      <!-- ── Tables domain ── -->
       <div class="dom-card rv">
         <div class="dom-head">📋 Tables</div>
         <div class="mc-wrap" data-mc="tables">
           <div class="mc-tabs">
-            <button class="mc-tab on"  data-d="tables" data-m="tabfact">TabFact</button>
-            <button class="mc-tab"     data-d="tables" data-m="wtq">WTQ</button>
-            <button class="mc-tab"     data-d="tables" data-m="gqfa">Bench GQ<sub>fa</sub></button>
+            <button class="mc-tab on" data-d="tables" data-m="tabfact">TabFact</button>
+            <button class="mc-tab" data-d="tables" data-m="wtq">WTQ</button>
+            <button class="mc-tab" data-d="tables" data-m="gqfa">Bench GQ<sub>fa</sub></button>
           </div>
           <p class="mc-hint">Hover for score · sorted high → low</p>
           <div class="mc-body">
             <div class="mc-pane on" id="mc-tables-tabfact"></div>
-            <div class="mc-pane"    id="mc-tables-wtq"></div>
-            <div class="mc-pane"    id="mc-tables-gqfa"></div>
+            <div class="mc-pane" id="mc-tables-wtq"></div>
+            <div class="mc-pane" id="mc-tables-gqfa"></div>
           </div>
         </div>
         <div class="tbl-wrap">
@@ -745,20 +749,19 @@ footer a:hover { color:var(--a); }
         </div>
       </div>
 
-      <!-- ── Documents domain ── -->
       <div class="dom-card rv">
         <div class="dom-head">📄 Documents</div>
         <div class="mc-wrap" data-mc="documents">
           <div class="mc-tabs">
-            <button class="mc-tab on"  data-d="documents" data-m="bdf1g">BD F1g</button>
-            <button class="mc-tab"     data-d="documents" data-m="dogrf1g">DOGR F1g</button>
-            <button class="mc-tab"     data-d="documents" data-m="mmdbiou">MMDB IoU</button>
+            <button class="mc-tab on" data-d="documents" data-m="bdf1g">BD F1g</button>
+            <button class="mc-tab" data-d="documents" data-m="dogrf1g">DOGR F1g</button>
+            <button class="mc-tab" data-d="documents" data-m="mmdbiou">MMDB IoU</button>
           </div>
           <p class="mc-hint">Hover for score · sorted high → low</p>
           <div class="mc-body">
             <div class="mc-pane on" id="mc-documents-bdf1g"></div>
-            <div class="mc-pane"    id="mc-documents-dogrf1g"></div>
-            <div class="mc-pane"    id="mc-documents-mmdbiou"></div>
+            <div class="mc-pane" id="mc-documents-dogrf1g"></div>
+            <div class="mc-pane" id="mc-documents-mmdbiou"></div>
           </div>
         </div>
         <div class="tbl-wrap">
@@ -774,7 +777,7 @@ footer a:hover { color:var(--a); }
         </div>
       </div>
 
-    </div><!-- /dom-stack -->
+    </div>
   </div>
 </section>
 
@@ -819,182 +822,219 @@ footer a:hover { color:var(--a); }
 </footer>
 
 <script>
-/* ════════════════════════════════════
-   MAIN CHART DATA  (7 tabs)
-════════════════════════════════════ */
+/* ══════════════════════════════════════
+   CAROUSEL
+══════════════════════════════════════ */
+(function(){
+  const SLIDES = [
+    { img:'static/images/qual_res_1.png', cap:'<strong>Flowchart Grounding —</strong> DoCoG accurately segments individual nodes, connectors, and decision branches in complex multi-step diagrams, grounding each CoT step to its structural evidence.' },
+    { img:'static/images/qual_res_2.png', cap:'<strong>Chart QA —</strong> Step-wise chain-of-thought with pixel-precise evidence: each intermediate reasoning step is grounded to the exact bar, line, or wedge supporting it.' },
+    { img:'static/images/qual_res_3.png', cap:'<strong>Dense Table Extraction —</strong> Precise cell-level grounding avoids boundary spillover into adjacent rows and columns — a capability bounding boxes fundamentally cannot achieve.' },
+    { img:'static/images/qual_res_4.png', cap:'<strong>Mixed Document Understanding —</strong> Multi-type evidence grounding across textual paragraphs and embedded graphical elements, all within a single forward pass.' },
+    { img:'static/images/qual_res_5.png', cap:'<strong>Curved &amp; Stylized Text —</strong> Mask-based localization captures curved, rotated, and decorative text regions that rectangular bounding boxes cannot represent.' },
+    { img:'static/images/qual_res_6.png', cap:'<strong>Multi-Span Reasoning —</strong> Evidence retrieved from non-contiguous, spatially distributed regions — a key capability enabled by DoCoG\'s autoregressive grounding design.' },
+  ];
+
+  const track   = document.getElementById('carTrack');
+  const ctr     = document.getElementById('carCtr');
+  const capEl   = document.getElementById('carCap');
+  const dotsEl  = document.querySelectorAll('.car-dot');
+  const thumbsW = document.getElementById('carThumbs');
+  const stage   = document.getElementById('carStage');
+  let cur = 0, dragging = false, dragStartX = 0, dragDelta = 0;
+
+  /* Build slides */
+  track.innerHTML = SLIDES.map((s,i)=>`
+    <div class="car-slide" aria-label="Slide ${i+1}">
+      <img src="${s.img}" alt="Qualitative result ${i+1}" loading="${i===0?'eager':'lazy'}">
+    </div>`).join('');
+
+  /* Build thumbnails */
+  thumbsW.innerHTML = SLIDES.map((s,i)=>`
+    <div class="car-thumb${i===0?' on':''}" data-i="${i}" role="button" tabindex="0" aria-label="Go to slide ${i+1}">
+      <img src="${s.img}" alt="Thumbnail ${i+1}" loading="lazy">
+    </div>`).join('');
+  const thumbEls = thumbsW.querySelectorAll('.car-thumb');
+
+  /* Go to slide n */
+  function go(n, animate=true) {
+    cur = ((n % SLIDES.length) + SLIDES.length) % SLIDES.length;
+    if(!animate) track.style.transition='none';
+    track.style.transform = `translateX(-${cur*100}%)`;
+    if(!animate) requestAnimationFrame(()=>{ track.style.transition=''; });
+
+    const pad = v => String(v).padStart(2,'0');
+    ctr.textContent = `${pad(cur+1)} / ${pad(SLIDES.length)}`;
+
+    capEl.classList.add('fade');
+    setTimeout(()=>{ capEl.innerHTML=SLIDES[cur].cap; capEl.classList.remove('fade'); },240);
+
+    dotsEl.forEach((d,i)=>d.classList.toggle('on',i===cur));
+    thumbEls.forEach((t,i)=>t.classList.toggle('on',i===cur));
+  }
+
+  /* Arrows */
+  document.getElementById('carPrev').addEventListener('click',()=>go(cur-1));
+  document.getElementById('carNext').addEventListener('click',()=>go(cur+1));
+
+  /* Dots */
+  dotsEl.forEach(d=>d.addEventListener('click',()=>go(+d.dataset.i)));
+
+  /* Thumbs */
+  thumbEls.forEach(t=>{
+    t.addEventListener('click',()=>go(+t.dataset.i));
+    t.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' ') go(+t.dataset.i); });
+  });
+
+  /* Keyboard */
+  document.addEventListener('keydown',e=>{
+    if(document.activeElement.closest('#carouselRoot')||e.target===document.body){
+      if(e.key==='ArrowLeft'){go(cur-1);e.preventDefault();}
+      if(e.key==='ArrowRight'){go(cur+1);e.preventDefault();}
+    }
+  });
+
+  /* Touch / pointer drag */
+  function onDragStart(x){ dragStartX=x; dragDelta=0; dragging=true; track.style.transition='none'; }
+  function onDragMove(x){
+    if(!dragging) return;
+    dragDelta = x - dragStartX;
+    track.style.transform = `translateX(calc(-${cur*100}% + ${dragDelta}px))`;
+  }
+  function onDragEnd(){
+    if(!dragging) return;
+    dragging=false;
+    track.style.transition='';
+    if(dragDelta < -50) go(cur+1);
+    else if(dragDelta > 50) go(cur-1);
+    else { track.style.transform=`translateX(-${cur*100}%)`; }
+    dragDelta=0;
+  }
+
+  stage.addEventListener('touchstart', e=>onDragStart(e.touches[0].clientX), {passive:true});
+  stage.addEventListener('touchmove',  e=>onDragMove(e.touches[0].clientX),  {passive:true});
+  stage.addEventListener('touchend',   onDragEnd, {passive:true});
+  stage.addEventListener('mousedown',  e=>onDragStart(e.clientX));
+  stage.addEventListener('mousemove',  e=>onDragMove(e.clientX));
+  stage.addEventListener('mouseup',    onDragEnd);
+  stage.addEventListener('mouseleave', onDragEnd);
+
+  /* Init */
+  go(0, false);
+  capEl.innerHTML = SLIDES[0].cap;
+})();
+
+/* ══════════════════════════════════════
+   MAIN CHART DATA (7 tabs)
+══════════════════════════════════════ */
 const MAIN = {
-  aq:{ models:[
-    {n:'DoCoG (Ours)',v:85.8,o:1},{n:'Gemini 3 Pro',v:84.2},{n:'GPT-5',v:82.9},
-    {n:'Gemini 3 Flash',v:80.6},{n:'Sonnet 4.5',v:79.9},{n:'Qwen3-VL FT',v:77.5},
-    {n:'InternVL 3.5 FT',v:76.1},{n:'Qwen3-VL',v:75.7},{n:'InternVL 3.5',v:73.9},{n:'VisualCoT',v:53.0}
-  ]},
-  gq:{ models:[
-    {n:'DoCoG (Ours)',v:81.9,o:1},{n:'InternVL 3.5 FT',v:64.6},{n:'Qwen3-VL FT',v:61.9},
-    {n:'Gemini 3 Flash',v:23.6},{n:'Gemini 3 Pro',v:11.4},{n:'Sonnet 4.5',v:7.1},
-    {n:'Qwen3-VL',v:5.5},{n:'GPT-5',v:4.8},{n:'InternVL 3.5',v:4.0},{n:'VisualCoT',v:3.5}
-  ]},
-  cq:{ models:[
-    {n:'DoCoG (Ours)',v:82.0,o:1},{n:'GPT-5',v:76.8},{n:'Qwen3-VL FT',v:74.8},
-    {n:'Gemini 3 Pro',v:75.2},{n:'Gemini 3 Flash',v:73.4},{n:'InternVL 3.5 FT',v:72.2},
-    {n:'Sonnet 4.5',v:71.3},{n:'VisualCoT',v:51.2},{n:'Qwen3-VL',v:35.9},{n:'InternVL 3.5',v:33.2}
-  ]},
-  ch:{ models:[
-    {n:'DoCoG (Ours)',v:83.5,o:1},{n:'Gemini 3 Pro',v:83.2},{n:'GPT-5',v:82.4},
-    {n:'Gemini 3 Flash',v:79.6},{n:'Sonnet 4.5',v:79.1},{n:'Qwen3-VL FT',v:75.8},
-    {n:'Qwen3-VL',v:75.2},{n:'InternVL 3.5 FT',v:74.6},{n:'InternVL 3.5',v:73.4},{n:'VisualCoT',v:52.3}
-  ]},
-  fl:{ models:[
-    {n:'DoCoG (Ours)',v:82.2,o:1},{n:'Gemini 3 Pro',v:79.4},{n:'GPT-5',v:78.1},
-    {n:'Gemini 3 Flash',v:75.8},{n:'Sonnet 4.5',v:75.3},{n:'Qwen3-VL FT',v:70.2},
-    {n:'Qwen3-VL',v:69.4},{n:'InternVL 3.5 FT',v:68.8},{n:'InternVL 3.5',v:67.2},{n:'VisualCoT',v:44.6}
-  ]},
-  tb:{ models:[
-    {n:'DoCoG (Ours)',v:87.8,o:1},{n:'Gemini 3 Pro',v:86.0},{n:'GPT-5',v:84.3},
-    {n:'Gemini 3 Flash',v:82.4},{n:'Sonnet 4.5',v:81.6},{n:'Qwen3-VL FT',v:80.6},
-    {n:'InternVL 3.5 FT',v:79.1},{n:'Qwen3-VL',v:79.5},{n:'InternVL 3.5',v:78.0},{n:'VisualCoT',v:55.4}
-  ]},
-  dc:{ models:[
-    {n:'DoCoG (Ours)',v:89.7,o:1},{n:'Gemini 3 Pro',v:88.1},{n:'GPT-5',v:86.7},
-    {n:'Gemini 3 Flash',v:84.5},{n:'Sonnet 4.5',v:83.8},{n:'Qwen3-VL FT',v:83.4},
-    {n:'InternVL 3.5 FT',v:82.0},{n:'Qwen3-VL',v:78.6},{n:'InternVL 3.5',v:77.1},{n:'VisualCoT',v:59.7}
-  ]}
+  aq:{ models:[{n:'DoCoG (Ours)',v:85.8,o:1},{n:'Gemini 3 Pro',v:84.2},{n:'GPT-5',v:82.9},{n:'Gemini 3 Flash',v:80.6},{n:'Sonnet 4.5',v:79.9},{n:'Qwen3-VL FT',v:77.5},{n:'InternVL 3.5 FT',v:76.1},{n:'Qwen3-VL',v:75.7},{n:'InternVL 3.5',v:73.9},{n:'VisualCoT',v:53.0}] },
+  gq:{ models:[{n:'DoCoG (Ours)',v:81.9,o:1},{n:'InternVL 3.5 FT',v:64.6},{n:'Qwen3-VL FT',v:61.9},{n:'Gemini 3 Flash',v:23.6},{n:'Gemini 3 Pro',v:11.4},{n:'Sonnet 4.5',v:7.1},{n:'Qwen3-VL',v:5.5},{n:'GPT-5',v:4.8},{n:'InternVL 3.5',v:4.0},{n:'VisualCoT',v:3.5}] },
+  cq:{ models:[{n:'DoCoG (Ours)',v:82.0,o:1},{n:'GPT-5',v:76.8},{n:'Gemini 3 Pro',v:75.2},{n:'Qwen3-VL FT',v:74.8},{n:'Gemini 3 Flash',v:73.4},{n:'InternVL 3.5 FT',v:72.2},{n:'Sonnet 4.5',v:71.3},{n:'VisualCoT',v:51.2},{n:'Qwen3-VL',v:35.9},{n:'InternVL 3.5',v:33.2}] },
+  ch:{ models:[{n:'DoCoG (Ours)',v:83.5,o:1},{n:'Gemini 3 Pro',v:83.2},{n:'GPT-5',v:82.4},{n:'Gemini 3 Flash',v:79.6},{n:'Sonnet 4.5',v:79.1},{n:'Qwen3-VL FT',v:75.8},{n:'Qwen3-VL',v:75.2},{n:'InternVL 3.5 FT',v:74.6},{n:'InternVL 3.5',v:73.4},{n:'VisualCoT',v:52.3}] },
+  fl:{ models:[{n:'DoCoG (Ours)',v:82.2,o:1},{n:'Gemini 3 Pro',v:79.4},{n:'GPT-5',v:78.1},{n:'Gemini 3 Flash',v:75.8},{n:'Sonnet 4.5',v:75.3},{n:'Qwen3-VL FT',v:70.2},{n:'Qwen3-VL',v:69.4},{n:'InternVL 3.5 FT',v:68.8},{n:'InternVL 3.5',v:67.2},{n:'VisualCoT',v:44.6}] },
+  tb:{ models:[{n:'DoCoG (Ours)',v:87.8,o:1},{n:'Gemini 3 Pro',v:86.0},{n:'GPT-5',v:84.3},{n:'Gemini 3 Flash',v:82.4},{n:'Sonnet 4.5',v:81.6},{n:'Qwen3-VL FT',v:80.6},{n:'InternVL 3.5 FT',v:79.1},{n:'Qwen3-VL',v:79.5},{n:'InternVL 3.5',v:78.0},{n:'VisualCoT',v:55.4}] },
+  dc:{ models:[{n:'DoCoG (Ours)',v:89.7,o:1},{n:'Gemini 3 Pro',v:88.1},{n:'GPT-5',v:86.7},{n:'Gemini 3 Flash',v:84.5},{n:'Sonnet 4.5',v:83.8},{n:'Qwen3-VL FT',v:83.4},{n:'InternVL 3.5 FT',v:82.0},{n:'Qwen3-VL',v:78.6},{n:'InternVL 3.5',v:77.1},{n:'VisualCoT',v:59.7}] }
 };
-// sort all
 Object.values(MAIN).forEach(d=>d.models.sort((a,b)=>b.v-a.v));
 
-/* ════════════════════════════════════
-   MINI CHART DATA  (3 tabs × 4 domains)
-════════════════════════════════════ */
 const MINI = {
-  charts:{
-    chartqa:   {models:[{n:'DoCoG (Ours)',v:92.7,o:1},{n:'Chart-R1',v:91.0},{n:'Qwen3-VL',v:89.6},{n:'GPT-5',v:89.0},{n:'InternVL 3.5',v:86.7}]},
-    chartbench:{models:[{n:'DoCoG (Ours)',v:79.4,o:1},{n:'GPT-5',v:69.4},{n:'Qwen3-VL',v:65.3},{n:'InternVL 3.5',v:51.4},{n:'Chart-R1',v:34.1}]},
-    cqapro:    {models:[{n:'DoCoG (Ours)',v:52.1,o:1},{n:'Chart-R1',v:44.0},{n:'GPT-5',v:42.7},{n:'InternVL 3.5',v:34.7},{n:'Qwen3-VL',v:32.9}]}
-  },
-  flowcharts:{
-    missqa: {models:[{n:'DoCoG (Ours)',v:78.4,o:1},{n:'GPT-5',v:71.7},{n:'InternVL 3.5',v:48.5},{n:'Qwen3-VL',v:46.2}]},
-    flowvqa:{models:[{n:'GPT-5',v:91.9},{n:'DoCoG (Ours)',v:85.5,o:1},{n:'Qwen3-VL',v:81.0},{n:'InternVL 3.5',v:78.4}]},
-    gqfa:   {models:[{n:'DoCoG (Ours)',v:79.2,o:1},{n:'Sonnet 4.5',v:13.3},{n:'Qwen3-VL',v:11.0},{n:'GPT-5',v:4.0},{n:'InternVL 3.5',v:1.5}]}
-  },
-  tables:{
-    tabfact:{models:[{n:'DoCoG (Ours)',v:89.4,o:1},{n:'GPT-5',v:87.7},{n:'Qwen3-VL',v:81.8},{n:'InternVL 3.5',v:78.1}]},
-    wtq:    {models:[{n:'GPT-5',v:78.8},{n:'DoCoG (Ours)',v:64.4,o:1},{n:'Qwen3-VL',v:57.4},{n:'InternVL 3.5',v:55.6}]},
-    gqfa:   {models:[{n:'DoCoG (Ours)',v:82.7,o:1},{n:'GPT-5',v:6.4},{n:'InternVL 3.5',v:3.2},{n:'Qwen3-VL',v:0.9}]}
-  },
-  documents:{
-    bdf1g:   {models:[{n:'DoCoG (Ours)',v:85.4,o:1},{n:'Gemini 3 Pro',v:73.5},{n:'Qwen3-VL',v:44.5},{n:'GPT-5',v:5.4}]},
-    dogrf1g: {models:[{n:'DoCoG (Ours)',v:75.4,o:1},{n:'Gemini 3 Pro',v:65.3},{n:'Qwen3-VL',v:27.6},{n:'GPT-5',v:3.6}]},
-    mmdbiou: {models:[{n:'DoCoG (Ours)',v:70.5,o:1},{n:'Gemini 3 Pro',v:55.4},{n:'Qwen3-VL',v:28.7},{n:'GPT-5',v:9.3}]}
-  }
+  charts:    { chartqa:{models:[{n:'DoCoG (Ours)',v:92.7,o:1},{n:'Chart-R1',v:91.0},{n:'Qwen3-VL',v:89.6},{n:'GPT-5',v:89.0},{n:'InternVL 3.5',v:86.7}]}, chartbench:{models:[{n:'DoCoG (Ours)',v:79.4,o:1},{n:'GPT-5',v:69.4},{n:'Qwen3-VL',v:65.3},{n:'InternVL 3.5',v:51.4},{n:'Chart-R1',v:34.1}]}, cqapro:{models:[{n:'DoCoG (Ours)',v:52.1,o:1},{n:'Chart-R1',v:44.0},{n:'GPT-5',v:42.7},{n:'InternVL 3.5',v:34.7},{n:'Qwen3-VL',v:32.9}]} },
+  flowcharts:{ missqa:{models:[{n:'DoCoG (Ours)',v:78.4,o:1},{n:'GPT-5',v:71.7},{n:'InternVL 3.5',v:48.5},{n:'Qwen3-VL',v:46.2}]}, flowvqa:{models:[{n:'GPT-5',v:91.9},{n:'DoCoG (Ours)',v:85.5,o:1},{n:'Qwen3-VL',v:81.0},{n:'InternVL 3.5',v:78.4}]}, gqfa:{models:[{n:'DoCoG (Ours)',v:79.2,o:1},{n:'Sonnet 4.5',v:13.3},{n:'Qwen3-VL',v:11.0},{n:'GPT-5',v:4.0},{n:'InternVL 3.5',v:1.5}]} },
+  tables:    { tabfact:{models:[{n:'DoCoG (Ours)',v:89.4,o:1},{n:'GPT-5',v:87.7},{n:'Qwen3-VL',v:81.8},{n:'InternVL 3.5',v:78.1}]}, wtq:{models:[{n:'GPT-5',v:78.8},{n:'DoCoG (Ours)',v:64.4,o:1},{n:'Qwen3-VL',v:57.4},{n:'InternVL 3.5',v:55.6}]}, gqfa:{models:[{n:'DoCoG (Ours)',v:82.7,o:1},{n:'GPT-5',v:6.4},{n:'InternVL 3.5',v:3.2},{n:'Qwen3-VL',v:0.9}]} },
+  documents: { bdf1g:{models:[{n:'DoCoG (Ours)',v:85.4,o:1},{n:'Gemini 3 Pro',v:73.5},{n:'Qwen3-VL',v:44.5},{n:'GPT-5',v:5.4}]}, dogrf1g:{models:[{n:'DoCoG (Ours)',v:75.4,o:1},{n:'Gemini 3 Pro',v:65.3},{n:'Qwen3-VL',v:27.6},{n:'GPT-5',v:3.6}]}, mmdbiou:{models:[{n:'DoCoG (Ours)',v:70.5,o:1},{n:'Gemini 3 Pro',v:55.4},{n:'Qwen3-VL',v:28.7},{n:'GPT-5',v:9.3}]} }
 };
-// sort all mini
 Object.values(MINI).forEach(d=>Object.values(d).forEach(m=>m.models.sort((a,b)=>b.v-a.v)));
 
-/* ── Build a main-chart pane ── */
-function buildMain(id, data) {
-  const el = document.getElementById('pane-'+id); if(!el) return;
-  const max = Math.max(...data.models.map(m=>m.v));
-  el.innerHTML = data.models.map(m=>`
-    <div class="bar-row">
-      <div class="bar-name${m.o?' ours':''}">${m.n}</div>
-      <div class="bar-track" title="${m.n}: ${m.v}">
-        <div class="bar-fill${m.o?' ours':''}" data-pct="${(m.v/100*100).toFixed(2)}" style="width:0%">
-          <span class="bar-tip">${m.v}</span>
+function mkRows(models, pfx) {
+  const isMain = pfx==='bar';
+  return models.map(m=>`
+    <div class="${pfx}-row">
+      <div class="${pfx}-name${m.o?' ours':''}">${m.n}</div>
+      <div class="${pfx}-track" title="${m.n}: ${m.v}">
+        <div class="${pfx}-fill${m.o?' ours':''}" data-pct="${(m.v).toFixed(2)}" style="width:0%">
+          <span class="${pfx}-tip">${m.v}</span>
         </div>
       </div>
-      <div class="bar-score${m.o?' ours':''}">${m.v}</div>
+      <div class="${pfx}-score${m.o?' ours':''}">${m.v}</div>
     </div>`).join('');
 }
-Object.entries(MAIN).forEach(([k,v])=>buildMain(k,v));
 
-/* ── Build a mini-chart pane ── */
-function buildMini(domain, metric, data) {
-  const el = document.getElementById(`mc-${domain}-${metric}`); if(!el) return;
-  el.innerHTML = data.models.map(m=>`
-    <div class="mc-row">
-      <div class="mc-name${m.o?' ours':''}">${m.n}</div>
-      <div class="mc-track" title="${m.n}: ${m.v}">
-        <div class="mc-fill${m.o?' ours':''}" data-pct="${(m.v/100*100).toFixed(2)}" style="width:0%">
-          <span class="mc-tip">${m.v}</span>
-        </div>
-      </div>
-      <div class="mc-score${m.o?' ours':''}">${m.v}</div>
-    </div>`).join('');
+/* Build main panes */
+Object.entries(MAIN).forEach(([k,d])=>{
+  const el=document.getElementById('pane-'+k); if(!el) return;
+  el.innerHTML=mkRows(d.models,'bar');
+});
+
+/* Build mini panes */
+Object.entries(MINI).forEach(([dom,ms])=>Object.entries(ms).forEach(([met,d])=>{
+  const el=document.getElementById(`mc-${dom}-${met}`); if(!el) return;
+  el.innerHTML=mkRows(d.models,'mc');
+}));
+
+function animBars(sel) {
+  const fills=document.querySelectorAll(sel+' .bar-fill, '+sel+' .mc-fill');
+  fills.forEach(f=>f.style.width='0%');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    fills.forEach((f,i)=>setTimeout(()=>{ f.style.width=f.dataset.pct+'%'; },i*55));
+  }));
 }
-Object.entries(MINI).forEach(([d,ms])=>Object.entries(ms).forEach(([m,data])=>buildMini(d,m,data)));
 
-/* ── Animate main pane ── */
-function animMain(id) {
-  const el = document.getElementById('pane-'+id); if(!el) return;
-  const fills = el.querySelectorAll('.bar-fill');
+function animPane(id) {
+  const el=document.getElementById(id); if(!el||!el.closest('.c-pane,.mc-pane')) return;
+  const fills=el.querySelectorAll('.bar-fill,.mc-fill');
   fills.forEach(f=>f.style.width='0%');
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
     fills.forEach((f,i)=>setTimeout(()=>{f.style.width=f.dataset.pct+'%';},i*55));
   }));
 }
 
-/* ── Animate mini pane ── */
-function animMini(domain, metric) {
-  const el = document.getElementById(`mc-${domain}-${metric}`); if(!el) return;
-  const fills = el.querySelectorAll('.mc-fill');
-  fills.forEach(f=>f.style.width='0%');
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{
-    fills.forEach((f,i)=>setTimeout(()=>{f.style.width=f.dataset.pct+'%';},i*50));
-  }));
-}
-
-/* ── Main chart tabs ── */
-let activeMain = 'aq';
+/* Main tabs */
+let activeMain='aq';
 document.querySelectorAll('.c-tab').forEach(tab=>{
   tab.addEventListener('click',()=>{
     document.querySelectorAll('.c-tab').forEach(t=>t.classList.remove('on'));
     document.querySelectorAll('.c-pane').forEach(p=>p.classList.remove('on'));
-    tab.classList.add('on');
-    activeMain = tab.dataset.p;
-    document.getElementById('pane-'+activeMain).classList.add('on');
-    animMain(activeMain);
+    tab.classList.add('on'); activeMain=tab.dataset.p;
+    const pane=document.getElementById('pane-'+activeMain);
+    pane.classList.add('on'); animPane('pane-'+activeMain);
   });
 });
 
-/* ── Mini chart tabs ── */
-const activeMini = {charts:'chartqa', flowcharts:'missqa', tables:'tabfact', documents:'bdf1g'};
+/* Mini tabs */
+const activeMini={charts:'chartqa',flowcharts:'missqa',tables:'tabfact',documents:'bdf1g'};
 document.querySelectorAll('.mc-tab').forEach(tab=>{
   tab.addEventListener('click',()=>{
-    const d = tab.dataset.d, m = tab.dataset.m;
+    const d=tab.dataset.d, m=tab.dataset.m;
     document.querySelectorAll(`.mc-tab[data-d="${d}"]`).forEach(t=>t.classList.remove('on'));
-    document.querySelectorAll(`#mc-${d}-${activeMini[d]},#mc-${d}-chartqa,#mc-${d}-chartbench,#mc-${d}-cqapro,#mc-${d}-missqa,#mc-${d}-flowvqa,#mc-${d}-gqfa,#mc-${d}-tabfact,#mc-${d}-wtq,#mc-${d}-bdf1g,#mc-${d}-dogrf1g,#mc-${d}-mmdbiou`).forEach(p=>{if(p)p.classList.remove('on');});
-    tab.classList.add('on');
-    activeMini[d] = m;
-    const pane = document.getElementById(`mc-${d}-${m}`);
-    if(pane) pane.classList.add('on');
-    animMini(d, m);
+    document.querySelectorAll(`.mc-wrap[data-mc="${d}"] .mc-pane`).forEach(p=>p.classList.remove('on'));
+    tab.classList.add('on'); activeMini[d]=m;
+    const pane=document.getElementById(`mc-${d}-${m}`);
+    if(pane){ pane.classList.add('on'); animPane(`mc-${d}-${m}`); }
   });
 });
 
-/* ── Scroll reveal + chart animation triggers ── */
-const rvObs = new IntersectionObserver(entries=>{
+/* Scroll reveal + trigger charts */
+const rvObs=new IntersectionObserver(entries=>{
   entries.forEach(e=>{
     if(!e.isIntersecting) return;
     e.target.classList.add('in');
-    if(e.target.id==='mainChart') setTimeout(()=>animMain(activeMain), 350);
+    if(e.target.id==='mainChart') setTimeout(()=>animPane('pane-'+activeMain),350);
   });
-},{threshold:0.1, rootMargin:'0px 0px -40px 0px'});
+},{threshold:0.1,rootMargin:'0px 0px -40px 0px'});
 document.querySelectorAll('.rv').forEach(el=>rvObs.observe(el));
 
-/* animate mini charts when their wrapper scrolls into view */
-const mcObs = new IntersectionObserver(entries=>{
+/* Mini chart scroll trigger */
+const mcObs=new IntersectionObserver(entries=>{
   entries.forEach(e=>{
     if(!e.isIntersecting) return;
-    const d = e.target.dataset.mc;
-    if(d && activeMini[d]) {
-      setTimeout(()=>animMini(d, activeMini[d]), 200);
-      mcObs.unobserve(e.target);
-    }
+    const d=e.target.dataset.mc;
+    if(d) { setTimeout(()=>animPane(`mc-${d}-${activeMini[d]}`),200); mcObs.unobserve(e.target); }
   });
 },{threshold:0.2});
 document.querySelectorAll('.mc-wrap').forEach(w=>mcObs.observe(w));
 
-/* ── BibTeX copy ── */
+/* BibTeX copy */
 document.getElementById('copyBib').addEventListener('click',function(){
   navigator.clipboard.writeText(document.getElementById('bibText').textContent).then(()=>{
     this.innerHTML='<i class="fas fa-check"></i>&ensp;Copied!';
@@ -1003,25 +1043,25 @@ document.getElementById('copyBib').addEventListener('click',function(){
   });
 });
 
-/* ── Mobile nav ── */
+/* Mobile nav */
 document.getElementById('navBurger').addEventListener('click',()=>
   document.getElementById('navLinks').classList.toggle('open'));
 document.querySelectorAll('#navLinks a').forEach(a=>
   a.addEventListener('click',()=>document.getElementById('navLinks').classList.remove('open')));
 
-/* ── Active nav highlight ── */
-const navAs = document.querySelectorAll('.nav-links a');
-const navObs = new IntersectionObserver(entries=>{
+/* Active nav on scroll */
+const navAs=document.querySelectorAll('.nav-links a');
+const navObs=new IntersectionObserver(entries=>{
   entries.forEach(e=>{
     if(e.isIntersecting){
       navAs.forEach(a=>a.style.color='');
-      const l = document.querySelector(`.nav-links a[href="#${e.target.id}"]`);
-      if(l) l.style.color='var(--a)';
+      const l=document.querySelector(`.nav-links a[href="#${e.target.id}"]`);
+      if(l) l.style.color='var(--ink)';
     }
   });
 },{threshold:0.4});
 ['abstract','method','dataset','results','bibtex'].forEach(id=>{
-  const el = document.getElementById(id); if(el) navObs.observe(el);
+  const el=document.getElementById(id); if(el) navObs.observe(el);
 });
 </script>
 </body>

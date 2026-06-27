@@ -180,28 +180,19 @@ code {
 ══════════════════════════════════════════════ */
 .carousel-outer { max-width:980px; margin:2.5rem auto 0; }
 
-/* Stage — white bg so PNG images never show a black letterbox */
+/* Stage — auto height, white, no letterbox */
 .car-stage {
   position:relative; border-radius:18px; overflow:hidden;
   background:#ffffff;
   border:1.5px solid var(--b1);
   box-shadow:0 4px 32px rgba(0,0,0,.07), 0 1px 8px rgba(0,0,0,.04);
   user-select:none;
-  /* no fixed height — stage stretches to tallest visible slide */
 }
-.car-track {
-  display:flex;
-  transition:transform .52s var(--e1);
-  will-change:transform;
-}
-.car-slide {
-  flex:0 0 100%; width:100%;
-  display:block;
-}
-.car-slide img {
-  width:100%; height:auto;
-  display:block;
-}
+.car-track { position:relative; }
+.car-slide { display:none; width:100%; }
+.car-slide.cur { display:block; animation:carFade .4s var(--e1); }
+@keyframes carFade { from{opacity:0} to{opacity:1} }
+.car-slide img { width:100%; height:auto; display:block; }
 
 /* Counter badge — dark pill, readable on both image content and white areas */
 .car-ctr {
@@ -864,11 +855,11 @@ footer a:hover { color:var(--ink); }
   const dotsEl  = document.querySelectorAll('.car-dot');
   const thumbsW = document.getElementById('carThumbs');
   const stage   = document.getElementById('carStage');
-  let cur = 0, dragging = false, dragStartX = 0, dragDelta = 0;
+  let cur = 0, touchX = 0;
 
-  /* Build slides */
+  /* Build slides — first one gets .cur */
   track.innerHTML = SLIDES.map((s,i)=>`
-    <div class="car-slide" aria-label="Slide ${i+1}">
+    <div class="car-slide${i===0?' cur':''}" aria-label="Slide ${i+1}">
       <img src="${s.img}" alt="Qualitative result ${i+1}" loading="${i===0?'eager':'lazy'}">
     </div>`).join('');
 
@@ -878,13 +869,13 @@ footer a:hover { color:var(--ink); }
       <img src="${s.img}" alt="Thumbnail ${i+1}" loading="lazy">
     </div>`).join('');
   const thumbEls = thumbsW.querySelectorAll('.car-thumb');
+  const slideEls = track.querySelectorAll('.car-slide');
 
   /* Go to slide n */
-  function go(n, animate=true) {
+  function go(n) {
+    slideEls[cur].classList.remove('cur');
     cur = ((n % SLIDES.length) + SLIDES.length) % SLIDES.length;
-    if(!animate) track.style.transition='none';
-    track.style.transform = `translateX(-${cur*100}%)`;
-    if(!animate) requestAnimationFrame(()=>{ track.style.transition=''; });
+    slideEls[cur].classList.add('cur');
 
     const pad = v => String(v).padStart(2,'0');
     ctr.textContent = `${pad(cur+1)} / ${pad(SLIDES.length)}`;
@@ -917,33 +908,14 @@ footer a:hover { color:var(--ink); }
     }
   });
 
-  /* Touch / pointer drag */
-  function onDragStart(x){ dragStartX=x; dragDelta=0; dragging=true; track.style.transition='none'; }
-  function onDragMove(x){
-    if(!dragging) return;
-    dragDelta = x - dragStartX;
-    track.style.transform = `translateX(calc(-${cur*100}% + ${dragDelta}px))`;
-  }
-  function onDragEnd(){
-    if(!dragging) return;
-    dragging=false;
-    track.style.transition='';
-    if(dragDelta < -50) go(cur+1);
-    else if(dragDelta > 50) go(cur-1);
-    else { track.style.transform=`translateX(-${cur*100}%)`; }
-    dragDelta=0;
-  }
+  /* Swipe */
+  stage.addEventListener('touchstart',e=>{touchX=e.touches[0].clientX;},{passive:true});
+  stage.addEventListener('touchend',  e=>{
+    const dx=e.changedTouches[0].clientX-touchX;
+    if(Math.abs(dx)>40) go(dx>0?cur-1:cur+1);
+  },{passive:true});
 
-  stage.addEventListener('touchstart', e=>onDragStart(e.touches[0].clientX), {passive:true});
-  stage.addEventListener('touchmove',  e=>onDragMove(e.touches[0].clientX),  {passive:true});
-  stage.addEventListener('touchend',   onDragEnd, {passive:true});
-  stage.addEventListener('mousedown',  e=>onDragStart(e.clientX));
-  stage.addEventListener('mousemove',  e=>onDragMove(e.clientX));
-  stage.addEventListener('mouseup',    onDragEnd);
-  stage.addEventListener('mouseleave', onDragEnd);
-
-  /* Init */
-  go(0, false);
+  /* Init caption (slide 0 already has .cur from HTML build) */
   capEl.innerHTML = SLIDES[0].cap;
 })();
 

@@ -1074,15 +1074,6 @@ const mcObs=new IntersectionObserver(entries=>{
 },{threshold:0.2});
 document.querySelectorAll('.mc-wrap').forEach(w=>mcObs.observe(w));
 
-/* BibTeX copy */
-document.getElementById('copyBib').addEventListener('click',function(){
-  navigator.clipboard.writeText(document.getElementById('bibText').textContent).then(()=>{
-    this.innerHTML='<i class="fas fa-check"></i>&ensp;Copied!';
-    this.style.color='#4ade80';
-    setTimeout(()=>{this.innerHTML='<i class="fas fa-copy"></i>&ensp;Copy';this.style.color='';},2200);
-  });
-});
-
 /* Mobile nav */
 document.getElementById('navBurger').addEventListener('click',()=>
   document.getElementById('navLinks').classList.toggle('open'));

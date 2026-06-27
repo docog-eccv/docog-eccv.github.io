@@ -180,12 +180,13 @@ code {
 ══════════════════════════════════════════════ */
 .carousel-outer { max-width:980px; margin:2.5rem auto 0; }
 
-/* Stage */
+/* Stage — white bg so PNG images never show a black letterbox */
 .car-stage {
   position:relative; border-radius:18px; overflow:hidden;
-  background:#09090f;
-  box-shadow:0 32px 80px rgba(0,0,0,.22), 0 8px 24px rgba(0,0,0,.14);
-  aspect-ratio:4/3;
+  background:#ffffff;
+  border:1.5px solid var(--b1);
+  box-shadow:0 4px 32px rgba(0,0,0,.07), 0 1px 8px rgba(0,0,0,.04);
+  height:500px;       /* fixed, consistent height; white areas invisible on white bg */
   user-select:none;
 }
 .car-track {
@@ -196,34 +197,41 @@ code {
 .car-slide {
   flex:0 0 100%; height:100%;
   display:flex; align-items:center; justify-content:center;
+  background:#ffffff;
 }
-.car-slide img { width:100%; height:100%; object-fit:contain; display:block; }
+.car-slide img {
+  width:100%; height:100%;
+  object-fit:contain;
+  object-position:center top;   /* anchor content to top; white space falls to bottom */
+  display:block; background:#fff;
+}
 
-/* Counter badge */
+/* Counter badge — dark pill, readable on both image content and white areas */
 .car-ctr {
-  position:absolute; top:14px; right:14px;
-  background:rgba(0,0,0,.52); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
-  color:rgba(255,255,255,.9); font-size:.72rem; font-weight:700;
+  position:absolute; top:12px; right:12px;
+  background:rgba(29,29,31,.62); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+  color:rgba(255,255,255,.95); font-size:.72rem; font-weight:700;
   padding:.3rem .72rem; border-radius:100px; letter-spacing:.06em;
   font-variant-numeric:tabular-nums; pointer-events:none;
-  border:1px solid rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.15);
 }
 
-/* Frosted arrows — show on stage hover */
+/* Nav arrows — dark glass style for light-background stage */
 .car-btn {
   position:absolute; top:50%; transform:translateY(-50%);
-  width:46px; height:46px; border-radius:50%;
-  background:rgba(255,255,255,.13); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
-  border:1px solid rgba(255,255,255,.22); color:#fff;
+  width:44px; height:44px; border-radius:50%;
+  background:rgba(255,255,255,.80); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+  border:1px solid rgba(0,0,0,.10); color:var(--t1);
   cursor:pointer; display:flex; align-items:center; justify-content:center;
-  font-size:.9rem; z-index:10;
+  font-size:.88rem; z-index:10;
+  box-shadow:0 2px 12px rgba(0,0,0,.12);
   opacity:0; transition:opacity .25s,background .2s,transform .2s var(--e1);
 }
 .car-stage:hover .car-btn { opacity:1; }
-.car-btn:hover { background:rgba(255,255,255,.28); transform:translateY(-50%) scale(1.08); }
+.car-btn:hover { background:rgba(255,255,255,.96); transform:translateY(-50%) scale(1.08); }
 .car-btn:active { transform:translateY(-50%) scale(.96); }
-.car-btn.prev { left:14px; }
-.car-btn.next { right:14px; }
+.car-btn.prev { left:12px; }
+.car-btn.next { right:12px; }
 
 /* Caption */
 .car-cap-wrap { min-height:72px; padding:1.1rem 1rem .4rem; display:flex; align-items:center; justify-content:center; }
@@ -827,12 +835,30 @@ footer a:hover { color:var(--ink); }
 ══════════════════════════════════════ */
 (function(){
   const SLIDES = [
-    { img:'static/images/qual_res_1.png', cap:'<strong>Flowchart Grounding —</strong> DoCoG accurately segments individual nodes, connectors, and decision branches in complex multi-step diagrams, grounding each CoT step to its structural evidence.' },
-    { img:'static/images/qual_res_2.png', cap:'<strong>Chart QA —</strong> Step-wise chain-of-thought with pixel-precise evidence: each intermediate reasoning step is grounded to the exact bar, line, or wedge supporting it.' },
-    { img:'static/images/qual_res_3.png', cap:'<strong>Dense Table Extraction —</strong> Precise cell-level grounding avoids boundary spillover into adjacent rows and columns — a capability bounding boxes fundamentally cannot achieve.' },
-    { img:'static/images/qual_res_4.png', cap:'<strong>Mixed Document Understanding —</strong> Multi-type evidence grounding across textual paragraphs and embedded graphical elements, all within a single forward pass.' },
-    { img:'static/images/qual_res_5.png', cap:'<strong>Curved &amp; Stylized Text —</strong> Mask-based localization captures curved, rotated, and decorative text regions that rectangular bounding boxes cannot represent.' },
-    { img:'static/images/qual_res_6.png', cap:'<strong>Multi-Span Reasoning —</strong> Evidence retrieved from non-contiguous, spatially distributed regions — a key capability enabled by DoCoG\'s autoregressive grounding design.' },
+    {
+      img:'static/images/qual_res_1.png',
+      cap:'<strong>Medical Bill Table QA —</strong> DoCoG grounds multi-span evidence across table cells, discount footnotes, and highlighted values simultaneously — tracking "Cost [GND]", "Blood Test [GND]", "5% discount [GND]", and "Claim [GND]" in a single grounded reasoning chain.'
+    },
+    {
+      img:'static/images/qual_res_2.png',
+      cap:'<strong>Infographic Spatial Grounding —</strong> On a Beijing 2022 Olympics venue infographic, DoCoG localizes named locations (Beijing, Yanqing, Zhangjiakou) and spatial connectors (dashed lines) as distinct grounded evidence regions, enabling precise QA over richly structured visual layouts.'
+    },
+    {
+      img:'static/images/qual_res_3.png',
+      cap:'<strong>Geometric Diagram QA —</strong> Mask-based grounding localizes specific labeled sides of a right-angled triangle — the hypotenuse annotation and the unknown length "x cm" — supporting step-wise mathematical reasoning that rectangular bounding boxes cannot express.'
+    },
+    {
+      img:'static/images/qual_res_4.png',
+      cap:'<strong>Financial Table Grounding —</strong> DoCoG distinguishes and grounds individual colored cell values ("Net Sales [GND]", "$20.00 [GND]") and the aggregate totals row ("$150.00 [GND]") within a dense credit card summary table — demonstrating precise intra-table, multi-span localization.'
+    },
+    {
+      img:'static/images/qual_res_5.png',
+      cap:'<strong>Architectural Floor Plan —</strong> DoCoG segments spatially distributed, non-rectangular room regions (Bedroom 1 and Bedroom 2) in a detailed architectural floor plan — a capability that pixel-aligned masks enable but axis-aligned bounding boxes fundamentally cannot.'
+    },
+    {
+      img:'static/images/qual_res_6.png',
+      cap:'<strong>Food Web Diagram —</strong> DoCoG grounds named species nodes (penguins, smaller toothed whales, leopard seal) and their directional arrow relationships in a complex ecological network — demonstrating simultaneous multi-type grounding over both diagram nodes and structural connectors.'
+    },
   ];
 
   const track   = document.getElementById('carTrack');

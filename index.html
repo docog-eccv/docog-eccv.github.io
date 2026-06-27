@@ -480,7 +480,7 @@ footer a:hover { color:var(--ink); }
 <!-- TEASER -->
 <div class="teaser-s">
   <div class="teaser-w rv">
-    <img class="teaser-img" src="static/images/teaser.png" alt="DoCoG teaser figure">
+    <img class="teaser-img" id="teaserImg" src="static/images/teaser.png" alt="DoCoG teaser figure">
     <p class="fig-cap">
       <strong>Mask-based Multi-type grounded CoT.</strong>
       Each example shows a QA pair where the model interleaves <code>[GND]</code> tokens within the CoT
@@ -511,7 +511,7 @@ footer a:hover { color:var(--ink); }
     <h2 class="s-title rv">Method</h2>
 
     <div class="rv">
-      <img class="method-img" src="static/images/model_overview.png" alt="DoCoG architecture overview">
+      <img class="method-img" id="methodImg" src="static/images/model_overview.png" alt="DoCoG architecture overview">
       <p class="fig-cap">
         <strong>DoCoG architecture:</strong> Given a document image \(I\) and question \(q\), the VLM <span class="circ">1</span> encodes visual features and autoregressively generates step-wise outputs interleaved with <code>[GND]</code> tokens <span class="circ">2</span>. Their hidden states <span class="circ">3</span> pass to GIM <span class="circ">4</span>, which refines them via cross-attention with segmenter features <span class="circ">6</span> from <span class="circ">5</span>, producing prompt embeddings decoded into evidence masks (<span class="circ-w">2c</span>).
       </p>
@@ -1100,16 +1100,23 @@ const navObs=new IntersectionObserver(entries=>{
   const btn=document.getElementById('themeBtn');
   const icon=document.getElementById('themeIcon');
   const html=document.documentElement;
-  // Apply saved or system preference on load
-  const saved=localStorage.getItem('docog-theme');
-  const sysDark=window.matchMedia('(prefers-color-scheme:dark)').matches;
-  if(saved==='dark'||(saved===null&&sysDark)){
-    html.dataset.theme='dark'; icon.className='fas fa-sun';
-  }
-  btn.addEventListener('click',()=>{
-    const dark=html.dataset.theme!=='dark';
+  const teaserImg=document.getElementById('teaserImg');
+  const methodImg=document.getElementById('methodImg');
+
+  function applyTheme(dark){
     html.dataset.theme=dark?'dark':'light';
     icon.className=dark?'fas fa-sun':'fas fa-moon';
+    teaserImg.src=dark?'static/images/dark/teaser_dark.png':'static/images/teaser.png';
+    methodImg.src=dark?'static/images/dark/method_diagram_dark.png':'static/images/model_overview.png';
+  }
+
+  const saved=localStorage.getItem('docog-theme');
+  const sysDark=window.matchMedia('(prefers-color-scheme:dark)').matches;
+  if(saved==='dark'||(saved===null&&sysDark)) applyTheme(true);
+
+  btn.addEventListener('click',()=>{
+    const dark=html.dataset.theme!=='dark';
+    applyTheme(dark);
     localStorage.setItem('docog-theme',dark?'dark':'light');
   });
 })();

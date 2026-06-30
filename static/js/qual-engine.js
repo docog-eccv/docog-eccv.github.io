@@ -6,7 +6,7 @@
 (function () {
   'use strict';
 
-  const CHAR_DELAY = 28; // ms per character during streaming
+  const CHAR_DELAY = 42; // ms per character during streaming
 
   const SPAN_COLORS = [
     { fill: 'rgba(79,126,248,0.26)',  border: '#4f7ef8' }, // blue
@@ -139,9 +139,9 @@
         group.appendChild(poly);
         svgEl.appendChild(group);
 
-        // Animate the clip rect width: ease-out quadratic over 600ms
+        // Animate the clip rect width: ease-out quadratic over 900ms
         const targetW  = mask.bbox.w + 1;
-        const duration = 600;
+        const duration = 900;
         const t0       = performance.now();
 
         function stepAnim(now) {
@@ -194,7 +194,7 @@
       svgEl.appendChild(group);
 
       const targetW  = mask.bbox.w + 1;
-      const duration = 600;
+      const duration = 900;
       const t0       = performance.now();
 
       function stepAnim(now) {
@@ -220,7 +220,7 @@
       setTimeout(() => {
         if (activeGenId !== capturedGen) return; // Tab switched or reset
         addSpanMaskToCurrentStep(spanIdx);
-      }, 160 + i * 80); // 160ms lets the 150ms fade complete, then stagger 80ms apart
+      }, 200 + i * 350); // 200ms lets the 150ms fade complete, then 350ms between each mask
     });
     currentlyShownSpanIndices = [...spansToShow];
   }
@@ -357,8 +357,8 @@
     function processOp() {
       if (genId !== activeGenId) return;
       if (opIdx >= ops.length) {
-        // Step done — brief pause before next step
-        setTimeout(() => streamStep(stepIdx + 1, genId, onAllDone), 250);
+        // Step done — pause before next step so the reader can absorb it
+        setTimeout(() => streamStep(stepIdx + 1, genId, onAllDone), 500);
         return;
       }
 
@@ -391,7 +391,8 @@
           addSpanMaskToCurrentStep(op.spanIndex);
           stepShownSpans.push(op.spanIndex);
           chatPanel.scrollTop = chatPanel.scrollHeight;
-          processOp();
+          // Pause so each grounding has time to register before the next token streams
+          setTimeout(processOp, 450);
           break;
         }
         case 'char': {

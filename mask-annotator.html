@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>DoCoG Mask Annotator</title>
+<style>
+  :root{ --accent:#4f7ef8; --bg:#f5f5f7; --border:#dcdce2; --text:#111; --muted:#70707a; }
+  *{box-sizing:border-box;}
+  body{font-family:-apple-system,'Inter',sans-serif;margin:0;background:var(--bg);color:var(--text);display:flex;height:100vh;overflow:hidden;}
+
+  .stage{flex:1;display:flex;flex-direction:column;background:#1a1a1e;overflow:auto;padding:24px;align-items:center;}
+  .stage-toolbar{width:100%;max-width:1100px;display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap;}
+  .stage-toolbar input[type=file]{color:#fff;font-size:13px;}
+  .stage-toolbar .hint{color:#aaa;font-size:12px;margin-left:auto;}
+  .canvas-wrap{position:relative;max-width:1100px;width:100%;}
+  .canvas-wrap img{width:100%;display:block;border-radius:8px;}
+  .canvas-wrap canvas{position:absolute;top:0;left:0;width:100%;height:100%;cursor:crosshair;border-radius:8px;}
+  .empty-state{color:#888;font-size:14px;margin-top:80px;text-align:center;}
+  .mode-banner{width:100%;max-width:1100px;background:#26262c;color:#bbb;font-size:12px;padding:8px 14px;border-radius:8px;margin-top:12px;line-height:1.6;}
+  .mode-banner b{color:#fff;}
+
+  .panel{width:400px;background:#fff;border-left:1px solid var(--border);display:flex;flex-direction:column;padding:20px;overflow-y:auto;flex-shrink:0;}
+  .panel h2{font-size:15px;margin:0 0 4px;}
+  .panel .sub{font-size:12px;color:var(--muted);margin-bottom:18px;}
+  .field{margin-bottom:14px;}
+  .field label{display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);margin-bottom:5px;}
+  .field input{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:7px;font-size:13px;font-family:inherit;}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:none;border-radius:8px;padding:9px 14px;font-size:13px;font-weight:500;cursor:pointer;transition:opacity .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}
+  .btn-ghost{background:#eee;color:#222;}
+  .btn:hover{opacity:.85;}
+  .btn-row{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+
+  .mode-tabs{display:flex;gap:6px;margin-bottom:14px;}
+  .mode-tabs button{flex:1;padding:9px 0;border-radius:999px;border:1px solid var(--border);background:#fff;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;}
+  .mode-tabs button.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+
+  .select-span-hint{font-size:11px;color:var(--muted);margin-bottom:16px;background:#f5f5f7;padding:8px 10px;border-radius:7px;line-height:1.5;}
+  .select-span-hint b{color:var(--accent);}
+
+  .active-span-badge{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:8px 10px;border-radius:8px;margin-bottom:12px;}
+  .span-color-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;}
+
+  .span-list{border-top:1px solid var(--border);padding-top:14px;margin-top:4px;}
+  .span-card{border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px;cursor:pointer;}
+  .span-card-head{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+  .span-card-head input{flex:1;border:none;font-size:13px;font-weight:600;background:transparent;padding:2px;}
+  .span-card-head input:focus{outline:1px solid var(--accent);border-radius:4px;}
+  .span-remove{cursor:pointer;color:#c0392b;font-size:13px;background:none;border:none;flex-shrink:0;}
+  .mask-chip{display:flex;justify-content:space-between;align-items:center;font-size:11px;font-family:'SF Mono',monospace;color:#444;background:#f7f7f9;border-radius:5px;padding:4px 7px;margin-bottom:3px;}
+  .mask-chip button{background:none;border:none;color:#c0392b;cursor:pointer;font-size:11px;padding:0 0 0 8px;}
+  .mask-empty{font-size:11px;color:#bbb;font-style:italic;padding:3px 0;}
+
+  textarea#jsonOut{width:100%;height:220px;font-family:'SF Mono',monospace;font-size:11px;border:1px solid var(--border);border-radius:8px;padding:10px;resize:vertical;margin-top:8px;background:#fafafa;}
+  .output-section{border-top:1px solid var(--border);margin-top:18px;padding-top:14px;}
+</style>
+</head>
+<body>
+
+  <div class="stage">
+    <div class="stage-toolbar">
+      <input type="file" id="imgInput" accept="image/*">
+      <span class="hint" id="imgDims"></span>
+    </div>
+    <div class="canvas-wrap" id="canvasWrap" style="display:none;">
+      <img id="docImg" />
+      <canvas id="overlay"></canvas>
+    </div>
+    <div class="empty-state" id="emptyState">Load a document image to start annotating.</div>
+    <div class="mode-banner" id="modeBanner" style="display:none;"></div>
+  </div>
+
+  <div class="panel">
+    <h2>DoCoG Mask Annotator</h2>
+    <div class="sub">Draw rectangle or freeform polygon masks per span — exports % point coordinates.</div>
+
+    <div class="field"><label>Example ID</label><input id="exampleId" placeholder="e.g. floorplan" value="floorplan"></div>
+    <div class="field"><label>Question</label><input id="exampleQ" placeholder="Question text..."></div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" id="addSpanBtn">+ Add Span</button>
+    </div>
+
+    <div id="activeSpanBadge"></div>
+
+    <div class="mode-tabs">
+      <button data-mode="rect" class="active">▭ Rectangle</button>
+      <button data-mode="polygon">⬡ Polygon</button>
+    </div>
+
+    <div class="select-span-hint" id="modeHint"></div>
+
+    <div class="span-list" id="spanList"></div>
+
+    <div class="output-section">
+      <div class="btn-row">
+        <button class="btn btn-ghost" id="genJsonBtn">Generate JSON</button>
+        <button class="btn btn-ghost" id="copyJsonBtn">Copy</button>
+      </div>
+      <textarea id="jsonOut" placeholder="Click 'Generate JSON' to see output here..." readonly></textarea>
+    </div>
+  </div>
+
+<script>
+const COLORS = [
+  {border:'#4f7ef8'}, {border:'#48c78e'}, {border:'#a855f7'},
+  {border:'#f5a623'}, {border:'#ec4899'}, {border:'#06b6d4'}, {border:'#84cc16'},
+];
+
+let spans = []; // {id, text, masks:[{points:[[x,y],...], bbox:{x,y,w,h}}]}
+let activeSpanIdx = null;
+let mode = 'rect'; // 'rect' | 'polygon'
+let spanCounter = 0;
+
+const imgInput = document.getElementById('imgInput');
+const docImg = document.getElementById('docImg');
+const overlay = document.getElementById('overlay');
+const canvasWrap = document.getElementById('canvasWrap');
+const emptyState = document.getElementById('emptyState');
+const imgDims = document.getElementById('imgDims');
+const modeBanner = document.getElementById('modeBanner');
+const modeHint = document.getElementById('modeHint');
+const ctx = overlay.getContext('2d');
+
+function updateHints(){
+  if (mode === 'rect') {
+    modeBanner.innerHTML = '<b>Rectangle mode:</b> click-drag on the image to draw a box. Good for table cells, simple boxes.';
+    modeHint.innerHTML = 'Select a span below, then drag a box on the image. Each drag adds a new mask to that span.';
+  } else {
+    modeBanner.innerHTML = '<b>Polygon mode:</b> click to place each vertex around the shape. Double-click (or press Enter) to close the polygon. Press Escape to cancel. Good for curved text, pie wedges, irregular outlines.';
+    modeHint.innerHTML = 'Select a span below, then click vertices around the shape, working your way around the outline. Double-click or Enter to finish.';
+  }
+}
+updateHints();
+
+imgInput.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const url = URL.createObjectURL(file);
+  docImg.src = url;
+  docImg.onload = () => {
+    canvasWrap.style.display = 'block';
+    emptyState.style.display = 'none';
+    modeBanner.style.display = 'block';
+    resizeCanvas();
+    imgDims.textContent = `${docImg.naturalWidth} × ${docImg.naturalHeight}px`;
+    redraw();
+  };
+});
+
+function resizeCanvas(){
+  overlay.width = docImg.clientWidth;
+  overlay.height = docImg.clientHeight;
+}
+window.addEventListener('resize', () => { resizeCanvas(); redraw(); });
+
+function round2(n){ return Math.round(n*100)/100; }
+
+function pxToPct(x, y){
+  return [round2((x/overlay.width)*100), round2((y/overlay.height)*100)];
+}
+
+function bboxFromPoints(points){
+  const xs = points.map(p=>p[0]), ys = points.map(p=>p[1]);
+  const minX=Math.min(...xs), maxX=Math.max(...xs);
+  const minY=Math.min(...ys), maxY=Math.max(...ys);
+  return { x: round2(minX), y: round2(minY), w: round2(maxX-minX), h: round2(maxY-minY) };
+}
+
+/* ── Rectangle drawing ── */
+let dragging = false, startX=0, startY=0;
+
+/* ── Polygon drawing ── */
+let polyPoints = []; // in px, current in-progress
+
+overlay.addEventListener('mousedown', (e) => {
+  if (activeSpanIdx === null) { alert('Select or add a span first.'); return; }
+  if (mode !== 'rect') return;
+  const rect = overlay.getBoundingClientRect();
+  startX = e.clientX - rect.left;
+  startY = e.clientY - rect.top;
+  dragging = true;
+});
+
+overlay.addEventListener('mousemove', (e) => {
+  const rect = overlay.getBoundingClientRect();
+  const curX = e.clientX - rect.left;
+  const curY = e.clientY - rect.top;
+
+  if (mode === 'rect' && dragging) {
+    redraw();
+    ctx.strokeStyle = COLORS[activeSpanIdx % COLORS.length].border;
+    ctx.lineWidth = 2; ctx.setLineDash([5,3]);
+    ctx.strokeRect(Math.min(startX,curX), Math.min(startY,curY), Math.abs(curX-startX), Math.abs(curY-startY));
+    ctx.setLineDash([]);
+  } else if (mode === 'polygon' && polyPoints.length > 0) {
+    redraw();
+    drawPolyPreview(curX, curY);
+  }
+});
+
+overlay.addEventListener('mouseup', (e) => {
+  if (mode !== 'rect' || !dragging) return;
+  dragging = false;
+  const rect = overlay.getBoundingClientRect();
+  const curX = e.clientX - rect.left;
+  const curY = e.clientY - rect.top;
+  const x = Math.min(startX, curX), y = Math.min(startY, curY);
+  const w = Math.abs(curX - startX), h = Math.abs(curY - startY);
+  if (w < 4 || h < 4) { redraw(); return; }
+
+  const p1 = pxToPct(x, y), p2 = pxToPct(x+w, y), p3 = pxToPct(x+w, y+h), p4 = pxToPct(x, y+h);
+  const points = [p1, p2, p3, p4];
+  spans[activeSpanIdx].masks.push({ points, bbox: bboxFromPoints(points) });
+  renderSpanList(); redraw();
+});
+
+overlay.addEventListener('click', (e) => {
+  if (mode !== 'polygon') return;
+  if (activeSpanIdx === null) { alert('Select or add a span first.'); return; }
+  const rect = overlay.getBoundingClientRect();
+  const x = e.clientX - rect.left, y = e.clientY - rect.top;
+
+  // If clicking near the first point (and we have 3+), close the polygon
+  if (polyPoints.length >= 3) {
+    const [fx, fy] = polyPoints[0];
+    if (Math.hypot(x-fx, y-fy) < 10) { closePolygon(); return; }
+  }
+  polyPoints.push([x, y]);
+  redraw();
+  drawPolyPreview(x, y);
+});
+
+overlay.addEventListener('dblclick', (e) => { e.preventDefault(); if (mode === 'polygon') closePolygon(); });
+
+document.addEventListener('keydown', (e) => {
+  if (mode !== 'polygon') return;
+  if (e.key === 'Enter') closePolygon();
+  if (e.key === 'Escape') { polyPoints = []; redraw(); }
+});
+
+function closePolygon(){
+  if (polyPoints.length < 3 || activeSpanIdx === null) { polyPoints = []; redraw(); return; }
+  const points = polyPoints.map(([x,y]) => pxToPct(x,y));
+  spans[activeSpanIdx].masks.push({ points, bbox: bboxFromPoints(points) });
+  polyPoints = [];
+  renderSpanList(); redraw();
+}
+
+function drawPolyPreview(curX, curY){
+  ctx.strokeStyle = COLORS[activeSpanIdx % COLORS.length].border;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(polyPoints[0][0], polyPoints[0][1]);
+  for (let i=1;i<polyPoints.length;i++) ctx.lineTo(polyPoints[i][0], polyPoints[i][1]);
+  ctx.lineTo(curX, curY);
+  ctx.stroke();
+  polyPoints.forEach(([px,py], i) => {
+    ctx.fillStyle = i===0 ? '#fff' : COLORS[activeSpanIdx % COLORS.length].border;
+    ctx.strokeStyle = COLORS[activeSpanIdx % COLORS.length].border;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(px,py, i===0?6:4, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+  });
+}
+
+function redraw(){
+  ctx.clearRect(0,0,overlay.width,overlay.height);
+  spans.forEach((span, idx) => {
+    const color = COLORS[idx % COLORS.length].border;
+    span.masks.forEach(m => {
+      ctx.beginPath();
+      m.points.forEach(([px,py], i) => {
+        const x = (px/100)*overlay.width, y = (py/100)*overlay.height;
+        i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+      });
+      ctx.closePath();
+      ctx.fillStyle = color + '26';
+      ctx.strokeStyle = color;
+      ctx.lineWidth = idx === activeSpanIdx ? 3 : 1.5;
+      ctx.fill(); ctx.stroke();
+    });
+  });
+}
+
+/* ── Span management ── */
+document.getElementById('addSpanBtn').addEventListener('click', () => {
+  spans.push({ id: spanCounter++, text: '', masks: [] });
+  activeSpanIdx = spans.length - 1;
+  renderSpanList(); renderBadge();
+});
+
+function renderBadge(){
+  const el = document.getElementById('activeSpanBadge');
+  if (activeSpanIdx === null) { el.innerHTML = ''; return; }
+  const c = COLORS[activeSpanIdx % COLORS.length];
+  el.innerHTML = `<div class="active-span-badge" style="background:${c.border}1a;color:${c.border};">
+    <span class="span-color-dot" style="background:${c.border};"></span>
+    Drawing: Span ${activeSpanIdx+1} — ${mode}
+  </div>`;
+}
+
+function renderSpanList(){
+  const list = document.getElementById('spanList');
+  list.innerHTML = '';
+  spans.forEach((span, idx) => {
+    const color = COLORS[idx % COLORS.length].border;
+    const card = document.createElement('div');
+    card.className = 'span-card';
+    card.style.borderColor = idx === activeSpanIdx ? color : '';
+    card.style.boxShadow = idx === activeSpanIdx ? `0 0 0 1px ${color}` : '';
+    const maskRows = span.masks.length
+      ? span.masks.map((m, mi) => `
+          <div class="mask-chip">
+            <span>mask ${mi+1} — ${m.points.length} pts</span>
+            <button data-span="${span.id}" data-mi="${mi}" class="mask-del">✕</button>
+          </div>`).join('')
+      : `<div class="mask-empty">no masks yet</div>`;
+    card.innerHTML = `
+      <div class="span-card-head">
+        <span class="span-color-dot" style="background:${color};"></span>
+        <input type="text" placeholder="span text, e.g. Bedroom 1" value="${span.text.replace(/"/g,'&quot;')}" data-idx="${idx}" class="span-text-input">
+        <button class="span-remove" data-idx="${idx}">✕</button>
+      </div>
+      ${maskRows}
+    `;
+    card.addEventListener('click', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.classList.contains('span-remove') || e.target.classList.contains('mask-del')) return;
+      activeSpanIdx = idx; polyPoints = [];
+      renderSpanList(); renderBadge(); redraw();
+    });
+    list.appendChild(card);
+  });
+
+  list.querySelectorAll('.span-text-input').forEach(inp => {
+    inp.addEventListener('input', (e) => { spans[+e.target.dataset.idx].text = e.target.value; });
+  });
+  list.querySelectorAll('.span-remove').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const idx = +e.target.dataset.idx;
+      spans.splice(idx, 1);
+      if (activeSpanIdx === idx) activeSpanIdx = null;
+      else if (activeSpanIdx > idx) activeSpanIdx--;
+      renderSpanList(); renderBadge(); redraw();
+    });
+  });
+  list.querySelectorAll('.mask-del').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const spanId = +e.target.dataset.span, mi = +e.target.dataset.mi;
+      const span = spans.find(s => s.id === spanId);
+      span.masks.splice(mi, 1);
+      renderSpanList(); redraw();
+    });
+  });
+  renderBadge();
+}
+
+/* ── Mode tabs ── */
+document.querySelectorAll('.mode-tabs button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.mode-tabs button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    mode = btn.dataset.mode;
+    polyPoints = [];
+    updateHints(); renderBadge(); redraw();
+  });
+});
+
+/* ── JSON export ── */
+document.getElementById('genJsonBtn').addEventListener('click', () => {
+  const id = document.getElementById('exampleId').value || 'example';
+  const q = document.getElementById('exampleQ').value || '';
+  const out = {
+    id,
+    label: id.charAt(0).toUpperCase() + id.slice(1),
+    image: `static/images/qual/originals/${id}.png`,
+    question: q,
+    spans: spans.map(s => ({ text: s.text, masks: s.masks }))
+  };
+  document.getElementById('jsonOut').value = JSON.stringify(out, null, 2);
+});
+document.getElementById('copyJsonBtn').addEventListener('click', () => {
+  const ta = document.getElementById('jsonOut');
+  ta.select(); document.execCommand('copy');
+});
+</script>
+</body>
+</html>

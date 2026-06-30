@@ -20,8 +20,8 @@ const DOCOG_EXAMPLES = [
     question: 'How many bedrooms are present in this floor plan?',
 
     spans: [
-      { text: 'Bedroom 1', masks: [ { points: [[10,8],[22,8],[22,14],[10,14]], bbox:{x:10,y:8,w:12,h:6} } ] },   // PLACEHOLDER
-      { text: 'Bedroom 2', masks: [ { points: [[62,4],[74,4],[74,10],[62,10]], bbox:{x:62,y:4,w:12,h:6} } ] },   // PLACEHOLDER
+      { text: 'Bedroom 1', masks: [ { points: [[16.86,15.48],[16.41,16.52],[8.95,16.96],[8.05,16.09],[8.05,15.13],[9.14,14.78],[15.14,14.52],[16.5,14.61]], bbox:{x:8.05,y:14.52,w:8.81,h:2.44} } ] },
+      { text: 'Bedroom 2', masks: [ { points: [[71.32,10],[71.95,8.43],[79.14,8.78],[79.59,10],[78.59,10.87],[72.32,10.87]], bbox:{x:71.32,y:8.43,w:8.27,h:2.44} } ] },
     ],
 
     steps: [
@@ -64,14 +64,15 @@ const DOCOG_EXAMPLES = [
     question: 'Does the Net Sales total equal the sum of the Net Sales values?',
 
     spans: [
-      { text: 'Net Sales',  masks: [ { points:[[68,16],[82,16],[82,19],[68,19]], bbox:{x:68,y:16,w:14,h:3} } ] }, // PLACEHOLDER — column header
-      { text: '$20.00',     masks: [ { points:[[68,22],[82,22],[82,25],[68,25]], bbox:{x:68,y:22,w:14,h:3} } ] }, // PLACEHOLDER — Mastercard row
-      { text: '$20.00',     masks: [ { points:[[68,26],[82,26],[82,29],[68,29]], bbox:{x:68,y:26,w:14,h:3} } ] }, // PLACEHOLDER — Visa row
-      { text: '$20.00',     masks: [ { points:[[68,30],[82,30],[82,33],[68,33]], bbox:{x:68,y:30,w:14,h:3} } ] }, // PLACEHOLDER — Discover row
-      { text: '$50.00',     masks: [ { points:[[68,34],[82,34],[82,37],[68,37]], bbox:{x:68,y:34,w:14,h:3} } ] }, // PLACEHOLDER — American Express row
-      { text: '$30.00',     masks: [ { points:[[68,38],[82,38],[82,41],[68,41]], bbox:{x:68,y:38,w:14,h:3} } ] }, // PLACEHOLDER — JCB row
-      { text: '$20.00',     masks: [ { points:[[68,42],[82,42],[82,45],[68,45]], bbox:{x:68,y:42,w:14,h:3} } ] }, // PLACEHOLDER — Debit row
-      { text: '$150.00',    masks: [ { points:[[68,47],[82,47],[82,50],[68,50]], bbox:{x:68,y:47,w:14,h:3} } ] }, // PLACEHOLDER — Totals row
+      // Annotator grouped rows 1-6 into one multi-mask span; distributed back into per-row spans to match step spanIndexes
+      { text: 'Net Sales',  masks: [ { points:[[80.45,32.65],[86.55,32.65],[86.55,36.07],[80.45,36.07]], bbox:{x:80.45,y:32.65,w:6.1,h:3.42} } ] },   // column header
+      { text: '$20.00',     masks: [ { points:[[81.36,37.95],[86.36,37.95],[86.36,42.05],[81.36,42.05]], bbox:{x:81.36,y:37.95,w:5,h:4.1} } ] },        // Mastercard row
+      { text: '$20.00',     masks: [ { points:[[81.18,43.93],[87.27,43.93],[87.27,47.52],[81.18,47.52]], bbox:{x:81.18,y:43.93,w:6.09,h:3.59} } ] },    // Visa row
+      { text: '$20.00',     masks: [ { points:[[81.45,49.06],[86.64,49.06],[86.64,53.5],[81.45,53.5]], bbox:{x:81.45,y:49.06,w:5.19,h:4.44} } ] },      // Discover row
+      { text: '$50.00',     masks: [ { points:[[81.18,54.36],[86.55,54.36],[86.55,58.97],[81.18,58.97]], bbox:{x:81.18,y:54.36,w:5.37,h:4.61} } ] },    // American Express row
+      { text: '$30.00',     masks: [ { points:[[81.18,59.49],[86.27,59.49],[86.27,64.1],[81.18,64.1]], bbox:{x:81.18,y:59.49,w:5.09,h:4.61} } ] },      // JCB row
+      { text: '$20.00',     masks: [ { points:[[81,65.3],[86.55,65.3],[86.55,69.74],[81,69.74]], bbox:{x:81,y:65.3,w:5.55,h:4.44} } ] },                 // Debit row
+      { text: '$150.00',    masks: [ { points:[[80.45,70.94],[86.82,70.94],[86.82,75.04],[80.45,75.04]], bbox:{x:80.45,y:70.94,w:6.37,h:4.1} } ] },     // Totals row
     ],
 
     steps: [
@@ -150,13 +151,14 @@ const DOCOG_EXAMPLES = [
     question: 'Find the value of x?',
 
     spans: [
-      { text: 'right angled triangle', masks: [ { points:[[20,5],[20,42],[88,42]], bbox:{x:20,y:5,w:68,h:37} } ] },     // PLACEHOLDER — whole triangle outline
-      { text: 'Height',  masks: [ { points:[[14,5],[20,5],[20,42],[14,42]], bbox:{x:14,y:5,w:6,h:37} } ] },             // PLACEHOLDER — vertical leg
-      { text: '3 cm',    masks: [ { points:[[10,20],[20,20],[20,25],[10,25]], bbox:{x:10,y:20,w:10,h:5} } ] },         // PLACEHOLDER — height label
-      { text: 'Width',   masks: [ { points:[[20,42],[88,42],[88,46],[20,46]], bbox:{x:20,y:42,w:68,h:4} } ] },         // PLACEHOLDER — horizontal leg
-      { text: '4 cm',    masks: [ { points:[[40,46],[55,46],[55,50],[40,50]], bbox:{x:40,y:46,w:15,h:4} } ] },         // PLACEHOLDER — width label
-      { text: 'Hypotenuse', masks: [ { points:[[20,5],[88,42],[88,38],[20,2]], bbox:{x:20,y:2,w:68,h:40} } ] },        // PLACEHOLDER — diagonal
-      { text: 'x cm',    masks: [ { points:[[55,15],[70,15],[70,20],[55,20]], bbox:{x:55,y:15,w:15,h:5} } ] },        // PLACEHOLDER — x label
+      // Annotator's multi-mask groups distributed back into the 7 per-concept spans the steps reference
+      { text: 'right angled triangle', masks: [ { points:[[19.64,66.71],[24.09,66.71],[24.09,74.14],[19.64,74.14]], bbox:{x:19.64,y:66.71,w:4.45,h:7.43} } ] },     // right-angle corner marker
+      { text: 'Height',  masks: [ { points:[[19.09,12.57],[21.09,12.57],[21.09,74.43],[19.09,74.43]], bbox:{x:19.09,y:12.57,w:2,h:61.86} } ] },                      // vertical leg
+      { text: '3 cm',    masks: [ { points:[[8,38.71],[18.36,38.71],[18.36,46.57],[8,46.57]], bbox:{x:8,y:38.71,w:10.36,h:7.86} } ] },                               // height label
+      { text: 'Width',   masks: [ { points:[[19.64,72],[88,72],[88,75.29],[19.64,75.29]], bbox:{x:19.64,y:72,w:68.36,h:3.29} } ] },                                  // horizontal leg
+      { text: '4 cm',    masks: [ { points:[[42.18,77.29],[52.73,77.29],[52.73,85.14],[42.18,85.14]], bbox:{x:42.18,y:77.29,w:10.55,h:7.85} } ] },                   // width label
+      { text: 'Hypotenuse', masks: [ { points:[[20.45,14.43],[21,13],[87,72],[86.27,73.71]], bbox:{x:20.45,y:13,w:66.55,h:60.71} } ] },                              // diagonal
+      { text: 'x cm',    masks: [ { points:[[50.91,32],[62.82,32],[62.82,39.14],[50.91,39.14]], bbox:{x:50.91,y:32,w:11.91,h:7.14} } ] },                            // x label
     ],
 
     steps: [
@@ -221,13 +223,14 @@ const DOCOG_EXAMPLES = [
     question: 'What is the travel time by rail line from Beijing to Zhangjiakou?',
 
     spans: [
-      { text: 'Beijing',      masks: [ { points:[[75,25],[85,25],[85,32],[75,32]], bbox:{x:75,y:25,w:10,h:7} } ] },  // PLACEHOLDER — pin
-      { text: 'Zhangjiakou',  masks: [ { points:[[10,25],[22,25],[22,32],[10,32]], bbox:{x:10,y:25,w:12,h:7} } ] },  // PLACEHOLDER — pin
-      { text: 'Yanqing',      masks: [ { points:[[45,22],[57,22],[57,29],[45,29]], bbox:{x:45,y:22,w:12,h:7} } ] },  // PLACEHOLDER — pin
-      { text: 'dashed line',  masks: [ { points:[[57,30],[75,30],[75,34],[57,34]], bbox:{x:57,y:30,w:18,h:4} } ] },  // PLACEHOLDER — Beijing-Yanqing line
-      { text: '20 mins',      masks: [ { points:[[63,32],[72,32],[72,35],[63,35]], bbox:{x:63,y:32,w:9,h:3} } ] },   // PLACEHOLDER — label
-      { text: 'dashed line',  masks: [ { points:[[22,30],[45,30],[45,35],[22,35]], bbox:{x:22,y:30,w:23,h:5} } ] },  // PLACEHOLDER — Yanqing-Zhangjiakou line
-      { text: '40 mins',      masks: [ { points:[[30,33],[40,33],[40,36],[30,36]], bbox:{x:30,y:33,w:10,h:3} } ] },  // PLACEHOLDER — label
+      // Annotator grouped endpoints together and line+label together; distributed back into 7 per-concept spans
+      { text: 'Beijing',     masks: [ { points:[[72,55.06],[77,55.06],[77,59.74],[72,59.74]], bbox:{x:72,y:55.06,w:5,h:4.68} } ] },                   // city pin — east/right
+      { text: 'Zhangjiakou', masks: [ { points:[[19.82,53.18],[28.91,53.18],[28.91,57.68],[19.82,57.68]], bbox:{x:19.82,y:53.18,w:9.09,h:4.5} } ] }, // city pin — west/left
+      { text: 'Yanqing',     masks: [ { points:[[48.91,50.56],[55.27,50.56],[55.27,54.31],[48.91,54.31]], bbox:{x:48.91,y:50.56,w:6.36,h:3.75} } ] }, // city pin — middle
+      { text: 'dashed line', masks: [ { points:[[54.45,74.91],[54.82,73.97],[55.82,74.34],[61.91,76.78],[63.91,78.09],[66.73,78.28],[67.45,78.65],[67.18,80.15],[63.73,79.78],[60.45,78.46],[58.09,76.78],[55.82,75.66]], bbox:{x:54.45,y:73.97,w:13,h:6.18} } ] },   // Beijing→Yanqing rail arc
+      { text: '20 mins',     masks: [ { points:[[63.55,75.09],[67.09,75.09],[67.09,78.28],[63.55,78.28]], bbox:{x:63.55,y:75.09,w:3.54,h:3.19} } ] },                                                                                                                  // travel-time label
+      { text: 'dashed line', masks: [ { points:[[27.64,76.97],[31.36,77.72],[35.82,79.4],[38.73,79.4],[41.36,78.46],[45.36,76.22],[49.09,73.6],[48.82,75.09],[45.18,77.53],[41.91,79.78],[39.64,80.9],[34.27,81.09],[31.09,79.59],[28.09,78.84]], bbox:{x:27.64,y:73.6,w:21.45,h:7.49} } ] }, // Yanqing→Zhangjiakou rail arc
+      { text: '40 mins',     masks: [ { points:[[38.55,76.4],[42.64,76.4],[42.64,79.03],[38.55,79.03]], bbox:{x:38.55,y:76.4,w:4.09,h:2.63} } ] },                                                                                                                     // travel-time label
     ],
 
     steps: [
@@ -298,13 +301,14 @@ const DOCOG_EXAMPLES = [
     question: 'How much should I pay for Blood Test?',
 
     spans: [
-      { text: 'Cost',          masks: [ { points:[[42,12],[55,12],[55,15],[42,15]], bbox:{x:42,y:12,w:13,h:3} } ] }, // PLACEHOLDER — column header
-      { text: 'Blood Test',    masks: [ { points:[[22,16],[40,16],[40,19],[22,19]], bbox:{x:22,y:16,w:18,h:3} } ] }, // PLACEHOLDER — row label
-      { text: '$50',           masks: [ { points:[[42,16],[50,16],[50,19],[42,19]], bbox:{x:42,y:16,w:8,h:3} } ] },  // PLACEHOLDER — cost cell
-      { text: '5% discount',   masks: [ { points:[[28,22],[48,22],[48,25],[28,25]], bbox:{x:28,y:22,w:20,h:3} } ] }, // PLACEHOLDER — footnote
-      { text: 'premium',       masks: [ { points:[[60,7],[75,7],[75,10],[60,10]], bbox:{x:60,y:7,w:15,h:3} } ] },   // PLACEHOLDER — plan badge
-      { text: 'Claim',         masks: [ { points:[[58,12],[70,12],[70,15],[58,15]], bbox:{x:58,y:12,w:12,h:3} } ] }, // PLACEHOLDER — column header
-      { text: '$20',           masks: [ { points:[[58,16],[66,16],[66,19],[58,19]], bbox:{x:58,y:16,w:8,h:3} } ] },  // PLACEHOLDER — claim cell
+      // Annotator's 4 groups distributed back into the 7 per-concept spans the steps reference
+      { text: 'Cost',          masks: [ { points:[[52.95,21.21],[59.14,21.21],[59.14,24.48],[52.95,24.48]], bbox:{x:52.95,y:21.21,w:6.19,h:3.27} } ] },               // column header
+      { text: 'Blood Test',    masks: [ { points:[[23.68,31.1],[35.59,31.1],[35.59,34.09],[23.68,34.09]], bbox:{x:23.68,y:31.1,w:11.91,h:2.99} } ] },                 // row label
+      { text: '$50',           masks: [ { points:[[53.05,31.01],[57.23,31.01],[57.23,34.45],[53.05,34.45]], bbox:{x:53.05,y:31.01,w:4.18,h:3.44} } ] },               // cost cell
+      { text: '5% discount',   masks: [ { points:[[28.86,43.34],[41.77,43.34],[41.77,46.42],[28.86,46.42]], bbox:{x:28.86,y:43.34,w:12.91,h:3.08} } ] },              // footnote
+      { text: 'premium',       masks: [ { points:[[79.05,15.32],[79.23,14.23],[80.23,13.78],[81.23,13.96],[86.41,14.6],[87.32,15.14],[88.14,16.14],[87.41,17.14],[83.23,16.41]], bbox:{x:79.05,y:13.78,w:9.09,h:3.36} } ] }, // plan badge
+      { text: 'Claim',         masks: [ { points:[[74.41,21.21],[81.32,21.21],[81.32,24.21],[74.41,24.21]], bbox:{x:74.41,y:21.21,w:6.91,h:3} } ] },                  // column header
+      { text: '$20',           masks: [ { points:[[74.59,30.92],[78.59,30.92],[78.59,34],[74.59,34]], bbox:{x:74.59,y:30.92,w:4,h:3.08} } ] },                        // claim cell
     ],
 
     steps: [
@@ -385,10 +389,22 @@ const DOCOG_EXAMPLES = [
     question: 'Who eats penguins?',
 
     spans: [
-      { text: 'penguins',                masks: [ { points:[[68,16],[80,16],[80,28],[68,28]], bbox:{x:68,y:16,w:12,h:12} } ] }, // PLACEHOLDER
-      { text: 'arrows from penguins',    masks: [ { points:[[58,12],[68,12],[68,22],[58,22]], bbox:{x:58,y:12,w:10,h:10} } ] }, // PLACEHOLDER — the two blue arrows
-      { text: 'smaller toothed whales',  masks: [ { points:[[42,4],[58,4],[58,14],[42,14]], bbox:{x:42,y:4,w:16,h:10} } ] },    // PLACEHOLDER
-      { text: 'leopard seal',            masks: [ { points:[[45,16],[60,16],[60,26],[45,26]], bbox:{x:45,y:16,w:15,h:10} } ] }, // PLACEHOLDER
+      { text: 'penguins', masks: [
+        { points:[[64.45,39.97],[65.27,37.63],[67.91,36.33],[68.36,35.16],[68.55,33.85],[68.55,26.43],[68.55,23.31],[68.91,21.61],[69.45,19.92],[70.09,18.75],[70.91,17.45],[72.64,16.8],[74.09,17.06],[74.73,18.1],[75.27,19.14],[75.36,20.57],[73.91,21.61],[73.73,22.79],[74.27,24.48],[74.91,26.95],[74.91,27.6],[75.18,30.21],[75.09,32.68],[74.73,34.38],[74.55,35.55],[75,37.37],[75.27,38.54],[75.55,40.63],[75.18,42.45],[74.36,42.32],[73.36,41.28],[71.55,41.8],[70.36,42.06],[65.36,41.67],[64.55,41.54]], bbox:{x:64.45,y:16.8,w:11.1,h:25.65} }
+      ] },
+      { text: 'arrows from penguins', masks: [
+        { points:[[60.64,27.08],[61.91,25.91],[62.45,26.82],[68.09,26.82],[68,27.99],[62.55,27.86],[62.45,28.52],[61.91,28.65]], bbox:{x:60.64,y:25.91,w:7.45,h:2.74} },
+        { points:[[58.55,18.23],[58.82,19.79],[59.73,19.79],[67.18,25.13],[68,23.44],[60.73,18.23],[60.55,17.19]], bbox:{x:58.55,y:17.19,w:9.45,h:7.94} }
+      ] },
+      { text: 'smaller toothed whales', masks: [
+        { points:[[47.36,20.31],[55.27,20.57],[55.64,18.23],[61.45,17.19],[62.45,14.71],[48.09,14.06],[50.73,12.11],[52.55,13.54],[54.27,13.28],[54.82,11.85],[52.73,6.64],[50.27,7.29],[43.45,6.77],[42.55,3.65],[40.91,3.39],[40.27,3.65],[40.09,7.16],[32.36,13.8],[31.91,15.89],[32.09,16.54],[34.91,18.49],[36.91,19.01],[38.27,19.4],[40.18,18.1],[42.45,17.06],[46.64,18.36]], bbox:{x:31.91,y:3.39,w:30.54,h:17.18} },
+        { points:[[39.55,27.6],[48.55,24.09],[52.91,23.05],[55.73,24.09],[59.09,24.35],[60.64,25.91],[60.36,28.65],[60,30.08],[59.64,31.64],[60,33.98],[59.55,35.81],[45.18,35.81],[44.91,34.64],[45.09,33.33],[45.55,32.42],[46.64,31.51],[47.09,31.12],[45.45,29.56],[44.36,29.43],[43.09,30.21],[41.27,30.21],[40,29.17]], bbox:{x:39.55,y:23.05,w:21.09,h:12.76} }
+      ] },
+      { text: 'leopard seal', masks: [
+        { points:[[31.82,16.28],[33,13.41],[40,7.03],[40.18,3.78],[41.73,3.39],[43.36,5.73],[43.73,6.64],[50.36,6.9],[52.82,6.64],[54.82,11.59],[54.09,13.02],[52.55,13.54],[50.64,11.85],[48.18,14.06],[62.45,14.71],[61.27,17.32],[55.45,18.23],[55.36,19.79],[55.09,20.7],[47.45,20.31],[46.55,18.49],[42.73,16.67],[37.64,19.53]], bbox:{x:31.82,y:3.39,w:30.63,h:17.31} },
+        { points:[[39.45,27.47],[50.82,22.79],[53.45,22.92],[54.18,23.96],[56.09,24.09],[59.45,24.61],[60.73,26.17],[59.73,31.9],[60,34.64],[59.55,35.94],[45,35.68],[44.91,33.72],[46.27,31.64],[47,30.99],[44.82,29.56],[42.55,30.34],[40.82,30.08],[39.64,29.04]], bbox:{x:39.45,y:22.79,w:21.28,h:13.15} },
+        { points:[[69.09,29.56],[68.45,35.29],[66.27,37.37],[65,38.54],[64.18,40.63],[65.91,41.93],[73.09,42.19],[75.64,41.41],[75.82,40.36],[75.64,37.11],[74.91,35.55],[74.73,32.68],[74.82,33.59],[75.36,31.9],[75.64,30.6],[75.45,27.73],[74.91,26.04],[74.27,23.44],[73.91,22.27],[74.64,20.96],[75.82,19.92],[75.82,19.4],[75.27,18.1],[74,16.54],[72.91,16.54],[70.64,16.67],[70.27,18.1],[69.45,19.66],[68.73,22.27],[68.27,24.09],[68,26.95],[68.18,28.65],[68.36,30.6],[68.36,32.16]], bbox:{x:64.18,y:16.54,w:11.64,h:25.65} }
+      ] },
     ],
 
     steps: [

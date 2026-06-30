@@ -51,6 +51,19 @@
   .mask-chip button{background:none;border:none;color:#c0392b;cursor:pointer;font-size:11px;padding:0 0 0 8px;}
   .mask-empty{font-size:11px;color:#bbb;font-style:italic;padding:3px 0;}
 
+  /* duplicate detection */
+  .dup-warning{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:11px;background:#fff7e6;border:1px solid #ffe1a8;color:#8a5a00;border-radius:6px;padding:6px 8px;margin-bottom:8px;line-height:1.4;}
+  .dup-warning button{flex-shrink:0;background:#fff;border:1px solid #ffd485;color:#8a5a00;border-radius:5px;padding:3px 8px;font-size:10px;font-weight:600;cursor:pointer;white-space:nowrap;}
+  .dup-warning button:hover{background:#fff1d6;}
+  @keyframes spanFlash{0%{box-shadow:0 0 0 4px rgba(79,126,248,0);}30%{box-shadow:0 0 0 4px rgba(79,126,248,.55);}100%{box-shadow:0 0 0 4px rgba(79,126,248,0);}}
+  .span-card-flash{animation:spanFlash 900ms ease;}
+
+  /* clone-from-existing */
+  .clone-row{display:flex;align-items:center;gap:6px;margin-bottom:8px;}
+  .clone-row select{flex:1;font-size:11px;padding:5px 6px;border:1px solid var(--border);border-radius:6px;background:#fff;}
+  .clone-row button{font-size:11px;padding:5px 9px;border-radius:6px;border:1px solid var(--border);background:#f2f2f5;cursor:pointer;white-space:nowrap;}
+  .clone-row button:hover{background:#e9e9ee;}
+
   textarea#jsonOut{width:100%;height:220px;font-family:'SF Mono',monospace;font-size:11px;border:1px solid var(--border);border-radius:8px;padding:10px;resize:vertical;margin-top:8px;background:#fafafa;}
   .output-section{border-top:1px solid var(--border);margin-top:18px;padding-top:14px;}
 </style>
@@ -299,6 +312,25 @@ function renderBadge(){
   </div>`;
 }
 
+function findDuplicateOf(idx){
+  const txt = (spans[idx].text || '').trim().toLowerCase();
+  if (!txt) return null;
+  for (let i=0;i<spans.length;i++){
+    if (i===idx) continue;
+    if ((spans[i].text||'').trim().toLowerCase() === txt) return i;
+  }
+  return null;
+}
+
+function flashSpanCard(idx){
+  const card = document.querySelectorAll('.span-card')[idx];
+  if (!card) return;
+  card.classList.remove('span-card-flash');
+  void card.offsetWidth; // restart animation
+  card.classList.add('span-card-flash');
+  card.scrollIntoView({ behavior:'smooth', block:'center' });
+}
+
 function renderSpanList(){
   const list = document.getElementById('spanList');
   list.innerHTML = '';
@@ -315,16 +347,38 @@ function renderSpanList(){
             <button data-span="${span.id}" data-mi="${mi}" class="mask-del">✕</button>
           </div>`).join('')
       : `<div class="mask-empty">no masks yet</div>`;
+
+    const dupIdx = findDuplicateOf(idx);
+    const dupWarning = dupIdx !== null
+      ? `<div class="dup-warning">
+           <span>Same text as Span ${dupIdx+1} (${COLORS[dupIdx % COLORS.length].border === color ? '' : ''}●). You likely don't need to redraw — reuse spanIndex ${dupIdx} when writing tokens.</span>
+           <button class="jump-to-dup" data-target="${dupIdx}">Jump there</button>
+         </div>`
+      : '';
+
+    const otherSpans = spans.filter((s,i) => i!==idx && s.masks.length);
+    const cloneRow = otherSpans.length ? `
+      <div class="clone-row">
+        <select class="clone-select" data-idx="${idx}">
+          <option value="">Copy masks from…</option>
+          ${spans.map((s,i) => i!==idx && s.masks.length
+              ? `<option value="${i}">Span ${i+1} — ${(s.text||'untitled').slice(0,28)}</option>` : '').join('')}
+        </select>
+        <button class="clone-go" data-idx="${idx}">Copy</button>
+      </div>` : '';
+
     card.innerHTML = `
       <div class="span-card-head">
         <span class="span-color-dot" style="background:${color};"></span>
         <input type="text" placeholder="span text, e.g. Bedroom 1" value="${span.text.replace(/"/g,'&quot;')}" data-idx="${idx}" class="span-text-input">
         <button class="span-remove" data-idx="${idx}">✕</button>
       </div>
+      ${dupWarning}
+      ${cloneRow}
       ${maskRows}
     `;
     card.addEventListener('click', (e) => {
-      if (e.target.tagName === 'INPUT' || e.target.classList.contains('span-remove') || e.target.classList.contains('mask-del')) return;
+      if (e.target.closest('input, .span-remove, .mask-del, .jump-to-dup, .clone-row')) return;
       activeSpanIdx = idx; polyPoints = [];
       renderSpanList(); renderBadge(); redraw();
     });
@@ -332,7 +386,10 @@ function renderSpanList(){
   });
 
   list.querySelectorAll('.span-text-input').forEach(inp => {
-    inp.addEventListener('input', (e) => { spans[+e.target.dataset.idx].text = e.target.value; });
+    inp.addEventListener('input', (e) => {
+      spans[+e.target.dataset.idx].text = e.target.value;
+      renderSpanList(); // live-refresh duplicate warning as you type
+    });
   });
   list.querySelectorAll('.span-remove').forEach(btn => {
     btn.addEventListener('click', (e) => {
@@ -348,6 +405,25 @@ function renderSpanList(){
       const spanId = +e.target.dataset.span, mi = +e.target.dataset.mi;
       const span = spans.find(s => s.id === spanId);
       span.masks.splice(mi, 1);
+      renderSpanList(); redraw();
+    });
+  });
+  list.querySelectorAll('.jump-to-dup').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const target = +e.target.dataset.target;
+      activeSpanIdx = target;
+      renderSpanList(); renderBadge(); redraw();
+      flashSpanCard(target);
+    });
+  });
+  list.querySelectorAll('.clone-go').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const idx = +e.target.dataset.idx;
+      const sel = list.querySelector(`.clone-select[data-idx="${idx}"]`);
+      const srcIdx = sel.value;
+      if (srcIdx === '') return;
+      const cloned = JSON.parse(JSON.stringify(spans[+srcIdx].masks));
+      spans[idx].masks.push(...cloned);
       renderSpanList(); redraw();
     });
   });

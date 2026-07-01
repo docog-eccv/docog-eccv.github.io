@@ -8,60 +8,92 @@
   *{box-sizing:border-box;}
   body{font-family:-apple-system,'Inter',sans-serif;margin:0;background:var(--bg);color:var(--text);display:flex;height:100vh;overflow:hidden;}
 
+  /* ── Stage ── */
   .stage{flex:1;display:flex;flex-direction:column;background:#1a1a1e;overflow:auto;padding:24px;align-items:center;}
   .stage-toolbar{width:100%;max-width:1100px;display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap;}
   .stage-toolbar input[type=file]{color:#fff;font-size:13px;}
   .stage-toolbar .hint{color:#aaa;font-size:12px;margin-left:auto;}
+
+  /* ── Pill strip ── */
+  #spanPills{display:none;flex-wrap:wrap;gap:6px;width:100%;max-width:1100px;margin-bottom:12px;}
+  .span-pill{display:inline-flex;align-items:center;gap:5px;padding:4px 10px 4px 8px;border-radius:999px;border:1.5px solid #555;background:#26262c;color:#ccc;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;transition:border-color .12s,color .12s,background .12s;}
+  .span-pill:hover{background:#2f2f38;}
+  .span-pill.active{background:#1e1e28;}
+  .span-pill.pill-hidden{opacity:.45;text-decoration:line-through;}
+  .pill-badge{display:inline-block;border-radius:999px;padding:1px 5px;font-size:10px;font-weight:700;line-height:1.5;}
+  .pill-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+  .pill-eye{font-size:10px;margin-left:1px;opacity:.7;}
+
+  /* ── Canvas wrap ── */
   .canvas-wrap{position:relative;max-width:1100px;width:100%;}
   .canvas-wrap img{width:100%;display:block;border-radius:8px;}
   .canvas-wrap canvas{position:absolute;top:0;left:0;width:100%;height:100%;cursor:crosshair;border-radius:8px;}
+
+  /* Cycle toast — appears on canvas when cycling overlapping spans */
+  #cycleToast{display:none;position:absolute;bottom:10px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.82);color:#fff;font-size:11px;font-weight:600;padding:5px 13px;border-radius:100px;pointer-events:none;white-space:nowrap;z-index:10;}
+
   .empty-state{color:#888;font-size:14px;margin-top:80px;text-align:center;}
   .mode-banner{width:100%;max-width:1100px;background:#26262c;color:#bbb;font-size:12px;padding:8px 14px;border-radius:8px;margin-top:12px;line-height:1.6;}
   .mode-banner b{color:#fff;}
 
+  /* ── Right panel ── */
   .panel{width:400px;background:#fff;border-left:1px solid var(--border);display:flex;flex-direction:column;padding:20px;overflow-y:auto;flex-shrink:0;}
   .panel h2{font-size:15px;margin:0 0 4px;}
   .panel .sub{font-size:12px;color:var(--muted);margin-bottom:18px;}
   .field{margin-bottom:14px;}
   .field label{display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);margin-bottom:5px;}
   .field input{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:7px;font-size:13px;font-family:inherit;}
-  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:none;border-radius:8px;padding:9px 14px;font-size:13px;font-weight:500;cursor:pointer;transition:opacity .15s;}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:none;border-radius:8px;padding:9px 14px;font-size:13px;font-weight:500;cursor:pointer;transition:opacity .15s;font-family:inherit;}
   .btn-primary{background:var(--accent);color:#fff;}
   .btn-ghost{background:#eee;color:#222;}
   .btn:hover{opacity:.85;}
   .btn-row{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
 
+  /* Add-span row with inline name input */
+  .add-span-row{display:flex;gap:6px;margin-bottom:14px;}
+  .add-span-row input{flex:1;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;}
+  .add-span-row .btn{flex-shrink:0;padding:8px 14px;}
+
   .mode-tabs{display:flex;gap:6px;margin-bottom:14px;}
-  .mode-tabs button{flex:1;padding:9px 0;border-radius:999px;border:1px solid var(--border);background:#fff;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;}
+  .mode-tabs button{flex:1;padding:9px 0;border-radius:999px;border:1px solid var(--border);background:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:5px;}
   .mode-tabs button.active{background:var(--accent);color:#fff;border-color:var(--accent);}
 
-  .select-span-hint{font-size:11px;color:var(--muted);margin-bottom:16px;background:#f5f5f7;padding:8px 10px;border-radius:7px;line-height:1.5;}
+  .select-span-hint{font-size:11px;color:var(--muted);margin-bottom:16px;background:#f0f4ff;border:1px solid #d6e0ff;padding:8px 10px;border-radius:7px;line-height:1.55;}
   .select-span-hint b{color:var(--accent);}
 
   .active-span-badge{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:8px 10px;border-radius:8px;margin-bottom:12px;}
   .span-color-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;}
 
   .span-list{border-top:1px solid var(--border);padding-top:14px;margin-top:4px;}
-  .span-card{border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px;cursor:pointer;}
-  .span-card-head{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
-  .span-card-head input{flex:1;border:none;font-size:13px;font-weight:600;background:transparent;padding:2px;}
+
+  /* Span card */
+  .span-card{border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px;cursor:pointer;transition:opacity .2s;}
+  .span-card.span-hidden{opacity:.5;}
+  .span-card-head{display:flex;align-items:center;gap:6px;margin-bottom:8px;}
+  .span-card-head input{flex:1;border:none;font-size:13px;font-weight:600;background:transparent;padding:2px;font-family:inherit;}
   .span-card-head input:focus{outline:1px solid var(--accent);border-radius:4px;}
+
+  /* Visibility toggle button */
+  .span-eye{background:none;border:none;cursor:pointer;font-size:15px;line-height:1;padding:0 1px;color:#bbb;flex-shrink:0;transition:color .15s;}
+  .span-eye:hover{color:#555;}
+  .span-eye.is-hidden{color:#ddd;}
+
   .span-remove{cursor:pointer;color:#c0392b;font-size:13px;background:none;border:none;flex-shrink:0;}
   .mask-chip{display:flex;justify-content:space-between;align-items:center;font-size:11px;font-family:'SF Mono',monospace;color:#444;background:#f7f7f9;border-radius:5px;padding:4px 7px;margin-bottom:3px;}
   .mask-chip button{background:none;border:none;color:#c0392b;cursor:pointer;font-size:11px;padding:0 0 0 8px;}
   .mask-empty{font-size:11px;color:#bbb;font-style:italic;padding:3px 0;}
 
-  /* duplicate detection */
+  /* Duplicate warning */
   .dup-warning{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:11px;background:#fff7e6;border:1px solid #ffe1a8;color:#8a5a00;border-radius:6px;padding:6px 8px;margin-bottom:8px;line-height:1.4;}
   .dup-warning button{flex-shrink:0;background:#fff;border:1px solid #ffd485;color:#8a5a00;border-radius:5px;padding:3px 8px;font-size:10px;font-weight:600;cursor:pointer;white-space:nowrap;}
   .dup-warning button:hover{background:#fff1d6;}
   @keyframes spanFlash{0%{box-shadow:0 0 0 4px rgba(79,126,248,0);}30%{box-shadow:0 0 0 4px rgba(79,126,248,.55);}100%{box-shadow:0 0 0 4px rgba(79,126,248,0);}}
   .span-card-flash{animation:spanFlash 900ms ease;}
 
-  /* clone-from-existing */
+  /* Clone-from row */
   .clone-row{display:flex;align-items:center;gap:6px;margin-bottom:8px;}
   .clone-row select{flex:1;font-size:11px;padding:5px 6px;border:1px solid var(--border);border-radius:6px;background:#fff;}
-  .clone-row button{font-size:11px;padding:5px 9px;border-radius:6px;border:1px solid var(--border);background:#f2f2f5;cursor:pointer;white-space:nowrap;}
+  .clone-row button{font-size:11px;padding:5px 9px;border-radius:6px;border:1px solid var(--border);background:#f2f2f5;cursor:pointer;white-space:nowrap;font-family:inherit;}
   .clone-row button:hover{background:#e9e9ee;}
 
   textarea#jsonOut{width:100%;height:220px;font-family:'SF Mono',monospace;font-size:11px;border:1px solid var(--border);border-radius:8px;padding:10px;resize:vertical;margin-top:8px;background:#fafafa;}
@@ -75,9 +107,15 @@
       <input type="file" id="imgInput" accept="image/*">
       <span class="hint" id="imgDims"></span>
     </div>
+
+    <!-- Quick-select pill strip -->
+    <div id="spanPills"></div>
+
     <div class="canvas-wrap" id="canvasWrap" style="display:none;">
       <img id="docImg" />
       <canvas id="overlay"></canvas>
+      <!-- Toast: shown when click-cycling through overlapping masks -->
+      <div id="cycleToast"></div>
     </div>
     <div class="empty-state" id="emptyState">Load a document image to start annotating.</div>
     <div class="mode-banner" id="modeBanner" style="display:none;"></div>
@@ -85,12 +123,14 @@
 
   <div class="panel">
     <h2>DoCoG Mask Annotator</h2>
-    <div class="sub">Draw rectangle or freeform polygon masks per span — exports % point coordinates.</div>
+    <div class="sub">Draw masks per span — exports % coordinates. Each unique region = one span; the same span can be grounded multiple times across steps without redrawing.</div>
 
-    <div class="field"><label>Example ID</label><input id="exampleId" placeholder="e.g. floorplan" value="floorplan"></div>
+    <div class="field"><label>Example ID</label><input id="exampleId" placeholder="e.g. foodweb" value="foodweb"></div>
     <div class="field"><label>Question</label><input id="exampleQ" placeholder="Question text..."></div>
 
-    <div class="btn-row">
+    <!-- Add span with inline name field -->
+    <div class="add-span-row">
+      <input type="text" id="newSpanName" placeholder="Span name (e.g. penguins)…">
       <button class="btn btn-primary" id="addSpanBtn">+ Add Span</button>
     </div>
 
@@ -120,37 +160,49 @@ const COLORS = [
   {border:'#f5a623'}, {border:'#ec4899'}, {border:'#06b6d4'}, {border:'#84cc16'},
 ];
 
-let spans = []; // {id, text, masks:[{points:[[x,y],...], bbox:{x,y,w,h}}]}
+let spans        = []; // {id, text, masks:[], hidden:bool}
 let activeSpanIdx = null;
-let mode = 'rect'; // 'rect' | 'polygon'
-let spanCounter = 0;
+let hoveredSpanIdx = null;
+let mode         = 'rect';
+let spanCounter  = 0;
 
-const imgInput = document.getElementById('imgInput');
-const docImg = document.getElementById('docImg');
-const overlay = document.getElementById('overlay');
-const canvasWrap = document.getElementById('canvasWrap');
-const emptyState = document.getElementById('emptyState');
-const imgDims = document.getElementById('imgDims');
-const modeBanner = document.getElementById('modeBanner');
-const modeHint = document.getElementById('modeHint');
-const ctx = overlay.getContext('2d');
+// Click-cycle state: lets repeated clicks at the same spot cycle through overlapping spans
+let clickCycle = null; // { pctX, pctY, candidates:[], idx }
+let cycleToastTimer = null;
 
+const imgInput    = document.getElementById('imgInput');
+const docImg      = document.getElementById('docImg');
+const overlay     = document.getElementById('overlay');
+const canvasWrap  = document.getElementById('canvasWrap');
+const emptyState  = document.getElementById('emptyState');
+const imgDims     = document.getElementById('imgDims');
+const modeBanner  = document.getElementById('modeBanner');
+const modeHint    = document.getElementById('modeHint');
+const spanPillsEl = document.getElementById('spanPills');
+const cycleToast  = document.getElementById('cycleToast');
+const ctx         = overlay.getContext('2d');
+
+/* ══════════════════════════════════════════════════════════
+   HINTS
+   ══════════════════════════════════════════════════════════ */
 function updateHints(){
   if (mode === 'rect') {
-    modeBanner.innerHTML = '<b>Rectangle mode:</b> click-drag on the image to draw a box. Good for table cells, simple boxes.';
-    modeHint.innerHTML = 'Select a span below, then drag a box on the image. Each drag adds a new mask to that span.';
+    modeBanner.innerHTML = '<b>Rectangle mode:</b> drag to draw a box. Click an existing mask to select that span. If masks overlap, click again at the same spot to <b>cycle</b> through them.';
+    modeHint.innerHTML = '<b>Tip:</b> Draw each unique region once. A span grounded in multiple steps (e.g. penguins in S1 and Sf) only needs <b>one mask</b> — just reference the same spanIndex. Use the <b>●/○</b> eye buttons to hide/show spans while drawing.';
   } else {
-    modeBanner.innerHTML = '<b>Polygon mode:</b> click to place each vertex around the shape. Double-click (or press Enter) to close the polygon. Press Escape to cancel. Good for curved text, pie wedges, irregular outlines.';
-    modeHint.innerHTML = 'Select a span below, then click vertices around the shape, working your way around the outline. Double-click or Enter to finish.';
+    modeBanner.innerHTML = '<b>Polygon mode:</b> click vertices → double-click or Enter to close. Escape cancels. Click an existing mask to select it; repeat click to cycle overlapping spans.';
+    modeHint.innerHTML = '<b>Tip:</b> Draw each unique region once — the same span can be referenced in many reasoning steps. Hide other spans (●/○) to reduce clutter while drawing.';
   }
 }
 updateHints();
 
+/* ══════════════════════════════════════════════════════════
+   IMAGE LOAD
+   ══════════════════════════════════════════════════════════ */
 imgInput.addEventListener('change', (e) => {
   const file = e.target.files[0];
   if (!file) return;
-  const url = URL.createObjectURL(file);
-  docImg.src = url;
+  docImg.src = URL.createObjectURL(file);
   docImg.onload = () => {
     canvasWrap.style.display = 'block';
     emptyState.style.display = 'none';
@@ -162,301 +214,455 @@ imgInput.addEventListener('change', (e) => {
 });
 
 function resizeCanvas(){
-  overlay.width = docImg.clientWidth;
+  overlay.width  = docImg.clientWidth;
   overlay.height = docImg.clientHeight;
 }
 window.addEventListener('resize', () => { resizeCanvas(); redraw(); });
 
 function round2(n){ return Math.round(n*100)/100; }
-
-function pxToPct(x, y){
-  return [round2((x/overlay.width)*100), round2((y/overlay.height)*100)];
+function pxToPct(x,y){ return [round2((x/overlay.width)*100), round2((y/overlay.height)*100)]; }
+function bboxFromPoints(pts){
+  const xs=pts.map(p=>p[0]), ys=pts.map(p=>p[1]);
+  return { x:round2(Math.min(...xs)), y:round2(Math.min(...ys)), w:round2(Math.max(...xs)-Math.min(...xs)), h:round2(Math.max(...ys)-Math.min(...ys)) };
 }
 
-function bboxFromPoints(points){
-  const xs = points.map(p=>p[0]), ys = points.map(p=>p[1]);
-  const minX=Math.min(...xs), maxX=Math.max(...xs);
-  const minY=Math.min(...ys), maxY=Math.max(...ys);
-  return { x: round2(minX), y: round2(minY), w: round2(maxX-minX), h: round2(maxY-minY) };
+/* ══════════════════════════════════════════════════════════
+   HIT TESTING — ray-casting in % coordinate space
+   ══════════════════════════════════════════════════════════ */
+function pointInPolygon(px, py, points){
+  let inside = false;
+  const n = points.length;
+  for (let i=0,j=n-1; i<n; j=i++){
+    const xi=points[i][0], yi=points[i][1], xj=points[j][0], yj=points[j][1];
+    if (((yi>py)!==(yj>py)) && (px<(xj-xi)*(py-yi)/(yj-yi)+xi)) inside=!inside;
+  }
+  return inside;
+}
+function polygonArea(pts){
+  let a=0, n=pts.length;
+  for (let i=0,j=n-1;i<n;j=i++) a+=(pts[j][0]*pts[i][1])-(pts[i][0]*pts[j][1]);
+  return Math.abs(a)/2;
 }
 
-/* ── Rectangle drawing ── */
-let dragging = false, startX=0, startY=0;
+// Returns ALL span indices that contain (pctX, pctY), sorted: smallest area first, then highest idx
+function hitTestAll(pctX, pctY){
+  const hits = [];
+  spans.forEach((span, spanIdx) => {
+    if (span.hidden) return;
+    let best = Infinity, found = false;
+    span.masks.forEach(m => {
+      if (!pointInPolygon(pctX, pctY, m.points)) return;
+      found = true;
+      const a = polygonArea(m.points);
+      if (a < best) best = a;
+    });
+    if (found) hits.push({ spanIdx, area: best });
+  });
+  hits.sort((a,b) => a.area!==b.area ? a.area-b.area : b.spanIdx-a.spanIdx);
+  return hits.map(h=>h.spanIdx);
+}
 
-/* ── Polygon drawing ── */
-let polyPoints = []; // in px, current in-progress
+// Click-cycle: repeated clicks at the same location cycle through overlapping spans
+function selectByClick(pctX, pctY){
+  const candidates = hitTestAll(pctX, pctY);
+  if (candidates.length === 0) return null;
 
+  const THRESH = 3; // % units — counts as "same spot"
+  if (clickCycle &&
+      Math.abs(clickCycle.pctX - pctX) < THRESH &&
+      Math.abs(clickCycle.pctY - pctY) < THRESH &&
+      clickCycle.candidates.join(',') === candidates.join(',')){
+    clickCycle.idx = (clickCycle.idx + 1) % candidates.length;
+  } else {
+    clickCycle = { pctX, pctY, candidates, idx: 0 };
+  }
+
+  if (candidates.length > 1){
+    showCycleToast(`S${candidates[clickCycle.idx]+1} selected  (${clickCycle.idx+1}/${candidates.length} overlapping — click again to cycle)`);
+  }
+  return candidates[clickCycle.idx];
+}
+
+function showCycleToast(msg){
+  cycleToast.textContent = msg;
+  cycleToast.style.display = 'block';
+  clearTimeout(cycleToastTimer);
+  cycleToastTimer = setTimeout(() => { cycleToast.style.display='none'; }, 2200);
+}
+
+/* ══════════════════════════════════════════════════════════
+   DRAWING STATE
+   ══════════════════════════════════════════════════════════ */
+let dragging=false, startX=0, startY=0;
+let polyPoints=[];
+
+/* ── mousedown: select existing OR start rect drag ── */
 overlay.addEventListener('mousedown', (e) => {
-  if (activeSpanIdx === null) { alert('Select or add a span first.'); return; }
   if (mode !== 'rect') return;
-  const rect = overlay.getBoundingClientRect();
-  startX = e.clientX - rect.left;
-  startY = e.clientY - rect.top;
-  dragging = true;
+  const r = overlay.getBoundingClientRect();
+  const px = e.clientX-r.left, py = e.clientY-r.top;
+  const [pctX, pctY] = pxToPct(px, py);
+
+  const hitIdx = selectByClick(pctX, pctY);
+  if (hitIdx !== null && hitIdx !== activeSpanIdx){
+    activeSpanIdx = hitIdx; polyPoints=[];
+    renderSpanList(); renderBadge(); redraw();
+    flashSpanCard(hitIdx);
+    return;
+  }
+  if (hitIdx !== null) return; // clicked active span — don't start a drag
+
+  if (activeSpanIdx === null){ alert('Select or add a span first.'); return; }
+  startX=px; startY=py; dragging=true;
 });
 
+/* ── mousemove: drag preview OR hover highlight ── */
 overlay.addEventListener('mousemove', (e) => {
-  const rect = overlay.getBoundingClientRect();
-  const curX = e.clientX - rect.left;
-  const curY = e.clientY - rect.top;
+  const r = overlay.getBoundingClientRect();
+  const cx = e.clientX-r.left, cy = e.clientY-r.top;
 
-  if (mode === 'rect' && dragging) {
+  if (mode==='rect' && dragging){
     redraw();
-    ctx.strokeStyle = COLORS[activeSpanIdx % COLORS.length].border;
-    ctx.lineWidth = 2; ctx.setLineDash([5,3]);
-    ctx.strokeRect(Math.min(startX,curX), Math.min(startY,curY), Math.abs(curX-startX), Math.abs(curY-startY));
+    ctx.strokeStyle=COLORS[activeSpanIdx%COLORS.length].border;
+    ctx.lineWidth=2; ctx.setLineDash([5,3]);
+    ctx.strokeRect(Math.min(startX,cx), Math.min(startY,cy), Math.abs(cx-startX), Math.abs(cy-startY));
     ctx.setLineDash([]);
-  } else if (mode === 'polygon' && polyPoints.length > 0) {
-    redraw();
-    drawPolyPreview(curX, curY);
+  } else if (mode==='polygon' && polyPoints.length>0){
+    redraw(); drawPolyPreview(cx,cy);
+  } else {
+    const [pctX,pctY] = pxToPct(cx,cy);
+    const candidates = hitTestAll(pctX,pctY);
+    const newHovered = candidates.length>0 ? candidates[0] : null;
+    if (newHovered !== hoveredSpanIdx){
+      hoveredSpanIdx = newHovered;
+      overlay.style.cursor = newHovered!==null ? 'pointer' : 'crosshair';
+      redraw();
+    }
   }
 });
 
-overlay.addEventListener('mouseup', (e) => {
-  if (mode !== 'rect' || !dragging) return;
-  dragging = false;
-  const rect = overlay.getBoundingClientRect();
-  const curX = e.clientX - rect.left;
-  const curY = e.clientY - rect.top;
-  const x = Math.min(startX, curX), y = Math.min(startY, curY);
-  const w = Math.abs(curX - startX), h = Math.abs(curY - startY);
-  if (w < 4 || h < 4) { redraw(); return; }
+overlay.addEventListener('mouseleave', () => {
+  if (hoveredSpanIdx !== null){ hoveredSpanIdx=null; overlay.style.cursor='crosshair'; redraw(); }
+});
 
-  const p1 = pxToPct(x, y), p2 = pxToPct(x+w, y), p3 = pxToPct(x+w, y+h), p4 = pxToPct(x, y+h);
-  const points = [p1, p2, p3, p4];
-  spans[activeSpanIdx].masks.push({ points, bbox: bboxFromPoints(points) });
+/* ── mouseup: commit rect ── */
+overlay.addEventListener('mouseup', (e) => {
+  if (mode!=='rect' || !dragging) return;
+  dragging=false;
+  const r=overlay.getBoundingClientRect();
+  const cx=e.clientX-r.left, cy=e.clientY-r.top;
+  const x=Math.min(startX,cx), y=Math.min(startY,cy);
+  const w=Math.abs(cx-startX), h=Math.abs(cy-startY);
+  if (w<4||h<4){ redraw(); return; }
+  const p1=pxToPct(x,y), p2=pxToPct(x+w,y), p3=pxToPct(x+w,y+h), p4=pxToPct(x,y+h);
+  spans[activeSpanIdx].masks.push({ points:[p1,p2,p3,p4], bbox:bboxFromPoints([p1,p2,p3,p4]) });
   renderSpanList(); redraw();
 });
 
+/* ── click: select existing OR place polygon vertex ── */
 overlay.addEventListener('click', (e) => {
-  if (mode !== 'polygon') return;
-  if (activeSpanIdx === null) { alert('Select or add a span first.'); return; }
-  const rect = overlay.getBoundingClientRect();
-  const x = e.clientX - rect.left, y = e.clientY - rect.top;
+  if (mode!=='polygon') return;
+  const r=overlay.getBoundingClientRect();
+  const x=e.clientX-r.left, y=e.clientY-r.top;
 
-  // If clicking near the first point (and we have 3+), close the polygon
-  if (polyPoints.length >= 3) {
-    const [fx, fy] = polyPoints[0];
-    if (Math.hypot(x-fx, y-fy) < 10) { closePolygon(); return; }
+  // Hit-test only when NOT mid-polygon
+  if (polyPoints.length===0){
+    const [pctX,pctY]=pxToPct(x,y);
+    const hitIdx=selectByClick(pctX,pctY);
+    if (hitIdx!==null && hitIdx!==activeSpanIdx){
+      activeSpanIdx=hitIdx; renderSpanList(); renderBadge(); redraw(); flashSpanCard(hitIdx);
+      return;
+    }
+    if (hitIdx!==null) return; // clicked active — just highlight
   }
-  polyPoints.push([x, y]);
-  redraw();
-  drawPolyPreview(x, y);
+
+  if (activeSpanIdx===null){ alert('Select or add a span first.'); return; }
+  if (polyPoints.length>=3){
+    const [fx,fy]=polyPoints[0];
+    if (Math.hypot(x-fx,y-fy)<10){ closePolygon(); return; }
+  }
+  polyPoints.push([x,y]);
+  redraw(); drawPolyPreview(x,y);
 });
 
-overlay.addEventListener('dblclick', (e) => { e.preventDefault(); if (mode === 'polygon') closePolygon(); });
-
-document.addEventListener('keydown', (e) => {
-  if (mode !== 'polygon') return;
-  if (e.key === 'Enter') closePolygon();
-  if (e.key === 'Escape') { polyPoints = []; redraw(); }
+overlay.addEventListener('dblclick', (e)=>{ e.preventDefault(); if(mode==='polygon') closePolygon(); });
+document.addEventListener('keydown', (e)=>{
+  if (mode!=='polygon') return;
+  if (e.key==='Enter') closePolygon();
+  if (e.key==='Escape'){ polyPoints=[]; redraw(); }
 });
 
 function closePolygon(){
-  if (polyPoints.length < 3 || activeSpanIdx === null) { polyPoints = []; redraw(); return; }
-  const points = polyPoints.map(([x,y]) => pxToPct(x,y));
-  spans[activeSpanIdx].masks.push({ points, bbox: bboxFromPoints(points) });
-  polyPoints = [];
-  renderSpanList(); redraw();
+  if (polyPoints.length<3||activeSpanIdx===null){ polyPoints=[]; redraw(); return; }
+  const points=polyPoints.map(([x,y])=>pxToPct(x,y));
+  spans[activeSpanIdx].masks.push({ points, bbox:bboxFromPoints(points) });
+  polyPoints=[]; renderSpanList(); redraw();
 }
 
-function drawPolyPreview(curX, curY){
-  ctx.strokeStyle = COLORS[activeSpanIdx % COLORS.length].border;
-  ctx.lineWidth = 2;
+function drawPolyPreview(curX,curY){
+  const color=COLORS[activeSpanIdx%COLORS.length].border;
+  ctx.strokeStyle=color; ctx.lineWidth=2;
   ctx.beginPath();
-  ctx.moveTo(polyPoints[0][0], polyPoints[0][1]);
-  for (let i=1;i<polyPoints.length;i++) ctx.lineTo(polyPoints[i][0], polyPoints[i][1]);
-  ctx.lineTo(curX, curY);
-  ctx.stroke();
-  polyPoints.forEach(([px,py], i) => {
-    ctx.fillStyle = i===0 ? '#fff' : COLORS[activeSpanIdx % COLORS.length].border;
-    ctx.strokeStyle = COLORS[activeSpanIdx % COLORS.length].border;
-    ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.arc(px,py, i===0?6:4, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+  ctx.moveTo(polyPoints[0][0],polyPoints[0][1]);
+  for (let i=1;i<polyPoints.length;i++) ctx.lineTo(polyPoints[i][0],polyPoints[i][1]);
+  ctx.lineTo(curX,curY); ctx.stroke();
+  polyPoints.forEach(([px,py],i)=>{
+    ctx.fillStyle=i===0?'#fff':color; ctx.strokeStyle=color; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.arc(px,py,i===0?6:4,0,Math.PI*2); ctx.fill(); ctx.stroke();
   });
 }
 
+/* ══════════════════════════════════════════════════════════
+   REDRAW
+   - Hidden spans are skipped entirely
+   - When a span is active, other spans are dimmed (20% fill, muted stroke)
+   - Hovered span gets brighter fill + thicker stroke
+   - Active span gets thickest stroke + bright fill
+   - Centroid label (S1, S2…) on every visible mask
+   ══════════════════════════════════════════════════════════ */
 function redraw(){
   ctx.clearRect(0,0,overlay.width,overlay.height);
-  spans.forEach((span, idx) => {
-    const color = COLORS[idx % COLORS.length].border;
-    span.masks.forEach(m => {
+  const hasActive = activeSpanIdx !== null;
+
+  spans.forEach((span,idx)=>{
+    if (span.hidden) return;
+    const color    = COLORS[idx%COLORS.length].border;
+    const isActive = idx===activeSpanIdx;
+    const isHover  = idx===hoveredSpanIdx && !isActive;
+    const isDimmed = hasActive && !isActive && !isHover;
+
+    span.masks.forEach(m=>{
       ctx.beginPath();
-      m.points.forEach(([px,py], i) => {
-        const x = (px/100)*overlay.width, y = (py/100)*overlay.height;
-        i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+      m.points.forEach(([px,py],i)=>{
+        const x=(px/100)*overlay.width, y=(py/100)*overlay.height;
+        i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
       });
       ctx.closePath();
-      ctx.fillStyle = color + '26';
-      ctx.strokeStyle = color;
-      ctx.lineWidth = idx === activeSpanIdx ? 3 : 1.5;
+
+      // Fill alpha: hover=27%, normal=15%, dimmed=6%
+      ctx.fillStyle   = color+(isHover?'44':isDimmed?'0f':'26');
+      ctx.strokeStyle = isDimmed ? color+'55' : color;
+      ctx.lineWidth   = isActive?3.5:isHover?3:1.5;
       ctx.fill(); ctx.stroke();
+
+      // Centroid label
+      const cx=m.points.reduce((s,p)=>s+p[0],0)/m.points.length;
+      const cy=m.points.reduce((s,p)=>s+p[1],0)/m.points.length;
+      ctx.save();
+      ctx.font='bold 10px -apple-system,Inter,sans-serif';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.shadowColor='#ffffff'; ctx.shadowBlur=4;
+      ctx.fillStyle=isDimmed?color+'77':color;
+      ctx.fillText(`S${idx+1}`,(cx/100)*overlay.width,(cy/100)*overlay.height);
+      ctx.shadowBlur=0; ctx.restore();
     });
   });
 }
 
-/* ── Span management ── */
-document.getElementById('addSpanBtn').addEventListener('click', () => {
-  spans.push({ id: spanCounter++, text: '', masks: [] });
-  activeSpanIdx = spans.length - 1;
+/* ══════════════════════════════════════════════════════════
+   SPAN MANAGEMENT
+   ══════════════════════════════════════════════════════════ */
+document.getElementById('addSpanBtn').addEventListener('click', ()=>{
+  const nameEl = document.getElementById('newSpanName');
+  const name   = nameEl.value.trim();
+  spans.push({ id:spanCounter++, text:name, masks:[], hidden:false });
+  activeSpanIdx=spans.length-1;
+  nameEl.value='';
   renderSpanList(); renderBadge();
 });
 
+// Also add span on Enter in the name field
+document.getElementById('newSpanName').addEventListener('keydown', (e)=>{
+  if (e.key==='Enter') document.getElementById('addSpanBtn').click();
+});
+
 function renderBadge(){
-  const el = document.getElementById('activeSpanBadge');
-  if (activeSpanIdx === null) { el.innerHTML = ''; return; }
-  const c = COLORS[activeSpanIdx % COLORS.length];
-  el.innerHTML = `<div class="active-span-badge" style="background:${c.border}1a;color:${c.border};">
+  const el=document.getElementById('activeSpanBadge');
+  if (activeSpanIdx===null){ el.innerHTML=''; return; }
+  const c=COLORS[activeSpanIdx%COLORS.length];
+  el.innerHTML=`<div class="active-span-badge" style="background:${c.border}1a;color:${c.border};">
     <span class="span-color-dot" style="background:${c.border};"></span>
-    Drawing: Span ${activeSpanIdx+1} — ${mode}
+    Drawing on: S${activeSpanIdx+1} — ${spans[activeSpanIdx]?.text||'(unnamed)'} &nbsp;·&nbsp; ${mode}
   </div>`;
 }
 
+/* ── Pill strip ── */
+function renderPills(){
+  if (spans.length===0){ spanPillsEl.style.display='none'; return; }
+  spanPillsEl.style.display='flex';
+  spanPillsEl.innerHTML=spans.map((span,idx)=>{
+    const color=COLORS[idx%COLORS.length].border;
+    const isActive=idx===activeSpanIdx;
+    const label=(span.text||`Span ${idx+1}`).slice(0,16)+(span.text.length>16?'…':'');
+    return `<button class="span-pill${isActive?' active':''}${span.hidden?' pill-hidden':''}" data-idx="${idx}"
+              style="border-color:${isActive?color:'#555'};color:${isActive?color:'#ccc'};">
+              <span class="pill-dot" style="background:${color};"></span>
+              <span>${label}</span>
+              <span class="pill-badge" style="background:${color}22;color:${color};">${span.masks.length}</span>
+              <span class="pill-eye">${span.hidden?'○':'●'}</span>
+            </button>`;
+  }).join('');
+  spanPillsEl.querySelectorAll('.span-pill').forEach(pill=>{
+    pill.addEventListener('click',()=>{
+      const idx=+pill.dataset.idx;
+      // Click the eye part vs the label part:
+      // For pills, the whole pill = select; the ●/○ at end = toggle visibility
+      // We'll detect if click was on the pill-eye span
+      if (idx===activeSpanIdx) return;
+      activeSpanIdx=idx; polyPoints=[];
+      renderSpanList(); renderBadge(); redraw(); flashSpanCard(idx);
+    });
+  });
+}
+
 function findDuplicateOf(idx){
-  const txt = (spans[idx].text || '').trim().toLowerCase();
+  const txt=(spans[idx].text||'').trim().toLowerCase();
   if (!txt) return null;
   for (let i=0;i<spans.length;i++){
     if (i===idx) continue;
-    if ((spans[i].text||'').trim().toLowerCase() === txt) return i;
+    if ((spans[i].text||'').trim().toLowerCase()===txt) return i;
   }
   return null;
 }
 
 function flashSpanCard(idx){
-  const card = document.querySelectorAll('.span-card')[idx];
+  const card=document.querySelectorAll('.span-card')[idx];
   if (!card) return;
   card.classList.remove('span-card-flash');
-  void card.offsetWidth; // restart animation
+  void card.offsetWidth;
   card.classList.add('span-card-flash');
   card.scrollIntoView({ behavior:'smooth', block:'center' });
 }
 
 function renderSpanList(){
-  const list = document.getElementById('spanList');
-  list.innerHTML = '';
-  spans.forEach((span, idx) => {
-    const color = COLORS[idx % COLORS.length].border;
-    const card = document.createElement('div');
-    card.className = 'span-card';
-    card.style.borderColor = idx === activeSpanIdx ? color : '';
-    card.style.boxShadow = idx === activeSpanIdx ? `0 0 0 1px ${color}` : '';
-    const maskRows = span.masks.length
-      ? span.masks.map((m, mi) => `
+  const list=document.getElementById('spanList');
+  list.innerHTML='';
+  spans.forEach((span,idx)=>{
+    const color=COLORS[idx%COLORS.length].border;
+    const card=document.createElement('div');
+    card.className=`span-card${span.hidden?' span-hidden':''}`;
+    card.style.borderColor=idx===activeSpanIdx?color:'';
+    card.style.boxShadow=idx===activeSpanIdx?`0 0 0 1px ${color}`:'';
+
+    const maskRows=span.masks.length
+      ?span.masks.map((m,mi)=>`
           <div class="mask-chip">
             <span>mask ${mi+1} — ${m.points.length} pts</span>
             <button data-span="${span.id}" data-mi="${mi}" class="mask-del">✕</button>
           </div>`).join('')
-      : `<div class="mask-empty">no masks yet</div>`;
+      :`<div class="mask-empty">no masks yet — draw on the image</div>`;
 
-    const dupIdx = findDuplicateOf(idx);
-    const dupWarning = dupIdx !== null
-      ? `<div class="dup-warning">
-           <span>Same text as Span ${dupIdx+1} (${COLORS[dupIdx % COLORS.length].border === color ? '' : ''}●). You likely don't need to redraw — reuse spanIndex ${dupIdx} when writing tokens.</span>
-           <button class="jump-to-dup" data-target="${dupIdx}">Jump there</button>
-         </div>`
-      : '';
+    const dupIdx=findDuplicateOf(idx);
+    const dupWarning=dupIdx!==null?`<div class="dup-warning">
+        <span>Same text as S${dupIdx+1}. If it's the same visual region, reuse spanIndex ${dupIdx} in your step tokens instead of drawing again.</span>
+        <button class="jump-to-dup" data-target="${dupIdx}">Go to S${dupIdx+1}</button>
+      </div>`:'';
 
-    const otherSpans = spans.filter((s,i) => i!==idx && s.masks.length);
-    const cloneRow = otherSpans.length ? `
+    const otherSpans=spans.filter((s,i)=>i!==idx&&s.masks.length);
+    const cloneRow=otherSpans.length?`
       <div class="clone-row">
         <select class="clone-select" data-idx="${idx}">
           <option value="">Copy masks from…</option>
-          ${spans.map((s,i) => i!==idx && s.masks.length
-              ? `<option value="${i}">Span ${i+1} — ${(s.text||'untitled').slice(0,28)}</option>` : '').join('')}
+          ${spans.map((s,i)=>i!==idx&&s.masks.length
+            ?`<option value="${i}">S${i+1} — ${(s.text||'untitled').slice(0,28)}</option>`:'').join('')}
         </select>
         <button class="clone-go" data-idx="${idx}">Copy</button>
-      </div>` : '';
+      </div>`:'';
 
-    card.innerHTML = `
+    card.innerHTML=`
       <div class="span-card-head">
-        <span class="span-color-dot" style="background:${color};"></span>
-        <input type="text" placeholder="span text, e.g. Bedroom 1" value="${span.text.replace(/"/g,'&quot;')}" data-idx="${idx}" class="span-text-input">
+        <span class="span-color-dot" style="background:${color};flex-shrink:0;"></span>
+        <span style="font-size:10px;font-weight:700;color:${color};flex-shrink:0;margin-right:2px;">S${idx+1}</span>
+        <input type="text" placeholder="span name, e.g. penguins" value="${span.text.replace(/"/g,'&quot;')}" data-idx="${idx}" class="span-text-input">
+        <button class="span-eye${span.hidden?' is-hidden':''}" data-idx="${idx}" title="${span.hidden?'Show on canvas':'Hide on canvas'}">${span.hidden?'○':'●'}</button>
         <button class="span-remove" data-idx="${idx}">✕</button>
       </div>
       ${dupWarning}
       ${cloneRow}
       ${maskRows}
     `;
-    card.addEventListener('click', (e) => {
-      if (e.target.closest('input, .span-remove, .mask-del, .jump-to-dup, .clone-row')) return;
-      activeSpanIdx = idx; polyPoints = [];
+
+    card.addEventListener('click',(e)=>{
+      if (e.target.closest('input,.span-remove,.mask-del,.jump-to-dup,.clone-row,.span-eye')) return;
+      activeSpanIdx=idx; polyPoints=[];
       renderSpanList(); renderBadge(); redraw();
     });
     list.appendChild(card);
   });
 
-  list.querySelectorAll('.span-text-input').forEach(inp => {
-    inp.addEventListener('input', (e) => {
-      spans[+e.target.dataset.idx].text = e.target.value;
-      renderSpanList(); // live-refresh duplicate warning as you type
-    });
+  // Text input — live update name
+  list.querySelectorAll('.span-text-input').forEach(inp=>{
+    inp.addEventListener('input',(e)=>{ spans[+e.target.dataset.idx].text=e.target.value; renderSpanList(); });
   });
-  list.querySelectorAll('.span-remove').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      const idx = +e.target.dataset.idx;
-      spans.splice(idx, 1);
-      if (activeSpanIdx === idx) activeSpanIdx = null;
-      else if (activeSpanIdx > idx) activeSpanIdx--;
-      renderSpanList(); renderBadge(); redraw();
-    });
-  });
-  list.querySelectorAll('.mask-del').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      const spanId = +e.target.dataset.span, mi = +e.target.dataset.mi;
-      const span = spans.find(s => s.id === spanId);
-      span.masks.splice(mi, 1);
+
+  // Eye toggle — hide/show span on canvas
+  list.querySelectorAll('.span-eye').forEach(btn=>{
+    btn.addEventListener('click',(e)=>{
+      e.stopPropagation();
+      const idx=+btn.dataset.idx;
+      spans[idx].hidden=!spans[idx].hidden;
+      // If we hid the active span, keep it active but re-render
       renderSpanList(); redraw();
     });
   });
-  list.querySelectorAll('.jump-to-dup').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      const target = +e.target.dataset.target;
-      activeSpanIdx = target;
+
+  list.querySelectorAll('.span-remove').forEach(btn=>{
+    btn.addEventListener('click',(e)=>{
+      const idx=+e.target.dataset.idx;
+      spans.splice(idx,1);
+      if (activeSpanIdx===idx) activeSpanIdx=null;
+      else if (activeSpanIdx>idx) activeSpanIdx--;
       renderSpanList(); renderBadge(); redraw();
-      flashSpanCard(target);
     });
   });
-  list.querySelectorAll('.clone-go').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      const idx = +e.target.dataset.idx;
-      const sel = list.querySelector(`.clone-select[data-idx="${idx}"]`);
-      const srcIdx = sel.value;
-      if (srcIdx === '') return;
-      const cloned = JSON.parse(JSON.stringify(spans[+srcIdx].masks));
-      spans[idx].masks.push(...cloned);
+  list.querySelectorAll('.mask-del').forEach(btn=>{
+    btn.addEventListener('click',(e)=>{
+      const spanId=+e.target.dataset.span, mi=+e.target.dataset.mi;
+      spans.find(s=>s.id===spanId).masks.splice(mi,1);
       renderSpanList(); redraw();
     });
   });
+  list.querySelectorAll('.jump-to-dup').forEach(btn=>{
+    btn.addEventListener('click',(e)=>{
+      const target=+e.target.dataset.target;
+      activeSpanIdx=target; renderSpanList(); renderBadge(); redraw(); flashSpanCard(target);
+    });
+  });
+  list.querySelectorAll('.clone-go').forEach(btn=>{
+    btn.addEventListener('click',(e)=>{
+      const idx=+e.target.dataset.idx;
+      const sel=list.querySelector(`.clone-select[data-idx="${idx}"]`);
+      if (!sel.value) return;
+      spans[idx].masks.push(...JSON.parse(JSON.stringify(spans[+sel.value].masks)));
+      renderSpanList(); redraw();
+    });
+  });
+
   renderBadge();
+  renderPills();
 }
 
 /* ── Mode tabs ── */
-document.querySelectorAll('.mode-tabs button').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.mode-tabs button').forEach(b => b.classList.remove('active'));
+document.querySelectorAll('.mode-tabs button').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.mode-tabs button').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
-    mode = btn.dataset.mode;
-    polyPoints = [];
+    mode=btn.dataset.mode; polyPoints=[];
     updateHints(); renderBadge(); redraw();
   });
 });
 
 /* ── JSON export ── */
-document.getElementById('genJsonBtn').addEventListener('click', () => {
-  const id = document.getElementById('exampleId').value || 'example';
-  const q = document.getElementById('exampleQ').value || '';
-  const out = {
-    id,
-    label: id.charAt(0).toUpperCase() + id.slice(1),
-    image: `static/images/qual/originals/${id}.png`,
-    question: q,
-    spans: spans.map(s => ({ text: s.text, masks: s.masks }))
-  };
-  document.getElementById('jsonOut').value = JSON.stringify(out, null, 2);
+document.getElementById('genJsonBtn').addEventListener('click',()=>{
+  const id=document.getElementById('exampleId').value||'example';
+  const q=document.getElementById('exampleQ').value||'';
+  const out={ id, label:id.charAt(0).toUpperCase()+id.slice(1),
+    image:`static/images/qual/originals/${id}.png`, question:q,
+    spans:spans.map(s=>({ text:s.text, masks:s.masks })) };
+  document.getElementById('jsonOut').value=JSON.stringify(out,null,2);
 });
-document.getElementById('copyJsonBtn').addEventListener('click', () => {
-  const ta = document.getElementById('jsonOut');
-  ta.select(); document.execCommand('copy');
+document.getElementById('copyJsonBtn').addEventListener('click',()=>{
+  const ta=document.getElementById('jsonOut'); ta.select(); document.execCommand('copy');
 });
 </script>
 </body>

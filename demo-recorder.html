@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>DoCoG Demo Recorder</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+<style>
+/* ══════════════════════════════════════════════
+   DESIGN TOKENS (mirror of index.html)
+══════════════════════════════════════════════ */
+:root {
+  --ink:    #4F46E5;
+  --ink50:  #EEF2FF;
+  --ink100: #E0E7FF;
+  --ink200: #C7D2FE;
+  --ink700: #3730A3;
+  --t1: #1d1d1f;
+  --t2: #6e6e73;
+  --t3: #aeaeb2;
+  --bg:  #ffffff;
+  --bg2: #f5f5f7;
+  --b0: #d2d2d7;
+  --b1: #e8e8ed;
+  --s1: 0 2px 8px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  --s2: 0 8px 24px rgba(0,0,0,.08), 0 2px 6px rgba(0,0,0,.04);
+  --ra: 8px; --rb: 14px; --rc: 20px;
+  --e1: cubic-bezier(0.25,0.46,0.45,0.94);
+  --e2: cubic-bezier(0.16,1,0.3,1);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #0a0a0a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ══════════════════════════════════════════════
+   FIXED 1280×720 RECORDING FRAME
+══════════════════════════════════════════════ */
+#recordFrame {
+  width: 1280px;
+  height: 720px;
+  overflow: hidden;
+  position: relative;
+  background: var(--bg);
+  border-radius: var(--rc);
+  box-shadow: 0 0 0 1px var(--b1), var(--s2);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ══════════════════════════════════════════════
+   TOP BAR — 48px
+══════════════════════════════════════════════ */
+#topBar {
+  height: 48px;
+  min-height: 48px;
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px solid var(--b1);
+  background: var(--bg2);
+  flex-shrink: 0;
+}
+
+/* Tabs fill available space on the left */
+.qd-tabs {
+  flex: 1;
+  display: flex;
+  overflow: hidden; /* no scrollbar visible in recording */
+  border-bottom: none; /* border is on topBar */
+  background: transparent;
+}
+.qd-tabs::-webkit-scrollbar { display: none; }
+.qd-tab {
+  padding: 0 1.1rem;
+  height: 100%;
+  font-size: .82rem;
+  font-weight: 600;
+  color: var(--t2);
+  background: none;
+  border: none;
+  border-bottom: 2.5px solid transparent;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+  transition: color .18s, border-color .18s, background .18s;
+  display: flex;
+  align-items: center;
+}
+.qd-tab:hover { color: var(--t1); background: var(--bg); }
+.qd-tab.on { color: var(--ink); border-bottom-color: var(--ink); background: var(--bg); }
+
+/* Recording controls — right side of top bar */
+#recControls {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  padding: 0 .9rem;
+  border-left: 1px solid var(--b1);
+  flex-shrink: 0;
+}
+#recTimer {
+  font-size: .78rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #d93025;
+  letter-spacing: .03em;
+  min-width: 3.4rem;
+  display: none;
+}
+#recBtn {
+  display: flex;
+  align-items: center;
+  gap: .38rem;
+  padding: .32rem .85rem;
+  border-radius: 100px;
+  border: 1.5px solid #d93025;
+  background: #fff0ef;
+  color: #d93025;
+  font-size: .78rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background .18s, box-shadow .18s, border-color .18s;
+  white-space: nowrap;
+}
+#recBtn:hover { background: #ffe4e1; }
+#recBtn.recording {
+  border-color: #d93025;
+  background: #fff0ef;
+  animation: recPulse 1.4s ease-in-out infinite;
+}
+@keyframes recPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(217,48,37,.35); }
+  50%       { box-shadow: 0 0 0 5px rgba(217,48,37,0); }
+}
+#recUnavailable {
+  font-size: .74rem;
+  color: var(--t2);
+  font-style: italic;
+}
+
+/* Toast for small messages */
+#recToast {
+  position: absolute;
+  top: 56px;
+  right: 12px;
+  background: rgba(29,29,31,.88);
+  color: #fff;
+  font-size: .8rem;
+  font-weight: 600;
+  padding: .4rem .9rem;
+  border-radius: 100px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .22s;
+  z-index: 999;
+}
+#recToast.show { opacity: 1; }
+
+/* ══════════════════════════════════════════════
+   CONTENT AREA — 672px (720 - 48)
+══════════════════════════════════════════════ */
+#demoPanel {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 55fr 45fr;
+  height: 672px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* LEFT — image panel
+   The img-wrap must size itself to the image's rendered dimensions,
+   not the container, so the SVG overlay stays pixel-perfect.
+   Strategy: image is width:100%; height:auto (fills column width, auto height).
+   Panel clips overflow vertically. SVG covers the wrap = image exactly. */
+.qd-img-panel {
+  border-right: 1px solid var(--b1);
+  background: var(--bg2);
+  padding: 1.25rem;
+  height: 100%;
+  overflow: hidden;
+  /* vertical centering when image is shorter than panel */
+  display: flex;
+  align-items: center;
+}
+.qd-img-wrap {
+  position: relative;
+  width: 100%;
+}
+.qd-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: var(--ra);
+}
+.qd-svg {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  overflow: visible;
+}
+
+/* RIGHT — chat panel */
+.qd-chat-panel {
+  display: flex;
+  flex-direction: column;
+  padding: 1.25rem;
+  height: 100%;
+  overflow: hidden; /* panel itself never scrolls */
+}
+
+/* Question row */
+.qd-question-row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: .5rem;
+  margin-bottom: .75rem;
+  flex-shrink: 0;
+}
+.qd-bubble {
+  background: var(--ink);
+  color: #fff;
+  border-radius: 16px 16px 4px 16px;
+  padding: .65rem 1rem;
+  font-size: .875rem;
+  line-height: 1.55;
+  max-width: 92%;
+  text-align: left;
+}
+.qd-send-btn {
+  background: var(--ink);
+  color: #fff;
+  border: none;
+  border-radius: 100px;
+  padding: .4rem 1.1rem;
+  font-size: .82rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: .35rem;
+  transition: opacity .2s, transform .2s var(--e1);
+}
+.qd-send-btn:hover:not(:disabled) { transform: translateY(-1px); opacity: .88; }
+.qd-send-btn:disabled { opacity: .42; cursor: not-allowed; }
+
+/* Steps area — scrolls internally */
+.qd-steps {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+.qd-steps::-webkit-scrollbar { width: 4px; }
+.qd-steps::-webkit-scrollbar-thumb { background: var(--b0); border-radius: 2px; }
+
+.qd-step-row {
+  display: flex;
+  align-items: flex-start;
+  gap: .45rem;
+  margin-top: .75rem;
+  font-size: .87rem;
+  line-height: 1.65;
+  color: var(--t1);
+}
+.qd-step-label {
+  flex-shrink: 0;
+  font-size: .7rem;
+  font-style: italic;
+  font-weight: 600;
+  background: var(--bg2);
+  color: var(--t2);
+  padding: .12rem .42rem;
+  border-radius: 4px;
+  border: 1px solid var(--b1);
+  margin-top: .22rem;
+}
+.qd-step-label-final {
+  background: var(--ink);
+  color: #fff;
+  border-color: var(--ink);
+  font-style: normal;
+  font-weight: 700;
+}
+.qd-step-text { flex: 1; word-break: break-word; }
+
+/* Span highlight */
+.qd-span { border-radius: 3px; padding: 0 2px; font-weight: 500; }
+
+/* GND chip */
+.qd-gnd-chip {
+  display: inline;
+  cursor: pointer;
+  font-size: 0.72em;
+  font-weight: 700;
+  font-family: inherit;
+  margin: 0 2px;
+  vertical-align: baseline;
+  padding: 1px 4px;
+  border-radius: 3px;
+  line-height: 1;
+  transition: background .15s;
+}
+
+/* Step header (label + show-all) */
+.qd-step-header {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  gap: 0.3rem;
+  align-items: flex-start;
+}
+
+/* Hide "Show all" button — not needed in recorder */
+.qd-show-all-btn { display: none !important; }
+
+/* Reset row — shown by engine after Sf; styled to fit the panel */
+.qd-reset-row {
+  display: none; /* engine sets display:flex when done */
+  justify-content: flex-end;
+  margin-top: 1rem;
+  padding-top: .75rem;
+  border-top: 1px solid var(--b1);
+  flex-shrink: 0;
+}
+.qd-reset-btn {
+  background: var(--bg2);
+  color: var(--t2);
+  border: 1.5px solid var(--b1);
+  border-radius: 100px;
+  padding: .35rem .9rem;
+  font-size: .8rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: .35rem;
+  transition: color .18s, border-color .18s, background .18s;
+}
+.qd-reset-btn:hover { color: var(--ink); border-color: var(--ink200); background: var(--ink50); }
+</style>
+</head>
+<body>
+
+<div id="recordFrame">
+
+  <!-- TOP BAR -->
+  <div id="topBar">
+    <div class="qd-tabs" id="qdTabs"></div>
+
+    <div id="recControls">
+      <span id="recTimer">00:00</span>
+      <button id="recBtn"><span id="recDot">⏺</span> <span id="recLabel">Record</span></button>
+      <span id="recUnavailable" style="display:none">Use browser screen recorder or OBS</span>
+    </div>
+  </div>
+
+  <!-- DEMO CONTENT -->
+  <div id="demoPanel">
+
+    <!-- LEFT: image + SVG overlay -->
+    <div class="qd-img-panel">
+      <div class="qd-img-wrap">
+        <img class="qd-img" id="qdImg" src="" alt="Document image">
+        <svg class="qd-svg" id="qdSvg" viewBox="0 0 100 100" preserveAspectRatio="none"
+             xmlns="http://www.w3.org/2000/svg">
+          <defs id="qdDefs"></defs>
+        </svg>
+      </div>
+    </div>
+
+    <!-- RIGHT: chat panel -->
+    <div class="qd-chat-panel">
+      <div class="qd-question-row" id="qdQuestionRow">
+        <div class="qd-bubble" id="qdBubble"></div>
+        <button class="qd-send-btn" id="qdSendBtn">
+          <i class="fas fa-play"></i>&ensp;Send
+        </button>
+      </div>
+      <div class="qd-steps" id="qdSteps"></div>
+
+      <!-- Reset row: hidden by CSS, kept for engine compatibility -->
+      <div class="qd-reset-row" id="qdResetRow">
+        <button class="qd-reset-btn" id="qdResetBtn">
+          <i class="fas fa-redo-alt"></i>&ensp;Reset
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /demoPanel -->
+
+  <!-- Floating toast for recording messages -->
+  <div id="recToast"></div>
+
+</div><!-- /recordFrame -->
+
+<!-- ════════════════════════════════════════════
+     DATA — reorder before engine loads
+════════════════════════════════════════════ -->
+<script src="static/js/qual-data.js"></script>
+<script>
+  // Reindex DOCOG_EXAMPLES in-place to the desired carousel order.
+  // This runs after qual-data.js defines the array but before qual-engine.js reads it.
+  (function () {
+    const EXAMPLE_ORDER = ['foodweb', 'olympics', 'triangle', 'medicalbill', 'floorplan', 'creditcard'];
+    const lookup = Object.fromEntries(DOCOG_EXAMPLES.map(ex => [ex.id, ex]));
+    DOCOG_EXAMPLES.length = 0;
+    EXAMPLE_ORDER.forEach(id => {
+      if (lookup[id]) DOCOG_EXAMPLES.push(lookup[id]);
+    });
+  })();
+</script>
+<script src="static/js/qual-engine.js"></script>
+
+<!-- ════════════════════════════════════════════
+     RECORDER LOGIC
+════════════════════════════════════════════ -->
+<script>
+(function () {
+  'use strict';
+
+  /* ── Recording controls ── */
+  const recBtn    = document.getElementById('recBtn');
+  const recLabel  = document.getElementById('recLabel');
+  const recDot    = document.getElementById('recDot');
+  const recTimer  = document.getElementById('recTimer');
+  const recToast  = document.getElementById('recToast');
+  const recUnavail = document.getElementById('recUnavailable');
+
+  // Check API availability
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+    recBtn.style.display = 'none';
+    recUnavail.style.display = 'inline';
+    return;
+  }
+
+  let mediaRecorder  = null;
+  let recordChunks   = [];
+  let timerInterval  = null;
+  let timerSeconds   = 0;
+  let currentExId    = 'demo'; // updated on tab switch
+  let isRecording    = false;
+
+  // Track active example id for filename
+  const qdTabs = document.getElementById('qdTabs');
+  qdTabs.addEventListener('click', e => {
+    const btn = e.target.closest('.qd-tab');
+    if (btn) {
+      const idx = +btn.dataset.i;
+      currentExId = (typeof DOCOG_EXAMPLES !== 'undefined' && DOCOG_EXAMPLES[idx])
+        ? DOCOG_EXAMPLES[idx].id
+        : String(idx);
+    }
+  });
+  // Init to first example id
+  setTimeout(() => {
+    if (typeof DOCOG_EXAMPLES !== 'undefined' && DOCOG_EXAMPLES[0]) {
+      currentExId = DOCOG_EXAMPLES[0].id;
+    }
+  }, 0);
+
+  function showToast(msg) {
+    recToast.textContent = msg;
+    recToast.classList.add('show');
+    setTimeout(() => recToast.classList.remove('show'), 2800);
+  }
+
+  function formatTime(s) {
+    const m = Math.floor(s / 60).toString().padStart(2, '0');
+    const sec = (s % 60).toString().padStart(2, '0');
+    return `${m}:${sec}`;
+  }
+
+  function startTimer() {
+    timerSeconds = 0;
+    recTimer.textContent = '00:00';
+    recTimer.style.display = 'inline';
+    timerInterval = setInterval(() => {
+      timerSeconds++;
+      recTimer.textContent = formatTime(timerSeconds);
+    }, 1000);
+  }
+
+  function stopTimer() {
+    clearInterval(timerInterval);
+    timerInterval = null;
+    recTimer.style.display = 'none';
+  }
+
+  function setIdle() {
+    isRecording = false;
+    recBtn.classList.remove('recording');
+    recDot.textContent = '⏺';
+    recLabel.textContent = 'Record';
+    stopTimer();
+  }
+
+  function setRecording() {
+    isRecording = true;
+    recBtn.classList.add('recording');
+    recDot.textContent = '⏹';
+    recLabel.textContent = 'Stop & Save';
+    startTimer();
+  }
+
+  async function startRecording() {
+    recordChunks = [];
+    let stream;
+    try {
+      stream = await navigator.mediaDevices.getDisplayMedia({
+        preferCurrentTab: true,   // Chrome 94+: pre-selects this tab in the picker
+        video: { frameRate: 60 },
+        audio: false
+      });
+    } catch (err) {
+      showToast('Screen share cancelled');
+      return;
+    }
+
+    // Pick best supported mime
+    const mimes = [
+      'video/webm;codecs=vp9',
+      'video/webm;codecs=vp8',
+      'video/webm'
+    ];
+    const mime = mimes.find(m => MediaRecorder.isTypeSupported(m)) || '';
+
+    mediaRecorder = new MediaRecorder(stream, mime ? { mimeType: mime } : {});
+    mediaRecorder.ondataavailable = e => {
+      if (e.data && e.data.size > 0) recordChunks.push(e.data);
+    };
+    mediaRecorder.onstop = () => {
+      // Stop all tracks so the browser capture indicator disappears
+      stream.getTracks().forEach(t => t.stop());
+      saveRecording();
+      setIdle();
+    };
+
+    // If the user stops sharing via the browser's native UI
+    stream.getVideoTracks()[0].onended = () => {
+      if (isRecording) stopRecording();
+    };
+
+    mediaRecorder.start(200); // collect chunks every 200ms
+    setRecording();
+  }
+
+  function stopRecording() {
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+      mediaRecorder.stop();
+    }
+  }
+
+  function saveRecording() {
+    const blob = new Blob(recordChunks, { type: 'video/webm' });
+    const ts   = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+    const name = `docog-demo-${currentExId}-${ts}.webm`;
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+  }
+
+  recBtn.addEventListener('click', () => {
+    if (isRecording) {
+      stopRecording();
+    } else {
+      startRecording();
+    }
+  });
+
+})();
+</script>
+
+</body>
+</html>

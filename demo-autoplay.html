@@ -401,11 +401,13 @@ body {
 
 #autoCursor.clicking {
   animation: apCursorClick 0.22s ease-out;
+  /* Pivot the animation around the arrow tip so it doesn't drift */
+  transform-origin: 7px 5px;
 }
 @keyframes apCursorClick {
-  0%   { transform: scale(1)    rotate(0deg); }
-  35%  { transform: scale(0.78) rotate(-4deg); }
-  100% { transform: scale(1)    rotate(0deg); }
+  0%   { transform: scale(1); }
+  35%  { transform: scale(0.78); }
+  100% { transform: scale(1); }
 }
 
 /* Ripple ring that expands on click */
@@ -648,10 +650,17 @@ body {
     });
   }
 
-  /* Smooth-scroll a chip into the visible steps area, then wait. */
-  function scrollIntoView(el) {
-    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    return delay(550);
+  /* Instantly scroll an element into view, then wait two rAF cycles
+     so the browser has committed the new scroll position before we
+     measure getBoundingClientRect(). Returns the element's frame coords
+     AFTER the scroll — call this instead of scrollIntoView + toFrameCoords. */
+  function snapToCoords(el) {
+    el.scrollIntoView({ behavior: 'instant', block: 'nearest' });
+    return new Promise(resolve =>
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => resolve(toFrameCoords(el)))
+      )
+    );
   }
 
   /* ══════════════════════════════════════════
@@ -704,8 +713,7 @@ body {
     const targetChip = pool[Math.floor(Math.random() * pool.length)];
 
     if (targetChip) {
-      await scrollIntoView(targetChip);
-      const chipPos = toFrameCoords(targetChip);
+      const chipPos = await snapToCoords(targetChip);
       await moveCursor(chipPos.x, chipPos.y);
       await delay(280);
 
@@ -724,11 +732,7 @@ body {
     const finalShowAll = allShowAll[allShowAll.length - 1];
 
     if (finalShowAll) {
-      /* Scroll final step into view */
-      finalShowAll.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      await delay(600);
-
-      const showAllPos = toFrameCoords(finalShowAll);
+      const showAllPos = await snapToCoords(finalShowAll);
       await moveCursor(showAllPos.x, showAllPos.y);
       await delay(280);
 

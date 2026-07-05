@@ -2,9 +2,9 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "demo-autoplay",
-      "runtimeExecutable": "/usr/bin/python3",
-      "runtimeArgs": ["-m", "http.server", "8743", "--directory", "/Users/hrithik/Documents/GitHub/docog-eccv.github.io"],
+      "name": "docog-demo",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "-l", "${PORT}", "/Users/bharatgen-hyd-202538/Documents/GitHub/docog-eccv.github.io"],
       "port": 8743
     }
   ]

@@ -38,7 +38,7 @@
 
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  background: #0a0a0a;
+  background: radial-gradient(ellipse at 50% -5%, #1c1638 0%, #0a0a0a 60%);
   display: flex;
   align-items: flex-start;
   justify-content: center;
@@ -50,33 +50,67 @@ body {
 }
 
 /* ══════════════════════════════════════════════
-   FIXED 1920×1080 RECORDING FRAME (Full HD)
+   FIXED 1528×1080 RECORDING FRAME (A4 landscape ratio)
 ══════════════════════════════════════════════ */
 #recordFrame {
-  width: 1920px;
+  width: 1528px;
   height: 1080px;
   overflow: hidden;
   position: relative;
   background: var(--bg);
   border-radius: var(--rc);
-  box-shadow: 0 0 0 1px var(--b1), var(--s2);
+  box-shadow: 0 0 0 1px rgba(79,70,229,.2), 0 0 80px rgba(79,70,229,.14), 0 40px 100px rgba(0,0,0,.55);
   display: flex;
   flex-direction: column;
-  /* Scale down visually so it fits the viewport while DOM stays 1920×1080 */
   transform-origin: top center;
 }
 
+/* Accent gradient stripe */
+#accentStripe {
+  height: 4px;
+  min-height: 4px;
+  flex-shrink: 0;
+  background: linear-gradient(90deg, var(--ink) 0%, #7c3aed 40%, #06b6d4 100%);
+}
+
 /* ══════════════════════════════════════════════
-   TOP BAR — 72px (scaled 1.5× from 48px)
+   TOP BAR — 68px (72 - 4px stripe)
 ══════════════════════════════════════════════ */
 #topBar {
-  height: 72px;
-  min-height: 72px;
+  height: 68px;
+  min-height: 68px;
   display: flex;
   align-items: stretch;
   border-bottom: 1px solid var(--b1);
   background: var(--bg2);
   flex-shrink: 0;
+}
+
+/* Brand pill */
+#brandPill {
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+  padding: 0 1.6rem 0 1.9rem;
+  border-right: 1px solid var(--b1);
+  flex-shrink: 0;
+}
+#brandPill .brand-name {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--t1);
+  letter-spacing: -.03em;
+}
+#brandPill .brand-badge {
+  font-size: .7rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: var(--ink50);
+  border: 1px solid var(--ink200);
+  border-radius: 100px;
+  padding: 3px 11px;
 }
 
 /* Tabs fill available space on the left */
@@ -382,15 +416,23 @@ body {
 
 <div id="recordFrame">
 
+  <!-- ACCENT STRIPE -->
+  <div id="accentStripe"></div>
+
   <!-- TOP BAR -->
   <div id="topBar">
+
+    <!-- Brand -->
+    <div id="brandPill">
+      <a href="https://bharatgen.com/" target="_blank" rel="noopener noreferrer" title="BharatGen">
+        <img src="static/images/logos/bharatgen_logo.png" alt="BharatGen" style="height:80px;width:auto;opacity:.85;transition:opacity .2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.85">
+      </a>
+      <span class="brand-name">DoCoG</span>
+      <span class="brand-badge">ECCV 2026</span>
+    </div>
+
     <div class="qd-tabs" id="qdTabs"></div>
 
-    <div id="recControls">
-      <a href="https://bharatgen.com/" target="_blank" rel="noopener noreferrer" title="BharatGen">
-        <img src="static/images/logos/bharatgen_logo.png" alt="BharatGen" style="height:100px;width:auto;opacity:.85;transition:opacity .2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.85">
-      </a>
-    </div>
   </div>
 
   <!-- DEMO CONTENT -->
@@ -432,10 +474,10 @@ body {
 
 </div><!-- /recordFrame -->
 
-<!-- Scale 1920×1080 frame to fit viewport -->
+<!-- Scale 1528×1080 frame to fit viewport (A4 landscape ratio) -->
 <script>
 (function scaleFrame() {
-  const FRAME_W = 1920, FRAME_H = 1080;
+  const FRAME_W = 1528, FRAME_H = 1080;
   const frame = document.getElementById('recordFrame');
   function fit() {
     const scaleX = (window.innerWidth  - 40) / FRAME_W;

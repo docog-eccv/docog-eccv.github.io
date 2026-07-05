@@ -327,8 +327,29 @@ body {
   align-items: flex-start;
 }
 
-/* Hide "Show all" button — not needed in recorder */
-.qd-show-all-btn { display: none !important; }
+/* Show all button */
+.qd-show-all-btn {
+  font-size: .8rem;
+  font-weight: 700;
+  font-family: inherit;
+  color: var(--t2);
+  background: var(--bg2);
+  border: 1.5px solid var(--b1);
+  border-radius: 5px;
+  padding: .12rem .52rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color .15s, border-color .15s, background .15s;
+  display: flex;
+  align-items: center;
+  gap: .3rem;
+}
+.qd-show-all-btn::before { content: '⊞'; font-size: .85em; }
+.qd-show-all-btn:hover {
+  color: var(--ink);
+  border-color: var(--ink200);
+  background: var(--ink50);
+}
 
 /* Reset row */
 .qd-reset-row {

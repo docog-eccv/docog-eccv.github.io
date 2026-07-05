@@ -428,8 +428,11 @@ footer a:hover { color:var(--ink); }
 .qual-demo{max-width:980px;margin:0 auto;background:var(--bg);border:1.5px solid var(--b1);border-radius:var(--rc);box-shadow:var(--s2);overflow:hidden;}
 
 /* Tab row */
-.qd-tabs{display:flex;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--b1);background:var(--bg2);}
+.qd-toolbar{display:flex;align-items:center;border-bottom:1px solid var(--b1);background:var(--bg2);}
+.qd-tabs{display:flex;overflow-x:auto;scrollbar-width:none;flex:1;}
 .qd-tabs::-webkit-scrollbar{display:none;}
+.qd-brand-logo{padding:0 .9rem;opacity:.75;transition:opacity .2s;flex-shrink:0;display:flex;align-items:center;}
+.qd-brand-logo:hover{opacity:1;}
 .qd-tab{padding:.6rem 1.1rem;font-size:.82rem;font-weight:600;color:var(--t2);background:none;border:none;border-bottom:2.5px solid transparent;cursor:pointer;font-family:inherit;white-space:nowrap;margin-bottom:-1px;transition:color .18s,border-color .18s,background .18s;}
 .qd-tab:hover{color:var(--t1);background:var(--bg);}
 .qd-tab.on{color:var(--ink);border-bottom-color:var(--ink);background:var(--bg);}
@@ -486,7 +489,7 @@ footer a:hover { color:var(--ink); }
 
 /* Dark mode */
 [data-theme="dark"] .qual-demo{background:var(--bg2);border-color:var(--b1);}
-[data-theme="dark"] .qd-tabs{background:#111;}
+[data-theme="dark"] .qd-toolbar{background:#111;}
 [data-theme="dark"] .qd-tab.on,[data-theme="dark"] .qd-tab:hover{background:var(--bg2);}
 [data-theme="dark"] .qd-img-panel{background:#0a0a0a;}
 [data-theme="dark"] .qd-step-label{background:#2c2c2e;border-color:var(--b0);}
@@ -650,7 +653,12 @@ footer a:hover { color:var(--ink); }
     <p class="s-sub rv" style="margin-bottom:1rem">Step through DoCoG's grounded reasoning — each <code>[GND]</code> token sweeps a mask over the supporting evidence in the image.</p>
 
     <div class="qual-demo rv" id="qualDemo">
-      <div class="qd-tabs" id="qdTabs"></div>
+      <div class="qd-toolbar">
+        <div class="qd-tabs" id="qdTabs"></div>
+        <a href="https://bharatgen.com/" target="_blank" rel="noopener noreferrer" title="BharatGen" class="qd-brand-logo">
+          <img src="static/images/logos/bharatgen_logo.png" alt="BharatGen" style="height:34px;width:auto;">
+        </a>
+      </div>
       <div class="qd-panel">
         <div class="qd-img-panel">
           <div class="qd-img-wrap">

@@ -445,4 +445,172 @@ const DOCOG_EXAMPLES = [
     ]
   },
 
+
+  /* ══════════════════════ 7. TEAM SCORE ══════════════════════ */
+  {
+    id: 'teamscore',
+    label: 'Teamscore',
+    image: 'static/images/qual/originals/qual_res_8_teamscore.png',
+    question: 'From Round 3 to Round 4, which team has an increasing trend?',
+
+    spans: [
+      // one span = one mask = one GND token
+      { text: 'Round 3 label', masks: [
+        { points:[[41.59,87.66],[43.77,93.46],[63.41,81.96],[60.23,76.58]], bbox:{x:41.59,y:76.58,w:21.82,h:16.88} }
+      ] },  // 0
+      { text: 'Round 4 label', masks: [
+        { points:[[60.14,87.76],[77.86,77.74],[80.5,83.23],[62.41,92.83]], bbox:{x:60.14,y:77.74,w:20.36,h:15.09} }
+      ] },  // 1
+      { text: 'Team Aurora legend', masks: [
+        { points:[[14.05,14.35],[39.32,14.35],[39.32,18.57],[14.05,18.57]], bbox:{x:14.05,y:14.35,w:25.27,h:4.22} }
+      ] },  // 2
+      { text: 'Team Aurora line', masks: [
+        { points:[[51.77,33.33],[71.05,28.16],[72.32,29.96],[72.05,31.01],[51.95,36.39],[51.05,35.34]], bbox:{x:51.05,y:28.16,w:21.27,h:8.23} }
+      ] },  // 3
+      { text: 'Team Blaze legend', masks: [
+        { points:[[14.05,19.2],[38.23,19.2],[38.23,23.1],[14.05,23.1]], bbox:{x:14.05,y:19.2,w:24.18,h:3.9} }
+      ] },  // 4
+      { text: 'Team Blaze line', masks: [
+        { points:[[50.95,40.82],[52.32,37.34],[53.5,39.03],[70.14,43.67],[70.86,41.98],[72.32,45.68],[69.14,46.2],[69.59,44.51],[53.95,40.61],[53.77,41.35]], bbox:{x:50.95,y:37.34,w:21.37,h:8.86} }
+      ] },  // 5
+      { text: 'Team Dynamo legend', masks: [
+        { points:[[13.86,23.52],[41.05,23.52],[41.05,27.95],[13.86,27.95]], bbox:{x:13.86,y:23.52,w:27.19,h:4.43} }
+      ] },  // 6
+      { text: 'Team Dynamo line', masks: [
+        { points:[[50.41,44.3],[52.77,41.88],[54.5,43.99],[54.32,44.83],[69.95,54.85],[70.95,53.8],[72.86,56.54],[70.77,58.33],[68.77,56.33],[68.5,55.59],[53.23,45.89],[52.23,46.31]], bbox:{x:50.41,y:41.88,w:22.45,h:16.45} }
+      ] },  // 7
+    ],
+
+    steps: [
+      {
+        label: 'S1',
+        tokens: [
+          { type:'text', content:'We first see ' },
+          { type:'span_start', spanIndex:0 }, { type:'text', content:'Round 3' }, { type:'span_end' }, { type:'ground', spanIndex:0 },
+          { type:'text', content:', ' },
+          { type:'span_start', spanIndex:1 }, { type:'text', content:'Round 4' }, { type:'span_end' }, { type:'ground', spanIndex:1 },
+          { type:'text', content:' labels.' },
+        ]
+      },
+      {
+        label: 'S2',
+        tokens: [
+          { type:'text', content:'In this transition, ' },
+          { type:'span_start', spanIndex:2 }, { type:'text', content:'Team Aurora' }, { type:'span_end' }, { type:'ground', spanIndex:2 },
+          { type:'text', content:' is increasing (see ' },
+          { type:'span_start', spanIndex:3 }, { type:'text', content:'line' }, { type:'span_end' }, { type:'ground', spanIndex:3 },
+          { type:'text', content:'), and ' },
+          { type:'span_start', spanIndex:4 }, { type:'text', content:'Team Blaze' }, { type:'span_end' }, { type:'ground', spanIndex:4 },
+          { type:'text', content:' (see ' },
+          { type:'span_start', spanIndex:5 }, { type:'text', content:'line' }, { type:'span_end' }, { type:'ground', spanIndex:5 },
+          { type:'text', content:'), ' },
+          { type:'span_start', spanIndex:6 }, { type:'text', content:'Team Dynamo' }, { type:'span_end' }, { type:'ground', spanIndex:6 },
+          { type:'text', content:' (see ' },
+          { type:'span_start', spanIndex:7 }, { type:'text', content:'line' }, { type:'span_end' }, { type:'ground', spanIndex:7 },
+          { type:'text', content:') are decreasing.' },
+        ]
+      },
+      {
+        label: 'Sf',
+        tokens: [
+          { type:'text', content:'Therefore, only ' },
+          { type:'span_start', spanIndex:2 }, { type:'text', content:'Team Aurora' }, { type:'span_end' }, { type:'ground', spanIndex:2 },
+          { type:'text', content:' (see ' },
+          { type:'span_start', spanIndex:3 }, { type:'text', content:'line' }, { type:'span_end' }, { type:'ground', spanIndex:3 },
+          { type:'text', content:') has an increasing trend.' },
+        ]
+      },
+    ]
+  },
+
+  /* ══════════════════════ 8. FLOWCHART ══════════════════════ */
+  {
+    id: 'flowchart',
+    label: 'Flowchart',
+    image: 'static/images/qual/originals/qual_res_7_flowchart.png',
+    question: 'A patient has cough for 5 days, no blood in sputum, fever, and throat pain. According to the flowchart, what condition should be suspected?',
+
+    spans: [
+      // one span = one mask = one GND token; cross-step reuse (7, 10, 12) is fine per DoCoG pattern
+      { text: 'COUGH',                   masks: [ { points:[[1.14,24.52],[9.41,24.52],[9.41,29.14],[1.14,29.14]], bbox:{x:1.14,y:24.52,w:8.27,h:4.62} } ] },                                                                                                                                                                                      // 0
+      { text: 'Yes arrow',               masks: [ { points:[[9.68,24.13],[12.95,24.13],[12.95,27.73],[9.68,27.73]], bbox:{x:9.68,y:24.13,w:3.27,h:3.6} } ] },                                                                                                                                                                                      // 1
+      { text: 'Blood in sputum?',        masks: [ { points:[[13.86,23.62],[19.5,23.62],[19.5,29.14],[13.86,29.14]], bbox:{x:13.86,y:23.62,w:5.64,h:5.52} } ] },                                                                                                                                                                                    // 2
+      { text: 'No',                      masks: [ { points:[[20.41,23.49],[26.32,23.49],[26.32,27.09],[20.41,27.09]], bbox:{x:20.41,y:23.49,w:5.91,h:3.6} } ] },                                                                                                                                                                                   // 3
+      { text: 'Cough more than 3 weeks?',masks: [ { points:[[26.59,23.62],[37.14,23.36],[37.32,25.42],[35.68,25.42],[35.68,29.27],[26.5,29.53]], bbox:{x:26.5,y:23.36,w:10.82,h:6.17} } ] },                                                                                                                                                      // 4
+      { text: 'No',                      masks: [ { points:[[36.41,25.67],[37.59,25.55],[37.59,23.49],[39.86,24.01],[40.05,25.16],[41.68,25.42],[42.59,25.29],[43.05,26.7],[41.95,27.09],[41.41,26.44]], bbox:{x:36.41,y:23.49,w:6.64,h:3.6} } ] },                                                                                                // 5
+      { text: 'Cough more than one week?',masks: [ { points:[[44.05,23.49],[54.5,23.49],[54.5,29.14],[44.05,29.14]], bbox:{x:44.05,y:23.49,w:10.45,h:5.65} } ] },                                                                                                                                                                                 // 6
+      { text: 'No',                      masks: [ { points:[[48.77,30.17],[48.86,31.71],[46.86,31.71],[47.23,33.63],[49.14,33.76],[48.95,34.92],[49.14,36.33],[50.32,36.59],[50.41,33.89],[49.86,33.12],[49.68,30.55],[49.77,29.65]], bbox:{x:46.86,y:29.65,w:3.55,h:6.94} } ] },                                                                  // 7 — reused as S3 "From No"
+      { text: 'Fever?',                  masks: [ { points:[[46.23,36.33],[51.95,36.33],[51.95,38.77],[46.23,38.77]], bbox:{x:46.23,y:36.33,w:5.72,h:2.44} } ] },                                                                                                                                                                                  // 8
+      { text: 'Yes arrow',               masks: [ { points:[[49.23,38.77],[49.14,39.54],[46.95,39.28],[46.95,41.34],[49.05,41.46],[48.95,44.93],[50.05,45.31]], bbox:{x:46.95,y:38.77,w:3.1,h:6.54} } ] },                                                                                                                                        // 9
+      { text: 'Throat Pain',             masks: [ { points:[[44.86,44.67],[53.5,44.67],[53.5,48.4],[44.86,48.4]], bbox:{x:44.86,y:44.67,w:8.64,h:3.73} } ] },                                                                                                                                                                                      // 10 — reused in S4
+      { text: 'Yes arrow',               masks: [ { points:[[38.23,46.34],[39.32,45.06],[39.68,45.96],[41.59,45.83],[41.41,44.29],[43.77,44.03],[44.14,45.83],[44.95,46.34],[44.95,47.24],[40.5,47.24],[39.77,47.24]], bbox:{x:38.23,y:44.03,w:6.72,h:3.21} } ] },                                                                                 // 11
+      { text: 'Sore Throat',             masks: [ { points:[[26.05,46.34],[29.14,41.46],[35.05,41.21],[38.14,46.34],[35.32,51.35],[28.86,51.09]], bbox:{x:26.05,y:41.21,w:12.09,h:10.14} } ] },                                                                                                                                                    // 12 — reused in Sf
+    ],
+
+    steps: [
+      {
+        label: 'S1',
+        tokens: [
+          { type:'text', content:'The patient has a cough, so we enter the flowchart at ' },
+          { type:'span_start', spanIndex:0 }, { type:'text', content:'COUGH' }, { type:'span_end' }, { type:'ground', spanIndex:0 },
+          { type:'text', content:' and follow the ' },
+          { type:'span_start', spanIndex:1 }, { type:'text', content:'Yes' }, { type:'span_end' }, { type:'ground', spanIndex:1 },
+          { type:'text', content:' arrow to ' },
+          { type:'span_start', spanIndex:2 }, { type:'text', content:'"Blood in sputum?"' }, { type:'span_end' }, { type:'ground', spanIndex:2 },
+          { type:'text', content:'.' },
+        ]
+      },
+      {
+        label: 'S2',
+        tokens: [
+          { type:'text', content:'There is no blood in sputum, so we follow ' },
+          { type:'span_start', spanIndex:3 }, { type:'text', content:'No' }, { type:'span_end' }, { type:'ground', spanIndex:3 },
+          { type:'text', content:' to ' },
+          { type:'span_start', spanIndex:4 }, { type:'text', content:'"Cough more than 3 weeks?"' }, { type:'span_end' }, { type:'ground', spanIndex:4 },
+          { type:'text', content:' and then ' },
+          { type:'span_start', spanIndex:5 }, { type:'text', content:'No' }, { type:'span_end' }, { type:'ground', spanIndex:5 },
+          { type:'text', content:' again (since it\'s only 5 days) to ' },
+          { type:'span_start', spanIndex:6 }, { type:'text', content:'"Cough more than one week?"' }, { type:'span_end' }, { type:'ground', spanIndex:6 },
+          { type:'text', content:' which is ' },
+          { type:'span_start', spanIndex:7 }, { type:'text', content:'No' }, { type:'span_end' }, { type:'ground', spanIndex:7 },
+          { type:'text', content:'.' },
+        ]
+      },
+      {
+        label: 'S3',
+        tokens: [
+          { type:'text', content:'From ' },
+          { type:'span_start', spanIndex:7 }, { type:'text', content:'No' }, { type:'span_end' }, { type:'ground', spanIndex:7 },
+          { type:'text', content:', we check ' },
+          { type:'span_start', spanIndex:8 }, { type:'text', content:'"Fever?"' }, { type:'span_end' }, { type:'ground', spanIndex:8 },
+          { type:'text', content:'; the patient has a fever, so we follow the ' },
+          { type:'span_start', spanIndex:9 }, { type:'text', content:'Yes' }, { type:'span_end' }, { type:'ground', spanIndex:9 },
+          { type:'text', content:' arrow to ' },
+          { type:'span_start', spanIndex:10 }, { type:'text', content:'Throat Pain' }, { type:'span_end' }, { type:'ground', spanIndex:10 },
+          { type:'text', content:'.' },
+        ]
+      },
+      {
+        label: 'S4',
+        tokens: [
+          { type:'text', content:'The patient does have ' },
+          { type:'span_start', spanIndex:10 }, { type:'text', content:'Throat Pain' }, { type:'span_end' }, { type:'ground', spanIndex:10 },
+          { type:'text', content:', so we follow ' },
+          { type:'span_start', spanIndex:11 }, { type:'text', content:'Yes' }, { type:'span_end' }, { type:'ground', spanIndex:11 },
+          { type:'text', content:', leading us to the diagnosis node ' },
+          { type:'span_start', spanIndex:12 }, { type:'text', content:'Sore Throat' }, { type:'span_end' }, { type:'ground', spanIndex:12 },
+          { type:'text', content:'.' },
+        ]
+      },
+      {
+        label: 'Sf',
+        tokens: [
+          { type:'text', content:'Following the decision path on the flowchart, we can confirm that the patient has ' },
+          { type:'span_start', spanIndex:12 }, { type:'text', content:'Sore Throat' }, { type:'span_end' }, { type:'ground', spanIndex:12 },
+          { type:'text', content:'.' },
+        ]
+      },
+    ]
+  },
+
 ];

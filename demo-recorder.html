@@ -503,7 +503,7 @@ body {
   // Reindex DOCOG_EXAMPLES in-place to the desired carousel order.
   // This runs after qual-data.js defines the array but before qual-engine.js reads it.
   (function () {
-    const EXAMPLE_ORDER = ['foodweb', 'olympics', 'triangle', 'medicalbill', 'floorplan', 'creditcard'];
+    const EXAMPLE_ORDER = ['foodweb', 'olympics', 'triangle', 'medicalbill', 'floorplan', 'creditcard', 'teamscore', 'flowchart'];
     const lookup = Object.fromEntries(DOCOG_EXAMPLES.map(ex => [ex.id, ex]));
     DOCOG_EXAMPLES.length = 0;
     EXAMPLE_ORDER.forEach(id => {

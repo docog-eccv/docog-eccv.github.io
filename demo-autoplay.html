@@ -531,7 +531,7 @@ body {
 <script src="static/js/qual-data.js"></script>
 <script>
 (function () {
-  const ORDER = ['foodweb', 'olympics', 'triangle', 'medicalbill', 'floorplan', 'creditcard'];
+  const ORDER = ['foodweb', 'olympics', 'triangle', 'medicalbill', 'floorplan', 'creditcard', 'teamscore', 'flowchart'];
   const lookup = Object.fromEntries(DOCOG_EXAMPLES.map(ex => [ex.id, ex]));
   DOCOG_EXAMPLES.length = 0;
   ORDER.forEach(id => { if (lookup[id]) DOCOG_EXAMPLES.push(lookup[id]); });

@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>DoCoG Demo – Autoplay</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+<style>
+/* ══════════════════════════════════════════════
+   DESIGN TOKENS
+══════════════════════════════════════════════ */
+:root {
+  --ink:    #4F46E5;
+  --ink50:  #EEF2FF;
+  --ink100: #E0E7FF;
+  --ink200: #C7D2FE;
+  --ink700: #3730A3;
+  --t1: #1d1d1f;
+  --t2: #6e6e73;
+  --t3: #aeaeb2;
+  --bg:  #ffffff;
+  --bg2: #f5f5f7;
+  --b0: #d2d2d7;
+  --b1: #e8e8ed;
+  --s1: 0 2px 8px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  --s2: 0 8px 24px rgba(0,0,0,.08), 0 2px 6px rgba(0,0,0,.04);
+  --ra: 8px; --rb: 14px; --rc: 20px;
+  --e1: cubic-bezier(0.25,0.46,0.45,0.94);
+  --e2: cubic-bezier(0.16,1,0.3,1);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #0a0a0a;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 20px;
+  overflow: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ══════════════════════════════════════════════
+   1920×1080 FRAME — DOM stays full HD,
+   the scaleFrame script fits it to the viewport
+══════════════════════════════════════════════ */
+#recordFrame {
+  width: 1920px;
+  height: 1080px;
+  overflow: hidden;
+  position: relative;
+  background: var(--bg);
+  border-radius: var(--rc);
+  box-shadow: 0 0 0 1px var(--b1), var(--s2);
+  display: flex;
+  flex-direction: column;
+  transform-origin: top center;
+}
+
+/* ══════════════════════════════════════════════
+   TOP BAR — 72px
+══════════════════════════════════════════════ */
+#topBar {
+  height: 72px;
+  min-height: 72px;
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px solid var(--b1);
+  background: var(--bg2);
+  flex-shrink: 0;
+}
+
+.qd-tabs {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  border-bottom: none;
+  background: transparent;
+}
+.qd-tabs::-webkit-scrollbar { display: none; }
+
+.qd-tab {
+  padding: 0 1.65rem;
+  height: 100%;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--t2);
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+  transition: color .18s, border-color .18s, background .18s;
+  display: flex;
+  align-items: center;
+}
+.qd-tab:hover { color: var(--t1); background: var(--bg); }
+.qd-tab.on { color: var(--ink); border-bottom-color: var(--ink); background: var(--bg); }
+
+/* Replay controls in top-right */
+#apControls {
+  display: flex;
+  align-items: center;
+  gap: .9rem;
+  padding: 0 1.35rem;
+  border-left: 1px solid var(--b1);
+  flex-shrink: 0;
+}
+#apStatusLabel {
+  font-size: .92rem;
+  font-weight: 600;
+  color: var(--t2);
+  font-style: italic;
+  min-width: 7rem;
+  text-align: right;
+}
+#replayBtn {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .48rem 1.28rem;
+  border-radius: 100px;
+  border: 2px solid var(--b1);
+  background: var(--bg);
+  color: var(--t2);
+  font-size: 1rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: color .18s, border-color .18s, background .18s;
+  white-space: nowrap;
+}
+#replayBtn:hover { color: var(--ink); border-color: var(--ink200); background: var(--ink50); }
+#replayBtn:disabled { opacity: .4; cursor: not-allowed; }
+
+/* ══════════════════════════════════════════════
+   CONTENT AREA — 1008px (1080 - 72)
+══════════════════════════════════════════════ */
+#demoPanel {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 55fr 45fr;
+  height: 1008px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* LEFT — image panel */
+.qd-img-panel {
+  border-right: 1px solid var(--b1);
+  background: var(--bg2);
+  padding: 1.875rem;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+.qd-img-wrap {
+  position: relative;
+  width: 100%;
+}
+.qd-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: var(--ra);
+}
+.qd-svg {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  overflow: visible;
+}
+
+/* RIGHT — chat panel */
+.qd-chat-panel {
+  display: flex;
+  flex-direction: column;
+  padding: 1.875rem;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Question + send button */
+.qd-question-row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: .75rem;
+  margin-bottom: 1.1rem;
+  flex-shrink: 0;
+}
+.qd-bubble {
+  background: var(--ink);
+  color: #fff;
+  border-radius: 20px 20px 5px 20px;
+  padding: .95rem 1.45rem;
+  font-size: 1.1rem;
+  line-height: 1.55;
+  max-width: 92%;
+  text-align: left;
+}
+.qd-send-btn {
+  background: var(--ink);
+  color: #fff;
+  border: none;
+  border-radius: 100px;
+  padding: .55rem 1.55rem;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  transition: opacity .2s, transform .2s var(--e1);
+}
+.qd-send-btn:hover:not(:disabled) { transform: translateY(-1px); opacity: .88; }
+.qd-send-btn:disabled { opacity: .42; cursor: not-allowed; }
+
+/* Steps area */
+.qd-steps {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+.qd-steps::-webkit-scrollbar { width: 6px; }
+.qd-steps::-webkit-scrollbar-thumb { background: var(--b0); border-radius: 3px; }
+
+.qd-step-row {
+  display: flex;
+  align-items: flex-start;
+  gap: .65rem;
+  margin-top: 1.1rem;
+  font-size: 1.05rem;
+  line-height: 1.65;
+  color: var(--t1);
+}
+.qd-step-label {
+  flex-shrink: 0;
+  font-size: .88rem;
+  font-style: italic;
+  font-weight: 600;
+  background: var(--bg2);
+  color: var(--t2);
+  padding: .15rem .58rem;
+  border-radius: 5px;
+  border: 1px solid var(--b1);
+  margin-top: .22rem;
+}
+.qd-step-label-final {
+  background: var(--ink);
+  color: #fff;
+  border-color: var(--ink);
+  font-style: normal;
+  font-weight: 700;
+}
+.qd-step-text { flex: 1; word-break: break-word; }
+
+/* Span highlight */
+.qd-span { border-radius: 4px; padding: 0 3px; font-weight: 500; }
+
+/* GND chip */
+.qd-gnd-chip {
+  display: inline;
+  cursor: pointer;
+  font-size: 0.72em;
+  font-weight: 700;
+  font-family: inherit;
+  margin: 0 2px;
+  vertical-align: baseline;
+  padding: 2px 5px;
+  border-radius: 4px;
+  line-height: 1;
+  transition: background .15s, transform .1s;
+}
+/* Brief scale-up when autoplay clicks a chip */
+.qd-gnd-chip.ap-click-flash {
+  animation: chipFlash .3s ease-out;
+}
+@keyframes chipFlash {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.25); }
+  100% { transform: scale(1); }
+}
+
+/* Step header (label + Show all) */
+.qd-step-header {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  gap: 0.4rem;
+  align-items: flex-start;
+}
+
+/* ══════════════════════════════════════════════
+   SHOW ALL BUTTON — visible in this page
+══════════════════════════════════════════════ */
+.qd-show-all-btn {
+  font-size: .8rem;
+  font-weight: 700;
+  font-family: inherit;
+  color: var(--t2);
+  background: var(--bg2);
+  border: 1.5px solid var(--b1);
+  border-radius: 5px;
+  padding: .12rem .52rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color .15s, border-color .15s, background .15s, transform .12s;
+  display: flex;
+  align-items: center;
+  gap: .3rem;
+}
+.qd-show-all-btn::before {
+  content: '⊞';
+  font-size: .85em;
+}
+.qd-show-all-btn:hover {
+  color: var(--ink);
+  border-color: var(--ink200);
+  background: var(--ink50);
+}
+/* Highlight ring when the cursor is hovering over it (autoplay) */
+.qd-show-all-btn.ap-targeted {
+  color: var(--ink);
+  border-color: var(--ink);
+  background: var(--ink50);
+  box-shadow: 0 0 0 3px var(--ink100);
+}
+.qd-show-all-btn.ap-click-flash {
+  animation: showAllFlash .28s ease-out;
+}
+@keyframes showAllFlash {
+  0%   { transform: scale(1); }
+  45%  { transform: scale(0.88); }
+  100% { transform: scale(1); }
+}
+
+/* Reset row */
+.qd-reset-row {
+  display: none;
+  justify-content: flex-end;
+  margin-top: 1.4rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--b1);
+  flex-shrink: 0;
+}
+.qd-reset-btn {
+  background: var(--bg2);
+  color: var(--t2);
+  border: 2px solid var(--b1);
+  border-radius: 100px;
+  padding: .5rem 1.35rem;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  transition: color .18s, border-color .18s, background .18s;
+}
+.qd-reset-btn:hover { color: var(--ink); border-color: var(--ink200); background: var(--ink50); }
+
+/* ══════════════════════════════════════════════
+   ANIMATED MOUSE CURSOR
+══════════════════════════════════════════════ */
+#autoCursor {
+  position: absolute;
+  left: 1400px;
+  top: 950px;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0;
+  /* smooth glide */
+  transition:
+    left  0s,
+    top   0s,
+    opacity 0.35s ease;
+  filter: drop-shadow(0 3px 6px rgba(0,0,0,.35));
+}
+/* Class added by JS to enable movement transitions */
+#autoCursor.gliding {
+  transition:
+    left  0.9s cubic-bezier(0.16, 1, 0.3, 1),
+    top   0.9s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.35s ease;
+}
+
+#autoCursor.clicking {
+  animation: apCursorClick 0.22s ease-out;
+  /* Pivot the animation around the arrow tip so it doesn't drift */
+  transform-origin: 7px 5px;
+}
+@keyframes apCursorClick {
+  0%   { transform: scale(1); }
+  35%  { transform: scale(0.78); }
+  100% { transform: scale(1); }
+}
+
+/* Ripple ring that expands on click */
+#cursorRipple {
+  position: absolute;
+  top: 4px;
+  left: 3px;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(99, 102, 241, 0.35);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+#cursorRipple.rippling {
+  animation: apRipple 0.6s ease-out forwards;
+}
+@keyframes apRipple {
+  0%   { width: 0;    height: 0;    opacity: 0.8; }
+  100% { width: 90px; height: 90px; opacity: 0;   }
+}
+</style>
+</head>
+<body>
+
+<div id="recordFrame">
+
+  <!-- TOP BAR -->
+  <div id="topBar">
+    <div class="qd-tabs" id="qdTabs"></div>
+
+    <div id="apControls">
+      <span id="apStatusLabel"></span>
+      <button id="replayBtn" disabled>
+        <i class="fas fa-redo-alt"></i> Replay
+      </button>
+    </div>
+  </div>
+
+  <!-- DEMO CONTENT -->
+  <div id="demoPanel">
+
+    <!-- LEFT: image + SVG overlay -->
+    <div class="qd-img-panel">
+      <div class="qd-img-wrap">
+        <img class="qd-img" id="qdImg" src="" alt="Document image">
+        <svg class="qd-svg" id="qdSvg" viewBox="0 0 100 100" preserveAspectRatio="none"
+             xmlns="http://www.w3.org/2000/svg">
+          <defs id="qdDefs"></defs>
+        </svg>
+      </div>
+    </div>
+
+    <!-- RIGHT: chat panel -->
+    <div class="qd-chat-panel">
+      <div class="qd-question-row" id="qdQuestionRow">
+        <div class="qd-bubble" id="qdBubble"></div>
+        <button class="qd-send-btn" id="qdSendBtn">
+          <i class="fas fa-play"></i>&ensp;Send
+        </button>
+      </div>
+      <div class="qd-steps" id="qdSteps"></div>
+
+      <div class="qd-reset-row" id="qdResetRow">
+        <button class="qd-reset-btn" id="qdResetBtn">
+          <i class="fas fa-redo-alt"></i>&ensp;Reset
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /demoPanel -->
+
+  <!-- ══════════════════════════════════════════
+       ANIMATED CURSOR OVERLAY
+  ══════════════════════════════════════════ -->
+  <div id="autoCursor">
+    <!--
+      Standard mouse-pointer arrow:
+      tip is at approximately (5, 4) in viewBox space.
+      Size rendered at 44×52 to be clearly visible at 1920×1080.
+    -->
+    <svg width="44" height="52" viewBox="0 0 32 38" xmlns="http://www.w3.org/2000/svg">
+      <path d="M5 4 L5 31 L12 24 L18 36 L23 33 L17 21 L27 21 Z"
+            fill="white"
+            stroke="#111827"
+            stroke-width="2.2"
+            stroke-linejoin="round"
+            stroke-linecap="round"/>
+    </svg>
+    <div id="cursorRipple"></div>
+  </div>
+
+</div><!-- /recordFrame -->
+
+<!-- ════════════════════════════════════════════
+     SCALE FRAME TO FIT VIEWPORT
+     DOM stays at 1920×1080; displayed smaller.
+════════════════════════════════════════════ -->
+<script>
+(function scaleFrame() {
+  const FRAME_W = 1920, FRAME_H = 1080;
+  const frame = document.getElementById('recordFrame');
+  function fit() {
+    const s = Math.min(
+      (window.innerWidth  - 40) / FRAME_W,
+      (window.innerHeight - 40) / FRAME_H,
+      1
+    );
+    frame.style.transform = 'scale(' + s + ')';
+    document.body.style.minHeight = (FRAME_H * s + 40) + 'px';
+  }
+  window.addEventListener('resize', fit);
+  document.addEventListener('DOMContentLoaded', fit);
+  if (document.readyState !== 'loading') fit();
+})();
+</script>
+
+<!-- ════════════════════════════════════════════
+     DATA + ENGINE
+════════════════════════════════════════════ -->
+<script src="static/js/qual-data.js"></script>
+<script>
+(function () {
+  const ORDER = ['foodweb', 'olympics', 'triangle', 'medicalbill', 'floorplan', 'creditcard', 'teamscore', 'flowchart'];
+  const lookup = Object.fromEntries(DOCOG_EXAMPLES.map(ex => [ex.id, ex]));
+  DOCOG_EXAMPLES.length = 0;
+  ORDER.forEach(id => { if (lookup[id]) DOCOG_EXAMPLES.push(lookup[id]); });
+})();
+</script>
+<script src="static/js/qual-engine.js"></script>
+
+<!-- ════════════════════════════════════════════
+     AUTOPLAY ORCHESTRATOR
+════════════════════════════════════════════ -->
+<script>
+(function () {
+  'use strict';
+
+  /* ─── DOM refs ─────────────────────────────────────── */
+  const frame      = document.getElementById('recordFrame');
+  const cursor     = document.getElementById('autoCursor');
+  const ripple     = document.getElementById('cursorRipple');
+  const replayBtn  = document.getElementById('replayBtn');
+  const statusEl   = document.getElementById('apStatusLabel');
+  const sendBtn    = document.getElementById('qdSendBtn');
+  const resetBtn   = document.getElementById('qdResetBtn');
+  const stepsEl    = document.getElementById('qdSteps');
+  const resetRow   = document.getElementById('qdResetRow');
+
+  /* ─── Tip offset in the cursor SVG (px in frame coords) ─ */
+  /* SVG viewBox 0 0 32 38, rendered 44×52.
+     Tip of arrow is at viewBox (5,4) → frame px (5/32*44 ≈ 7, 4/38*52 ≈ 5). */
+  const TIP_X = 7;
+  const TIP_Y = 5;
+
+  let autoplayRunning = false;
+
+  /* ══════════════════════════════════════════
+     PRIMITIVE HELPERS
+  ══════════════════════════════════════════ */
+
+  function delay(ms) {
+    return new Promise(r => setTimeout(r, ms));
+  }
+
+  function setStatus(msg) {
+    statusEl.textContent = msg;
+  }
+
+  /* Convert an element's center to frame-coordinate (left/top) values.
+     Accounts for the CSS scale() transform on #recordFrame. */
+  function toFrameCoords(el) {
+    const er = el.getBoundingClientRect();
+    const fr = frame.getBoundingClientRect();
+    const s  = fr.width / 1920; // current visual scale
+    return {
+      x: (er.left - fr.left + er.width  / 2) / s,
+      y: (er.top  - fr.top  + er.height / 2) / s,
+    };
+  }
+
+  /* Move cursor so its TIP lands at frame coords (x, y).
+     durationMs controls the CSS transition speed. */
+  function moveCursor(x, y, durationMs = 900) {
+    return new Promise(resolve => {
+      cursor.classList.add('gliding');
+      cursor.style.transitionDuration = durationMs + 'ms, ' + durationMs + 'ms, 0.35s';
+      cursor.style.left = (x - TIP_X) + 'px';
+      cursor.style.top  = (y - TIP_Y) + 'px';
+      setTimeout(resolve, durationMs + 80);
+    });
+  }
+
+  /* Instant reposition — no glide (e.g. cursor appearing for first time). */
+  function placeCursor(x, y) {
+    cursor.classList.remove('gliding');
+    cursor.style.left = (x - TIP_X) + 'px';
+    cursor.style.top  = (y - TIP_Y) + 'px';
+  }
+
+  /* Click animation: scale-pulse + ripple ring. */
+  function animateClick() {
+    return new Promise(resolve => {
+      /* Ripple: remove + force reflow to restart if clicked again quickly */
+      ripple.classList.remove('rippling');
+      void ripple.offsetWidth;
+      ripple.classList.add('rippling');
+
+      cursor.classList.remove('clicking');
+      void cursor.offsetWidth;
+      cursor.classList.add('clicking');
+
+      setTimeout(() => {
+        cursor.classList.remove('clicking');
+        resolve();
+      }, 260);
+    });
+  }
+
+  /* Flash a chip element when the cursor "clicks" it. */
+  function flashElement(el, cls) {
+    el.classList.remove(cls);
+    void el.offsetWidth;
+    el.classList.add(cls);
+    setTimeout(() => el.classList.remove(cls), 400);
+  }
+
+  /* Wait for the engine to finish streaming all steps.
+     The engine sets resetRow.style.display = 'flex' when done. */
+  function waitForStreamDone() {
+    return new Promise(resolve => {
+      if (resetRow.style.display === 'flex') { resolve(); return; }
+      const obs = new MutationObserver(() => {
+        if (resetRow.style.display === 'flex') {
+          obs.disconnect();
+          resolve();
+        }
+      });
+      obs.observe(resetRow, { attributes: true, attributeFilter: ['style'] });
+    });
+  }
+
+  /* Instantly scroll an element into view, then wait two rAF cycles
+     so the browser has committed the new scroll position before we
+     measure getBoundingClientRect(). Returns the element's frame coords
+     AFTER the scroll — call this instead of scrollIntoView + toFrameCoords. */
+  function snapToCoords(el) {
+    el.scrollIntoView({ behavior: 'instant', block: 'nearest' });
+    return new Promise(resolve =>
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => resolve(toFrameCoords(el)))
+      )
+    );
+  }
+
+  /* ══════════════════════════════════════════
+     AUTOPLAY SEQUENCE
+  ══════════════════════════════════════════ */
+  async function runAutoplay() {
+    if (autoplayRunning) return;
+    autoplayRunning = true;
+    replayBtn.disabled = true;
+
+    /* ── 1. Place cursor off to the side, invisible, then fade in ── */
+    placeCursor(1550, 920);
+    cursor.style.opacity = '0';
+    await delay(400);
+
+    setStatus('Asking a question…');
+    cursor.style.opacity = '1';
+    await delay(500);
+
+    /* ── 2. Glide to the Send button & click it ── */
+    const sendPos = toFrameCoords(sendBtn);
+    await moveCursor(sendPos.x, sendPos.y);
+    await delay(280);
+
+    await animateClick();
+    flashElement(sendBtn, 'ap-click-flash');
+    sendBtn.click();
+
+    /* ── 3. Cursor drifts away so it doesn't block the text ── */
+    setStatus('Generating answer…');
+    cursor.style.opacity = '0.18';
+    moveCursor(1600, 580, 700); // fire and forget
+
+    /* ── 4. Wait for ALL steps to finish streaming ── */
+    await waitForStreamDone();
+    await delay(1100);
+
+    /* ── 5. Bring cursor back ── */
+    cursor.style.opacity = '1';
+    setStatus('Highlighting a span…');
+
+    /* ── 6. Pick a random [GND] chip from a non-final step row ── */
+    const allRows  = Array.from(stepsEl.querySelectorAll('.qd-step-row'));
+    const lastRow  = allRows[allRows.length - 1];
+    const allChips = Array.from(stepsEl.querySelectorAll('.qd-gnd-chip'));
+
+    /* Prefer chips NOT in the final step; fall back to all chips if needed. */
+    const nonFinalChips = allChips.filter(c => !lastRow.contains(c));
+    const pool = nonFinalChips.length > 0 ? nonFinalChips : allChips;
+    const targetChip = pool[Math.floor(Math.random() * pool.length)];
+
+    if (targetChip) {
+      const chipPos = await snapToCoords(targetChip);
+      await moveCursor(chipPos.x, chipPos.y);
+      await delay(280);
+
+      await animateClick();
+      flashElement(targetChip, 'ap-click-flash');
+      targetChip.click();   // triggers showSpanMasks() inside the engine
+
+      await delay(2400);    // let the mask sweep animation finish
+    }
+
+    /* ── 7. Find the Show All button on the FINAL step ── */
+    setStatus('Showing all groundings…');
+
+    const allShowAll = Array.from(stepsEl.querySelectorAll('.qd-show-all-btn'));
+    /* Last Show All button = the one belonging to the final step row */
+    const finalShowAll = allShowAll[allShowAll.length - 1];
+
+    if (finalShowAll) {
+      const showAllPos = await snapToCoords(finalShowAll);
+      await moveCursor(showAllPos.x, showAllPos.y);
+      await delay(280);
+
+      /* Highlight ring so the viewer's eye is drawn to the button */
+      finalShowAll.classList.add('ap-targeted');
+      await delay(200);
+
+      await animateClick();
+      finalShowAll.classList.remove('ap-targeted');
+      flashElement(finalShowAll, 'ap-click-flash');
+      finalShowAll.click(); // triggers showStepMasks() inside the engine
+
+      await delay(3200);    // watch all masks appear
+    }
+
+    /* ── 8. Done ── */
+    setStatus('Done  ✓');
+    cursor.style.opacity = '0';
+
+    autoplayRunning = false;
+    replayBtn.disabled = false;
+  }
+
+  /* ── Replay button: reset engine then re-run ── */
+  replayBtn.addEventListener('click', () => {
+    if (autoplayRunning) return;
+    setStatus('');
+    resetBtn.click();     // the engine resets state + re-enables Send
+    autoplayRunning = false;
+    setTimeout(runAutoplay, 900);
+  });
+
+  /* ── Auto-start once the engine has initialised ── */
+  document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(runAutoplay, 1800);
+  });
+  if (document.readyState !== 'loading') {
+    setTimeout(runAutoplay, 1800);
+  }
+
+})();
+</script>
+
+</body>
+</html>

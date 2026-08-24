@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>DoCoG Demo Recorder</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+<style>
+/* ══════════════════════════════════════════════
+   DESIGN TOKENS (mirror of index.html)
+══════════════════════════════════════════════ */
+:root {
+  --ink:    #4F46E5;
+  --ink50:  #EEF2FF;
+  --ink100: #E0E7FF;
+  --ink200: #C7D2FE;
+  --ink700: #3730A3;
+  --t1: #1d1d1f;
+  --t2: #6e6e73;
+  --t3: #aeaeb2;
+  --bg:  #ffffff;
+  --bg2: #f5f5f7;
+  --b0: #d2d2d7;
+  --b1: #e8e8ed;
+  --s1: 0 2px 8px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  --s2: 0 8px 24px rgba(0,0,0,.08), 0 2px 6px rgba(0,0,0,.04);
+  --ra: 8px; --rb: 14px; --rc: 20px;
+  --e1: cubic-bezier(0.25,0.46,0.45,0.94);
+  --e2: cubic-bezier(0.16,1,0.3,1);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: radial-gradient(ellipse at 50% -5%, #1c1638 0%, #0a0a0a 60%);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 20px;
+  overflow: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ══════════════════════════════════════════════
+   FIXED 1528×1080 RECORDING FRAME (A4 landscape ratio)
+══════════════════════════════════════════════ */
+#recordFrame {
+  width: 1528px;
+  height: 1080px;
+  overflow: hidden;
+  position: relative;
+  background: var(--bg);
+  border-radius: var(--rc);
+  box-shadow: 0 0 0 1px rgba(79,70,229,.2), 0 0 80px rgba(79,70,229,.14), 0 40px 100px rgba(0,0,0,.55);
+  display: flex;
+  flex-direction: column;
+  transform-origin: top center;
+}
+
+/* Accent gradient stripe */
+#accentStripe {
+  height: 4px;
+  min-height: 4px;
+  flex-shrink: 0;
+  background: linear-gradient(90deg, var(--ink) 0%, #7c3aed 40%, #06b6d4 100%);
+}
+
+/* ══════════════════════════════════════════════
+   TOP BAR — 68px (72 - 4px stripe)
+══════════════════════════════════════════════ */
+#topBar {
+  height: 68px;
+  min-height: 68px;
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px solid var(--b1);
+  background: var(--bg2);
+  flex-shrink: 0;
+}
+
+/* Brand pill */
+#brandPill {
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+  padding: 0 1.6rem 0 1.9rem;
+  border-right: 1px solid var(--b1);
+  flex-shrink: 0;
+}
+#brandPill .brand-name {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--t1);
+  letter-spacing: -.03em;
+}
+#brandPill .brand-badge {
+  font-size: .7rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: var(--ink50);
+  border: 1px solid var(--ink200);
+  border-radius: 100px;
+  padding: 3px 11px;
+}
+
+/* Tabs fill available space on the left */
+.qd-tabs {
+  flex: 1;
+  display: flex;
+  overflow: hidden; /* no scrollbar visible in recording */
+  border-bottom: none; /* border is on topBar */
+  background: transparent;
+}
+.qd-tabs::-webkit-scrollbar { display: none; }
+.qd-tab {
+  padding: 0 1.65rem;
+  height: 100%;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--t2);
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+  transition: color .18s, border-color .18s, background .18s;
+  display: flex;
+  align-items: center;
+}
+.qd-tab:hover { color: var(--t1); background: var(--bg); }
+.qd-tab.on { color: var(--ink); border-bottom-color: var(--ink); background: var(--bg); }
+
+/* Recording controls — right side of top bar */
+#recControls {
+  display: flex;
+  align-items: center;
+  gap: .9rem;
+  padding: 0 1.35rem;
+  border-left: 1px solid var(--b1);
+  flex-shrink: 0;
+}
+#recTimer {
+  font-size: 1rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #d93025;
+  letter-spacing: .03em;
+  min-width: 3.4rem;
+  display: none;
+}
+#recBtn {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .48rem 1.28rem;
+  border-radius: 100px;
+  border: 2px solid #d93025;
+  background: #fff0ef;
+  color: #d93025;
+  font-size: 1rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background .18s, box-shadow .18s, border-color .18s;
+  white-space: nowrap;
+}
+#recBtn:hover { background: #ffe4e1; }
+#recBtn.recording {
+  border-color: #d93025;
+  background: #fff0ef;
+  animation: recPulse 1.4s ease-in-out infinite;
+}
+@keyframes recPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(217,48,37,.35); }
+  50%       { box-shadow: 0 0 0 7px rgba(217,48,37,0); }
+}
+#recUnavailable {
+  font-size: 1rem;
+  color: var(--t2);
+  font-style: italic;
+}
+
+/* Toast for small messages */
+#recToast {
+  position: absolute;
+  top: 82px;
+  right: 18px;
+  background: rgba(29,29,31,.88);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: .55rem 1.2rem;
+  border-radius: 100px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .22s;
+  z-index: 999;
+}
+#recToast.show { opacity: 1; }
+
+/* ══════════════════════════════════════════════
+   CONTENT AREA — 1008px (1080 - 72)
+══════════════════════════════════════════════ */
+#demoPanel {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 55fr 45fr;
+  height: 1008px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* LEFT — image panel */
+.qd-img-panel {
+  border-right: 1px solid var(--b1);
+  background: var(--bg2);
+  padding: 1.875rem;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+.qd-img-wrap {
+  position: relative;
+  width: 100%;
+}
+.qd-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: var(--ra);
+}
+.qd-svg {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  overflow: visible;
+}
+
+/* RIGHT — chat panel */
+.qd-chat-panel {
+  display: flex;
+  flex-direction: column;
+  padding: 1.875rem;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Question row */
+.qd-question-row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: .75rem;
+  margin-bottom: 1.1rem;
+  flex-shrink: 0;
+}
+.qd-bubble {
+  background: var(--ink);
+  color: #fff;
+  border-radius: 20px 20px 5px 20px;
+  padding: .95rem 1.45rem;
+  font-size: 1.1rem;
+  line-height: 1.55;
+  max-width: 92%;
+  text-align: left;
+}
+.qd-send-btn {
+  background: var(--ink);
+  color: #fff;
+  border: none;
+  border-radius: 100px;
+  padding: .55rem 1.55rem;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  transition: opacity .2s, transform .2s var(--e1);
+}
+.qd-send-btn:hover:not(:disabled) { transform: translateY(-1px); opacity: .88; }
+.qd-send-btn:disabled { opacity: .42; cursor: not-allowed; }
+
+/* Steps area — scrolls internally */
+.qd-steps {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+.qd-steps::-webkit-scrollbar { width: 6px; }
+.qd-steps::-webkit-scrollbar-thumb { background: var(--b0); border-radius: 3px; }
+
+.qd-step-row {
+  display: flex;
+  align-items: flex-start;
+  gap: .65rem;
+  margin-top: 1.1rem;
+  font-size: 1.05rem;
+  line-height: 1.65;
+  color: var(--t1);
+}
+.qd-step-label {
+  flex-shrink: 0;
+  font-size: .88rem;
+  font-style: italic;
+  font-weight: 600;
+  background: var(--bg2);
+  color: var(--t2);
+  padding: .15rem .58rem;
+  border-radius: 5px;
+  border: 1px solid var(--b1);
+  margin-top: .22rem;
+}
+.qd-step-label-final {
+  background: var(--ink);
+  color: #fff;
+  border-color: var(--ink);
+  font-style: normal;
+  font-weight: 700;
+}
+.qd-step-text { flex: 1; word-break: break-word; }
+
+/* Span highlight */
+.qd-span { border-radius: 4px; padding: 0 3px; font-weight: 500; }
+
+/* GND chip */
+.qd-gnd-chip {
+  display: inline;
+  cursor: pointer;
+  font-size: 0.72em;
+  font-weight: 700;
+  font-family: inherit;
+  margin: 0 2px;
+  vertical-align: baseline;
+  padding: 2px 5px;
+  border-radius: 4px;
+  line-height: 1;
+  transition: background .15s;
+}
+
+/* Step header (label + show-all) */
+.qd-step-header {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  gap: 0.4rem;
+  align-items: flex-start;
+}
+
+/* Show all button */
+.qd-show-all-btn {
+  font-size: .8rem;
+  font-weight: 700;
+  font-family: inherit;
+  color: var(--t2);
+  background: var(--bg2);
+  border: 1.5px solid var(--b1);
+  border-radius: 5px;
+  padding: .12rem .52rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color .15s, border-color .15s, background .15s;
+  display: flex;
+  align-items: center;
+  gap: .3rem;
+}
+.qd-show-all-btn::before { content: '⊞'; font-size: .85em; }
+.qd-show-all-btn:hover {
+  color: var(--ink);
+  border-color: var(--ink200);
+  background: var(--ink50);
+}
+
+/* Reset row */
+.qd-reset-row {
+  display: none;
+  justify-content: flex-end;
+  margin-top: 1.4rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--b1);
+  flex-shrink: 0;
+}
+.qd-reset-btn {
+  background: var(--bg2);
+  color: var(--t2);
+  border: 2px solid var(--b1);
+  border-radius: 100px;
+  padding: .5rem 1.35rem;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  transition: color .18s, border-color .18s, background .18s;
+}
+.qd-reset-btn:hover { color: var(--ink); border-color: var(--ink200); background: var(--ink50); }
+</style>
+</head>
+<body>
+
+<div id="recordFrame">
+
+  <!-- ACCENT STRIPE -->
+  <div id="accentStripe"></div>
+
+  <!-- TOP BAR -->
+  <div id="topBar">
+
+    <!-- Brand -->
+    <div id="brandPill">
+      <a href="https://bharatgen.com/" target="_blank" rel="noopener noreferrer" title="BharatGen">
+        <img src="static/images/logos/bharatgen_logo.png" alt="BharatGen" style="height:80px;width:auto;opacity:.85;transition:opacity .2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.85">
+      </a>
+      <span class="brand-name">DoCoG</span>
+      <span class="brand-badge">ECCV 2026</span>
+    </div>
+
+    <div class="qd-tabs" id="qdTabs"></div>
+
+  </div>
+
+  <!-- DEMO CONTENT -->
+  <div id="demoPanel">
+
+    <!-- LEFT: image + SVG overlay -->
+    <div class="qd-img-panel">
+      <div class="qd-img-wrap">
+        <img class="qd-img" id="qdImg" src="" alt="Document image">
+        <svg class="qd-svg" id="qdSvg" viewBox="0 0 100 100" preserveAspectRatio="none"
+             xmlns="http://www.w3.org/2000/svg">
+          <defs id="qdDefs"></defs>
+        </svg>
+      </div>
+    </div>
+
+    <!-- RIGHT: chat panel -->
+    <div class="qd-chat-panel">
+      <div class="qd-question-row" id="qdQuestionRow">
+        <div class="qd-bubble" id="qdBubble"></div>
+        <button class="qd-send-btn" id="qdSendBtn">
+          <i class="fas fa-play"></i>&ensp;Send
+        </button>
+      </div>
+      <div class="qd-steps" id="qdSteps"></div>
+
+      <!-- Reset row: hidden by CSS, kept for engine compatibility -->
+      <div class="qd-reset-row" id="qdResetRow">
+        <button class="qd-reset-btn" id="qdResetBtn">
+          <i class="fas fa-redo-alt"></i>&ensp;Reset
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /demoPanel -->
+
+  <!-- Floating toast for recording messages -->
+  <div id="recToast"></div>
+
+</div><!-- /recordFrame -->
+
+<!-- Scale 1528×1080 frame to fit viewport (A4 landscape ratio) -->
+<script>
+(function scaleFrame() {
+  const FRAME_W = 1528, FRAME_H = 1080;
+  const frame = document.getElementById('recordFrame');
+  function fit() {
+    const scaleX = (window.innerWidth  - 40) / FRAME_W;
+    const scaleY = (window.innerHeight - 40) / FRAME_H;
+    const s = Math.min(scaleX, scaleY, 1); // never upscale beyond 100%
+    frame.style.transform = `scale(${s})`;
+    // Keep body tall enough to not clip the scaled frame
+    document.body.style.minHeight = (FRAME_H * s + 40) + 'px';
+  }
+  window.addEventListener('resize', fit);
+  // Run after DOM is ready
+  document.addEventListener('DOMContentLoaded', fit);
+  // Also run immediately in case DOMContentLoaded already fired
+  if (document.readyState !== 'loading') fit();
+})();
+</script>
+
+<!-- ════════════════════════════════════════════
+     DATA — reorder before engine loads
+════════════════════════════════════════════ -->
+<script src="static/js/qual-data.js"></script>
+<script>
+  // Reindex DOCOG_EXAMPLES in-place to the desired carousel order.
+  // This runs after qual-data.js defines the array but before qual-engine.js reads it.
+  (function () {
+    const EXAMPLE_ORDER = ['foodweb', 'olympics', 'triangle', 'medicalbill', 'floorplan', 'creditcard', 'teamscore', 'flowchart'];
+    const lookup = Object.fromEntries(DOCOG_EXAMPLES.map(ex => [ex.id, ex]));
+    DOCOG_EXAMPLES.length = 0;
+    EXAMPLE_ORDER.forEach(id => {
+      if (lookup[id]) DOCOG_EXAMPLES.push(lookup[id]);
+    });
+  })();
+</script>
+<script src="static/js/qual-engine.js"></script>
+
+
+</body>
+</html>

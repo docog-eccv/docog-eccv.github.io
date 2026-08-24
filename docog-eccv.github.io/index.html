@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/png" sizes="32x32" href="static/images/logos/iiith_logo.png">
+  <link rel="shortcut icon" href="static/images/logos/iiith_logo.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="static/images/logos/iiith_logo.png">
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>DoCoG: Mask-based Multi-Type Grounded Chain-of-Thought for Document QA</title>
+  <meta name="description" content="DoCoG: a mask-based multi-type grounded step-wise Chain-of-Thought architecture for Document QA. ECCV 2026."/>
+  <meta property="og:title" content="DoCoG — ECCV 2026"/>
+  <meta property="og:description" content="Mask-based Multi-Type Grounded Chain-of-Thought for Document QA. ECCV 2026."/>
+  <meta property="og:type" content="website"/>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body);"></script>
+
+<style>
+/* ══════════════════════════════════════════════
+   DESIGN TOKENS
+   Single accent: indigo #4F46E5
+   No orange anywhere.
+══════════════════════════════════════════════ */
+:root {
+  /* Accent – indigo – used for ALL highlights,
+     UI chrome, "Ours" elements, badges */
+  --ink:    #4F46E5;
+  --ink50:  #EEF2FF;
+  --ink100: #E0E7FF;
+  --ink200: #C7D2FE;
+  --ink700: #3730A3;
+
+  /* Table header */
+  --navy: #14223E;
+
+  /* Apple-system grays */
+  --t1: #1d1d1f;
+  --t2: #6e6e73;
+  --t3: #aeaeb2;
+
+  /* Surfaces */
+  --bg:  #ffffff;
+  --bg2: #f5f5f7;
+
+  /* Borders */
+  --b0: #d2d2d7;
+  --b1: #e8e8ed;
+
+  /* Shadows */
+  --s1: 0 2px 8px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  --s2: 0 8px 24px rgba(0,0,0,.08), 0 2px 6px rgba(0,0,0,.04);
+  --s3: 0 20px 60px rgba(0,0,0,.11), 0 6px 16px rgba(0,0,0,.06);
+
+  /* Radius */
+  --ra: 8px; --rb: 14px; --rc: 20px;
+
+  /* Easing */
+  --e1: cubic-bezier(0.25,0.46,0.45,0.94);
+  --e2: cubic-bezier(0.16,1,0.3,1);
+}
+
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+html { scroll-behavior:smooth; }
+body {
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+  color:var(--t1); background:var(--bg); line-height:1.6;
+  -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+}
+code {
+  font-family:'JetBrains Mono',monospace; font-size:.85em;
+  background:var(--bg2); padding:.1em .4em; border-radius:5px; color:var(--navy);
+}
+
+/* ── Nav ── */
+.nav {
+  position:sticky; top:0; z-index:100;
+  backdrop-filter:saturate(180%) blur(20px);
+  -webkit-backdrop-filter:saturate(180%) blur(20px);
+  background:rgba(255,255,255,.88);
+  border-bottom:1px solid rgba(0,0,0,.07);
+}
+.nav-in { max-width:1100px; margin:0 auto; padding:0 1.5rem; display:flex; align-items:center; justify-content:space-between; height:52px; }
+.nav-brand { font-weight:800; font-size:1.05rem; letter-spacing:-.02em; color:var(--t1); text-decoration:none; }
+.nav-brand span { color:var(--ink); }
+.nav-links { display:flex; list-style:none; }
+.nav-links a { display:block; padding:.35rem .75rem; color:var(--t2); text-decoration:none; font-size:.875rem; font-weight:500; border-radius:var(--ra); transition:color .2s,background .2s; }
+.nav-links a:hover { color:var(--t1); background:var(--bg2); }
+.nav-burger { display:none; background:none; border:none; cursor:pointer; padding:.5rem; font-size:1.2rem; color:var(--t1); }
+
+/* ── Hero ── */
+.hero { padding:5rem 1.5rem 4rem; text-align:center; position:relative; overflow:hidden; }
+.hero::before {
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% -15%, rgba(79,70,229,.08) 0%, transparent 60%),
+    radial-gradient(ellipse 55% 45% at 85% 85%, rgba(99,102,241,.05) 0%, transparent 50%);
+}
+.hi { max-width:860px; margin:0 auto; position:relative; }
+
+.badge { display:inline-flex; align-items:center; gap:.4rem; background:var(--ink50); color:var(--ink); font-size:.77rem; font-weight:700; padding:.28rem .9rem; border-radius:100px; letter-spacing:.06em; text-transform:uppercase; margin-bottom:1.5rem; border:1px solid var(--ink200); }
+.hero-title { font-size:clamp(2rem,5vw,3.2rem); font-weight:800; line-height:1.13; letter-spacing:-.03em; color:var(--t1); margin-bottom:1.5rem; }
+.hero-title .accent { color:var(--ink); }
+.authors { font-size:.95rem; color:var(--t2); line-height:2.1; margin-bottom:.5rem; }
+.authors a { color:var(--t1); text-decoration:none; border-bottom:1px dotted var(--b0); transition:color .2s,border-color .2s; }
+.authors a:hover { color:var(--ink); border-color:var(--ink); }
+.authors sup { color:var(--ink); font-size:.7em; }
+.affil { font-size:.88rem; color:var(--t2); margin-bottom:2rem; }
+.affil strong { color:var(--t1); }
+
+.btn-row { display:flex; flex-wrap:wrap; gap:.5rem; justify-content:center; margin-bottom:2.5rem; }
+.btn { display:inline-flex; align-items:center; gap:.4rem; padding:.5rem 1.15rem; border-radius:100px; font-size:.875rem; font-weight:600; font-family:inherit; text-decoration:none; cursor:pointer; border:none; transition:transform .2s var(--e1),box-shadow .2s var(--e1); }
+.btn:hover:not(.btn-dis) { transform:translateY(-1px); }
+.btn-dis { opacity:.5; cursor:not-allowed; background:#fff; color:var(--t2); border:1.5px solid var(--b0); }
+.cs { font-size:.61rem; font-weight:700; background:#f3f4f6; color:var(--t2); padding:.1rem .4rem; border-radius:4px; text-transform:uppercase; letter-spacing:.05em; }
+
+.logos { display:flex; align-items:center; justify-content:center; gap:2.5rem; flex-wrap:wrap; padding:1.5rem 2rem; margin-top:2.5rem; background:var(--ink50); border:1px solid var(--ink200); border-radius:var(--rc); }
+.logos a { opacity:.8; transition:opacity .2s,transform .2s var(--e1); display:flex; }
+.logos a:hover { opacity:1; transform:scale(1.06); }
+.logos img { height:62px; width:auto; object-fit:contain; }
+
+/* ── Teaser ── */
+.teaser-s { padding:0 1.5rem 3.5rem; }
+.teaser-w { max-width:920px; margin:0 auto; }
+.teaser-img { width:100%; border-radius:var(--rc); box-shadow:var(--s3); }
+.fig-cap { text-align:center; font-size:.875rem; color:var(--t2); margin-top:.9rem; line-height:1.75; max-width:820px; margin-inline:auto; }
+.fig-cap strong { color:var(--t1); }
+
+/* ── Sections ── */
+.section { padding:5rem 1.5rem; }
+.section-alt { background:var(--bg2); }
+.si  { max-width:860px;  margin:0 auto; }
+.siw { max-width:1100px; margin:0 auto; }
+
+.s-lbl { text-align:center; font-size:.72rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--ink); margin-bottom:.4rem; }
+.s-title { font-size:clamp(1.75rem,4vw,2.4rem); font-weight:800; letter-spacing:-.03em; color:var(--t1); text-align:center; margin-bottom:1rem; }
+.s-sub { text-align:center; color:var(--t2); font-size:.95rem; margin-bottom:2.5rem; }
+
+/* ── Abstract ── */
+.abs-body { font-size:1.03rem; color:var(--t1); line-height:1.87; max-width:720px; margin:0 auto; }
+.abs-body p+p { margin-top:1.25rem; }
+.abs-body strong { color:var(--navy); }
+
+/* ── Method ── */
+.method-img { width:100%; border-radius:var(--rb); box-shadow:var(--s2); }
+.grid2 { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+.m-card { background:#fff; border:1.5px solid var(--b1); border-radius:var(--rb); padding:1.5rem; box-shadow:var(--s1); transition:transform .28s var(--e1),box-shadow .28s var(--e1); }
+.m-card:hover { transform:translateY(-4px); box-shadow:var(--s2); }
+.m-card h4 { font-size:.95rem; font-weight:700; margin-bottom:.5rem; }
+.m-card p  { font-size:.875rem; color:var(--t2); line-height:1.7; }
+
+.grid3 { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin:1.5rem 0; }
+.f-card { background:#fff; border:1.5px solid var(--b1); border-radius:var(--rb); padding:1.5rem; text-align:center; box-shadow:var(--s1); transition:transform .28s var(--e1),box-shadow .28s var(--e1); }
+.f-card:hover { transform:translateY(-4px); box-shadow:var(--s2); }
+.f-em { font-size:2rem; margin-bottom:.5rem; }
+.f-card h4 { font-size:.88rem; font-weight:700; margin-bottom:.3rem; }
+.f-card p  { font-size:.8rem; color:var(--t2); line-height:1.6; }
+
+.enc { text-align:center; background:var(--ink50); border:1px solid var(--ink200); border-radius:var(--rb); padding:.95rem 2rem; font-size:.95rem; color:var(--ink); font-weight:600; margin:1.5rem 0; }
+.enc code { background:rgba(79,70,229,.1); color:var(--ink700); }
+
+.loss4 { display:grid; grid-template-columns:1fr 1fr; gap:.8rem; margin-top:1.5rem; }
+.lc { border-radius:var(--ra); padding:1rem 1.25rem; border-left:4px solid; transition:transform .2s var(--e1); }
+.lc:hover { transform:translateX(3px); }
+.lc.navy  { border-color:var(--navy);  background:#f0f2f5; }
+.lc.green { border-color:#30d158;      background:#f4fbf7; }
+.lc.ink   { border-color:var(--ink);   background:var(--ink50); }
+.lc.gold  { border-color:#f5a623;      background:#fffbf0; }
+.lc strong { font-size:.875rem; display:block; margin-bottom:.25rem; }
+.lc p      { font-size:.8rem; color:var(--t2); line-height:1.65; }
+.math-line { text-align:center; font-family:'JetBrains Mono',monospace; font-size:1.05rem; margin-bottom:1.5rem; }
+
+/* ══════════════════════════════════════════════
+   QUALITATIVE CAROUSEL — Apple premium style
+══════════════════════════════════════════════ */
+.carousel-outer { max-width:980px; margin:2.5rem auto 0; }
+
+/* Stage — auto height, white, no letterbox */
+.car-stage {
+  position:relative; border-radius:18px; overflow:hidden;
+  background:#ffffff;
+  border:1.5px solid var(--b1);
+  box-shadow:0 4px 32px rgba(0,0,0,.07), 0 1px 8px rgba(0,0,0,.04);
+  user-select:none;
+}
+.car-track { position:relative; }
+.car-slide { display:none; width:100%; }
+.car-slide.cur { display:block; animation:carFade .4s var(--e1); }
+@keyframes carFade { from{opacity:0} to{opacity:1} }
+.car-slide img { width:100%; height:auto; display:block; }
+
+/* Counter badge — dark pill, readable on both image content and white areas */
+.car-ctr {
+  position:absolute; top:12px; right:12px;
+  background:rgba(29,29,31,.62); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+  color:rgba(255,255,255,.95); font-size:.72rem; font-weight:700;
+  padding:.3rem .72rem; border-radius:100px; letter-spacing:.06em;
+  font-variant-numeric:tabular-nums; pointer-events:none;
+  border:1px solid rgba(255,255,255,.15);
+}
+
+/* Nav arrows — dark glass style for light-background stage */
+.car-btn {
+  position:absolute; top:50%; transform:translateY(-50%);
+  width:44px; height:44px; border-radius:50%;
+  background:rgba(255,255,255,.80); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+  border:1px solid rgba(0,0,0,.10); color:var(--t1);
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+  font-size:.88rem; z-index:10;
+  box-shadow:0 2px 12px rgba(0,0,0,.12);
+  opacity:0; transition:opacity .25s,background .2s,transform .2s var(--e1);
+}
+.car-stage:hover .car-btn { opacity:1; }
+.car-btn:hover { background:rgba(255,255,255,.96); transform:translateY(-50%) scale(1.08); }
+.car-btn:active { transform:translateY(-50%) scale(.96); }
+.car-btn.prev { left:12px; }
+.car-btn.next { right:12px; }
+
+/* Caption */
+.car-cap-wrap { min-height:72px; padding:1.1rem 1rem .4rem; display:flex; align-items:center; justify-content:center; }
+.car-cap-text { font-size:.9rem; color:var(--t2); line-height:1.65; text-align:center; max-width:680px; transition:opacity .28s var(--e1),transform .28s var(--e1); }
+.car-cap-text.fade { opacity:0; transform:translateY(6px); }
+.car-cap-text strong { color:var(--t1); font-weight:700; }
+
+/* Pill-dot indicator (Apple style — active dot elongates) */
+.car-dots { display:flex; gap:.45rem; justify-content:center; margin:.6rem 0 .9rem; }
+.car-dot { height:7px; width:7px; border-radius:100px; background:var(--b0); cursor:pointer; transition:width .3s var(--e2),background .25s; }
+.car-dot.on { width:22px; background:var(--ink); }
+.car-dot:hover:not(.on) { background:var(--b0); filter:brightness(.8); }
+
+/* Thumbnail strip */
+.car-thumbs { display:flex; gap:.55rem; justify-content:center; flex-wrap:wrap; }
+.car-thumb {
+  width:80px; height:56px; border-radius:9px; overflow:hidden;
+  cursor:pointer; border:2px solid transparent; opacity:.52;
+  transition:opacity .22s,border-color .22s,transform .22s var(--e1),box-shadow .22s;
+}
+.car-thumb.on { opacity:1; border-color:var(--ink); box-shadow:0 0 0 3px var(--ink100); }
+.car-thumb:hover:not(.on) { opacity:.82; transform:scale(1.05); }
+.car-thumb img { width:100%; height:100%; object-fit:cover; display:block; }
+
+/* ── Dataset ── */
+.ds-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:1.5rem; }
+.ds-card { background:#fff; border:1.5px solid var(--b1); border-radius:var(--rc); padding:2rem; box-shadow:var(--s1); transition:transform .28s var(--e1),box-shadow .28s var(--e1); }
+.ds-card:hover { transform:translateY(-3px); box-shadow:var(--s2); }
+.ds-card h3 { font-size:1.1rem; font-weight:800; color:var(--ink); margin-bottom:.35rem; }
+.ds-desc { font-size:.85rem; color:var(--t2); line-height:1.65; margin-bottom:1.25rem; }
+.mg { display:grid; grid-template-columns:repeat(4,1fr); gap:.5rem; margin-bottom:1rem; }
+.ms { background:var(--bg2); border-radius:var(--ra); padding:.7rem .4rem; text-align:center; }
+.ms .n { font-size:1.3rem; font-weight:800; color:var(--ink); letter-spacing:-.02em; line-height:1; }
+.ms .l { font-size:.7rem; color:var(--t3); margin-top:.2rem; line-height:1.3; }
+.tags { display:flex; flex-wrap:wrap; gap:.3rem; }
+.tag { background:var(--bg2); border:1px solid var(--b1); color:var(--t2); font-size:.73rem; padding:.2rem .6rem; border-radius:100px; font-weight:500; }
+.tag.bl { background:var(--ink50); border-color:var(--ink200); color:var(--ink); }
+.ds-solo { background:#fff; border:1.5px solid var(--b1); border-radius:var(--rc); padding:1.5rem 2rem; margin-top:1rem; text-align:center; box-shadow:var(--s1); }
+.ds-solo h3 { font-size:1rem; font-weight:800; color:var(--ink); margin-bottom:.3rem; }
+.ds-solo p  { font-size:.875rem; color:var(--t2); max-width:580px; margin:0 auto; }
+.coming-note { background:#f8faff; border:1px solid var(--ink200); border-radius:var(--rb); padding:.85rem 1.25rem; font-size:.88rem; color:var(--ink700); display:flex; align-items:center; gap:.5rem; margin-bottom:1.5rem; }
+
+/* ── Results chips ── */
+.chips { display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; margin-bottom:3rem; }
+.chip { background:#fff; border:1.5px solid var(--b1); border-radius:var(--rb); padding:1.25rem 1.75rem; text-align:center; box-shadow:var(--s1); min-width:140px; transition:transform .28s var(--e1),box-shadow .28s var(--e1); }
+.chip:hover { transform:translateY(-4px); box-shadow:var(--s2); }
+.chip .n { font-size:2.2rem; font-weight:800; color:var(--ink); letter-spacing:-.03em; line-height:1; }
+.chip .l { font-size:.77rem; color:var(--t2); margin-top:.35rem; line-height:1.4; font-weight:500; }
+
+/* ── Main interactive chart ── */
+.chart-box { background:#fff; border:1.5px solid var(--b1); border-radius:var(--rc); overflow:hidden; box-shadow:var(--s1); margin-bottom:3rem; }
+.chart-head { padding:1.25rem 1.5rem 0; border-bottom:1px solid var(--b1); }
+.chart-tabs { display:flex; gap:.25rem; overflow-x:auto; scrollbar-width:none; padding-bottom:1px; }
+.chart-tabs::-webkit-scrollbar { display:none; }
+.c-tab { padding:.5rem 1rem; font-size:.82rem; font-weight:600; color:var(--t2); background:none; border:none; border-bottom:2.5px solid transparent; cursor:pointer; font-family:inherit; white-space:nowrap; margin-bottom:-1px; transition:color .18s,border-color .18s; }
+.c-tab:hover { color:var(--t1); }
+.c-tab.on { color:var(--ink); border-bottom-color:var(--ink); }
+.c-hint { font-size:.72rem; color:var(--t3); padding:.55rem 1.5rem; font-style:italic; }
+.chart-body { padding:.5rem 1.5rem 1.5rem; }
+.c-pane { display:none; } .c-pane.on { display:block; }
+
+/* bar rows */
+.bar-row { display:grid; grid-template-columns:155px 1fr 50px; align-items:center; gap:.75rem; padding:.28rem 0; }
+.bar-name { font-size:.81rem; font-weight:500; color:var(--t1); text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.bar-name.ours { color:var(--ink); font-weight:700; }
+.bar-track { background:var(--bg2); border-radius:100px; height:22px; position:relative; overflow:hidden; }
+.bar-fill { height:100%; border-radius:100px; background:linear-gradient(90deg,#c0c0c5,#d0d0d5); width:0%; transition:width .7s var(--e2); position:relative; }
+.bar-fill.ours { background:linear-gradient(90deg,var(--ink),#818cf8); box-shadow:0 2px 8px rgba(79,70,229,.38); }
+.bar-track:hover .bar-fill { filter:brightness(1.1); }
+.bar-tip { position:absolute; right:7px; top:50%; transform:translateY(-50%); font-size:.7rem; font-weight:700; color:rgba(255,255,255,.95); opacity:0; transition:opacity .15s; pointer-events:none; }
+.bar-track:hover .bar-tip { opacity:1; }
+.bar-score { font-size:.81rem; font-weight:700; color:var(--t2); }
+.bar-score.ours { color:var(--ink); }
+
+/* ── Tables ── */
+.tbl-wrap { overflow-x:auto; border-radius:var(--rb); border:1.5px solid var(--b1); box-shadow:var(--s1); }
+table.rt { width:100%; border-collapse:collapse; font-size:.8rem; }
+.rt thead { background:var(--navy); }
+.rt thead th { color:#fff; padding:.65rem .75rem; font-weight:600; font-size:.75rem; letter-spacing:.02em; text-align:center; white-space:nowrap; }
+.rt thead th:first-child { text-align:left; }
+.rt tbody tr { border-bottom:1px solid var(--b1); }
+.rt tbody tr:last-child { border-bottom:none; }
+.rt tbody td { padding:.5rem .75rem; color:var(--t1); text-align:center; vertical-align:middle; }
+.rt tbody td:first-child { text-align:left; font-weight:500; }
+.rt tr.comm { background:#f7f7ff; }
+.rt tr.oss  { background:#f5f5fb; }
+.rt tr.ft   { background:#f0f0ff; }
+.rt tr.ours td { font-weight:700; color:var(--ink); background:var(--ink50); }
+.rt tbody tr:hover:not(.ours) { background:var(--bg2); }
+.rt tr.ours:hover td { background:var(--ink100); }
+.sota { display:inline-block; background:var(--ink); color:#fff; font-size:.53rem; font-weight:700; padding:1px 5px; border-radius:3px; letter-spacing:.06em; text-transform:uppercase; vertical-align:middle; margin-left:4px; }
+
+/* ── Domain cards ── */
+.dom-stack { display:flex; flex-direction:column; gap:1.5rem; margin-top:1.5rem; }
+.dom-card { background:#fff; border:1.5px solid var(--b1); border-radius:var(--rc); overflow:hidden; box-shadow:var(--s1); transition:box-shadow .28s var(--e1); }
+.dom-card:hover { box-shadow:var(--s2); }
+.dom-head { background:var(--bg2); padding:.75rem 1.25rem; font-size:.92rem; font-weight:700; border-bottom:1px solid var(--b1); color:var(--t1); }
+
+/* ── Mini charts ── */
+.mc-wrap { padding:.85rem 1.25rem 1rem; border-bottom:1px solid var(--b1); }
+.mc-tabs { display:flex; gap:.3rem; flex-wrap:wrap; margin-bottom:.55rem; }
+.mc-tab { padding:.25rem .7rem; font-size:.72rem; font-weight:600; cursor:pointer; color:var(--t2); background:var(--bg2); border:1px solid var(--b1); border-radius:100px; font-family:inherit; transition:background .18s,color .18s,border-color .18s; }
+.mc-tab:hover { color:var(--ink); background:var(--ink100); border-color:var(--ink200); }
+.mc-tab.on { background:var(--ink100); color:var(--ink); border-color:var(--ink200); font-weight:700; }
+.mc-hint { font-size:.69rem; color:var(--t3); font-style:italic; margin-bottom:.5rem; }
+.mc-pane { display:none; } .mc-pane.on { display:block; }
+.mc-row { display:grid; grid-template-columns:130px 1fr 44px; align-items:center; gap:.55rem; padding:.18rem 0; }
+.mc-name { font-size:.75rem; font-weight:500; color:var(--t1); text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.mc-name.ours { color:var(--ink); font-weight:700; }
+.mc-track { background:var(--bg2); border-radius:100px; height:18px; position:relative; overflow:hidden; }
+.mc-fill { height:100%; border-radius:100px; background:linear-gradient(90deg,#bdbdc2,#cdcdd2); width:0%; transition:width .65s var(--e2); }
+.mc-fill.ours { background:linear-gradient(90deg,var(--ink),#818cf8); box-shadow:0 1px 6px rgba(79,70,229,.32); }
+.mc-track:hover .mc-fill { filter:brightness(1.1); }
+.mc-tip { position:absolute; right:6px; top:50%; transform:translateY(-50%); font-size:.68rem; font-weight:700; color:rgba(255,255,255,.95); opacity:0; transition:opacity .15s; pointer-events:none; }
+.mc-track:hover .mc-tip { opacity:1; }
+.mc-score { font-size:.75rem; font-weight:700; color:var(--t2); }
+.mc-score.ours { color:var(--ink); }
+.dom-card .tbl-wrap { border:none; border-radius:0; box-shadow:none; }
+
+/* ── BibTeX ── */
+.bib-wrap { background:#0f0f1a; border-radius:var(--rc); overflow:hidden; box-shadow:var(--s3); }
+.bib-bar { display:flex; justify-content:space-between; align-items:center; padding:.65rem 1.25rem; background:#09091a; border-bottom:1px solid rgba(255,255,255,.07); }
+.bib-bar span { font-family:'JetBrains Mono',monospace; font-size:.78rem; color:#6868a0; }
+.bib-bar button { background:rgba(255,255,255,.09); border:1px solid rgba(255,255,255,.14); color:#9090b8; border-radius:7px; padding:.25rem .75rem; font-size:.75rem; font-family:inherit; cursor:pointer; display:flex; align-items:center; gap:.35rem; transition:background .2s,color .2s; }
+.bib-bar button:hover { background:rgba(255,255,255,.18); color:#fff; }
+pre.bib-code { padding:1.5rem; font-family:'JetBrains Mono',monospace; font-size:.81rem; line-height:1.8; color:#c9d1d9; margin:0; white-space:pre-wrap; word-break:break-all; }
+
+/* ── Footer ── */
+footer { background:var(--bg2); border-top:1px solid var(--b1); padding:3rem 1.5rem; text-align:center; }
+.foot-logos { display:flex; justify-content:center; align-items:center; gap:2rem; flex-wrap:wrap; margin-bottom:1.5rem; }
+.foot-logos a { opacity:.55; transition:opacity .2s; display:flex; }
+.foot-logos a:hover { opacity:1; }
+.foot-logos img { height:28px; width:auto; object-fit:contain; }
+footer p { font-size:.82rem; color:var(--t3); line-height:1.75; }
+footer a { color:var(--t2); transition:color .2s; }
+footer a:hover { color:var(--ink); }
+
+/* ── Labels ── */
+.circ   { display:inline-flex; align-items:center; justify-content:center; border:1.5px solid var(--ink); color:var(--ink); border-radius:50%; font-weight:700; font-size:.73rem; width:1.35em; height:1.35em; margin:0 1px; }
+.circ-w { display:inline-flex; align-items:center; justify-content:center; border:1.5px solid var(--ink); color:var(--ink); border-radius:10px; font-weight:700; font-size:.73rem; padding:0 5px; margin:0 1px; }
+
+/* ── Scroll reveal ── */
+.rv { opacity:0; transform:translateY(26px); transition:opacity .75s var(--e2),transform .75s var(--e2); }
+.rv.in { opacity:1; transform:translateY(0); }
+.rv.d1{transition-delay:.1s} .rv.d2{transition-delay:.2s} .rv.d3{transition-delay:.3s} .rv.d4{transition-delay:.4s}
+.ha { opacity:0; transform:translateY(22px); animation:fu .8s var(--e2) forwards; }
+.ha.a2{animation-delay:.14s} .ha.a3{animation-delay:.28s} .ha.a4{animation-delay:.42s} .ha.a5{animation-delay:.56s}
+@keyframes fu { to { opacity:1; transform:translateY(0); } }
+
+/* ── Responsive ── */
+@media(max-width:768px){
+  .nav-links{display:none} .nav-burger{display:block}
+  .nav-links.open{display:flex;flex-direction:column;position:absolute;top:52px;left:0;right:0;background:rgba(255,255,255,.97);backdrop-filter:blur(20px);padding:1rem;border-bottom:1px solid var(--b1);z-index:99;}
+  .nav-links.open a{padding:.6rem .75rem}
+  .grid2,.loss4,.ds-grid,.grid3{grid-template-columns:1fr}
+  .mg{grid-template-columns:repeat(2,1fr)}
+  .hero-title{font-size:1.85rem}
+  .logos{gap:1.5rem;padding:1.25rem} .logos img{height:48px}
+  .bar-row{grid-template-columns:90px 1fr 44px} .bar-name{font-size:.73rem}
+  .mc-row{grid-template-columns:100px 1fr 40px} .mc-name{font-size:.7rem}
+  .car-thumbs{gap:.4rem} .car-thumb{width:60px;height:42px}
+}
+@media(prefers-reduced-motion:reduce){
+  .rv,.ha{transition:none;animation:none;opacity:1;transform:none}
+  .bar-fill,.mc-fill{transition:none}
+  .car-dot{transition:none}
+}
+
+/* ── Theme toggle button ── */
+.theme-btn{background:none;border:none;cursor:pointer;padding:.35rem .5rem;color:var(--t2);font-size:.95rem;border-radius:var(--ra);transition:color .2s,background .2s;margin-left:.25rem;}
+.theme-btn:hover{color:var(--t1);background:var(--bg2);}
+
+/* ── Dark Mode ────────────────────────────── */
+[data-theme="dark"]{
+  --t1:#f5f5f7; --t2:#aeaeb2; --t3:#6e6e73;
+  --bg:#000; --bg2:#1c1c1e; --b0:#3a3a3c; --b1:#2c2c2e;
+  --ink:#818cf8; --ink50:#1a1840; --ink100:#231f6e; --ink200:#3730a3; --ink700:#a5b4fc;
+  --navy:#1e3a5f;
+}
+[data-theme="dark"] .nav{background:rgba(0,0,0,.88);}
+[data-theme="dark"] .nav-links.open{background:rgba(28,28,30,.97);}
+[data-theme="dark"] .hero::before{background:radial-gradient(ellipse 80% 60% at 50% -15%,rgba(129,140,248,.12) 0%,transparent 60%);}
+[data-theme="dark"] .m-card,[data-theme="dark"] .f-card,[data-theme="dark"] .ds-card,
+[data-theme="dark"] .ds-solo,[data-theme="dark"] .chart-box,[data-theme="dark"] .chip,
+[data-theme="dark"] .dom-card,[data-theme="dark"] .car-stage{background:var(--bg2);border-color:var(--b1);}
+[data-theme="dark"] .rt tr.comm{background:#16162a;}
+[data-theme="dark"] .rt tr.oss{background:#161622;}
+[data-theme="dark"] .rt tr.ft{background:#18162e;}
+[data-theme="dark"] .lc.navy{background:#0d1520;}
+[data-theme="dark"] .lc.green{background:#0a1f12;}
+[data-theme="dark"] .lc.gold{background:#1f1505;}
+[data-theme="dark"] .coming-note{background:#1a1840;border-color:var(--ink200);color:var(--ink700);}
+[data-theme="dark"] .enc{background:#1a1840;border-color:var(--ink200);}
+[data-theme="dark"] code{background:#2c2c2e;color:var(--ink700);}
+[data-theme="dark"] .ms{background:#2c2c2e;}
+[data-theme="dark"] .tag{background:#2c2c2e;border-color:var(--b0);}
+[data-theme="dark"] .logos{background:var(--ink50);border-color:var(--ink200);}
+[data-theme="dark"] .bar-track,[data-theme="dark"] .mc-track{background:#2c2c2e;}
+[data-theme="dark"] .bar-fill:not(.ours),[data-theme="dark"] .mc-fill:not(.ours){background:linear-gradient(90deg,#3a3a50,#4a4a60);}
+[data-theme="dark"] .car-dot{background:#3a3a3c;}
+[data-theme="dark"] .abs-body strong{color:#e0e7ff;}
+
+/* ══════════════════════════════════════════════
+   INTERACTIVE QUAL DEMO
+══════════════════════════════════════════════ */
+.qual-demo{max-width:980px;margin:0 auto;background:var(--bg);border:1.5px solid var(--b1);border-radius:var(--rc);box-shadow:var(--s2);overflow:hidden;}
+
+/* Tab row */
+.qd-toolbar{display:flex;align-items:center;border-bottom:1px solid var(--b1);background:var(--bg2);}
+.qd-tabs{display:flex;overflow-x:auto;scrollbar-width:none;flex:1;}
+.qd-tabs::-webkit-scrollbar{display:none;}
+.qd-brand-logo{padding:0 .9rem;opacity:.75;transition:opacity .2s;flex-shrink:0;display:flex;align-items:center;}
+.qd-brand-logo:hover{opacity:1;}
+.qd-tab{padding:.6rem 1.1rem;font-size:.82rem;font-weight:600;color:var(--t2);background:none;border:none;border-bottom:2.5px solid transparent;cursor:pointer;font-family:inherit;white-space:nowrap;margin-bottom:-1px;transition:color .18s,border-color .18s,background .18s;}
+.qd-tab:hover{color:var(--t1);background:var(--bg);}
+.qd-tab.on{color:var(--ink);border-bottom-color:var(--ink);background:var(--bg);}
+
+/* Two-column panel */
+.qd-panel{display:grid;grid-template-columns:55fr 45fr;min-height:400px;}
+
+/* Left — image panel */
+.qd-img-panel{border-right:1px solid var(--b1);padding:1.25rem;display:flex;align-items:center;justify-content:center;background:var(--bg2);}
+.qd-img-wrap{position:relative;width:100%;}
+.qd-img{width:100%;height:auto;display:block;border-radius:var(--ra);}
+.qd-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible;}
+
+/* Right — chat panel */
+.qd-chat-panel{display:flex;flex-direction:column;padding:1.25rem;max-height:520px;overflow-y:auto;}
+
+/* Question bubble */
+.qd-question-row{display:flex;flex-direction:column;align-items:flex-end;gap:.5rem;margin-bottom:.75rem;}
+.qd-bubble{background:var(--ink);color:#fff;border-radius:16px 16px 4px 16px;padding:.65rem 1rem;font-size:.875rem;line-height:1.55;max-width:92%;text-align:left;}
+.qd-send-btn{background:var(--ink);color:#fff;border:none;border-radius:100px;padding:.4rem 1.1rem;font-size:.82rem;font-weight:600;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:.35rem;transition:opacity .2s,transform .2s var(--e1);}
+.qd-send-btn:hover:not(:disabled){transform:translateY(-1px);opacity:.88;}
+.qd-send-btn:disabled{opacity:.42;cursor:not-allowed;}
+
+/* Steps area */
+.qd-steps{flex:1;}
+.qd-step-row{display:flex;align-items:flex-start;gap:.45rem;margin-top:.75rem;font-size:.87rem;line-height:1.65;color:var(--t1);}
+.qd-step-label{flex-shrink:0;font-size:.7rem;font-style:italic;font-weight:600;background:var(--bg2);color:var(--t2);padding:.12rem .42rem;border-radius:4px;border:1px solid var(--b1);margin-top:.22rem;}
+.qd-step-label-final{background:var(--ink);color:#fff;border-color:var(--ink);font-style:normal;font-weight:700;}
+.qd-step-text{flex:1;word-break:break-word;}
+
+/* Span highlight */
+.qd-span{border-radius:3px;padding:0 2px;font-weight:500;}
+
+/* GND chip — text tag style; hover/active handled in JS per-chip color */
+.qd-gnd-chip{display:inline;cursor:pointer;font-size:0.72em;font-weight:700;font-family:inherit;margin:0 2px;vertical-align:baseline;padding:1px 4px;border-radius:3px;line-height:1;transition:background .15s;}
+
+/* Step header: label + optional Show-all button stacked in a column */
+.qd-step-header{display:flex;flex-direction:column;flex-shrink:0;gap:0.3rem;align-items:flex-start;}
+.qd-show-all-btn{font-size:0.65rem;font-weight:600;font-family:inherit;padding:0.1rem 0.5rem;border-radius:100px;border:1px solid var(--b0);background:var(--bg2);color:var(--t2);cursor:pointer;line-height:1.5;white-space:nowrap;transition:color .15s,border-color .15s,background .15s;}
+.qd-show-all-btn:hover{color:var(--ink);border-color:var(--ink200);background:var(--ink50);}
+[data-theme="dark"] .qd-show-all-btn:hover{background:var(--ink50);}
+
+/* Reset row */
+.qd-reset-row{display:flex;justify-content:flex-end;margin-top:1rem;padding-top:.75rem;border-top:1px solid var(--b1);}
+.qd-reset-btn{background:var(--bg2);color:var(--t2);border:1.5px solid var(--b1);border-radius:100px;padding:.35rem .9rem;font-size:.8rem;font-weight:600;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:.35rem;transition:color .18s,border-color .18s,background .18s;}
+.qd-reset-btn:hover{color:var(--ink);border-color:var(--ink200);background:var(--ink50);}
+
+/* Mobile */
+@media(max-width:768px){
+  .qd-panel{grid-template-columns:1fr;}
+  .qd-img-panel{border-right:none;border-bottom:1px solid var(--b1);}
+  .qd-chat-panel{max-height:420px;}
+}
+
+/* Dark mode */
+[data-theme="dark"] .qual-demo{background:var(--bg2);border-color:var(--b1);}
+[data-theme="dark"] .qd-toolbar{background:#111;}
+[data-theme="dark"] .qd-tab.on,[data-theme="dark"] .qd-tab:hover{background:var(--bg2);}
+[data-theme="dark"] .qd-img-panel{background:#0a0a0a;}
+[data-theme="dark"] .qd-step-label{background:#2c2c2e;border-color:var(--b0);}
+[data-theme="dark"] .qd-reset-btn:hover{background:var(--ink50);}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav" role="navigation">
+  <div class="nav-in">
+    <a class="nav-brand" href="#">Do<span>Co</span>G</a>
+    <button class="nav-burger" id="navBurger" aria-label="menu"><i class="fas fa-bars"></i></button>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#abstract">Abstract</a></li>
+      <li><a href="#method">Method</a></li>
+      <li><a href="#dataset">Dataset</a></li>
+      <li><a href="#results">Results</a></li>
+    </ul>
+    <button class="theme-btn" id="themeBtn" aria-label="Toggle dark mode"><i class="fas fa-moon" id="themeIcon"></i></button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hi">
+    <div class="badge ha"><i class="fas fa-award"></i>&ensp;ECCV 2026</div>
+    <h1 class="hero-title ha a2">
+      DoCoG: Mask-based Multi-Type<br>
+      <span class="accent">Grounded Chain-of-Thought</span><br>
+      for Document QA
+    </h1>
+    <div class="authors ha a3">
+      <a href="https://www.linkedin.com/in/sai-madhusudan-gunda-45bab4223/" target="_blank">Sai&nbsp;Madhusudan&nbsp;Gunda</a><sup>2,*</sup>,&ensp;
+      <a href="https://www.linkedin.com/in/jyothi-swaroopa-jinka-339320200/" target="_blank">Jyothi&nbsp;Swaroopa&nbsp;Jinka</a><sup>2,*</sup>,&ensp;
+      <a href="https://www.linkedin.com/in/hrithiksagar/" target="_blank">Hrithik&nbsp;Sagar&nbsp;Rachakonda</a><sup>2,*</sup>,&ensp;
+      <a href="https://www.linkedin.com/in/aryan23132/" target="_blank">Aryan&nbsp;Jain</a><sup>2</sup>,&ensp;
+      <a href="https://www.linkedin.com/in/venkata-kesav-venna-8a489b20b/" target="_blank">Venkat&nbsp;Kesav&nbsp;Venna</a><sup>1</sup>,&ensp;
+      <a href="https://www.linkedin.com/in/anirudh-srini/" target="_blank">Anirudh&nbsp;Srinivasan</a><sup>1</sup>,&ensp;
+      <a href="https://www.linkedin.com/in/ravi-kiran-s/" target="_blank">Ravi&nbsp;Kiran&nbsp;Sarvadevabhatla</a><sup>1,2</sup>
+    </div>
+    <div class="affil ha a3">
+      <strong><sup>1</sup> BharatGen</strong>&emsp;
+      <strong><sup>2</sup> IIIT Hyderabad</strong>&emsp;
+      <span style="font-size:.82rem;color:var(--t3)"><sup>*</sup> Equal contribution</span>
+    </div>
+    <div class="btn-row ha a4">
+      <span class="btn btn-dis"><i class="fas fa-newspaper"></i> arXiv <span class="cs">Soon</span></span>
+      <span class="btn btn-dis"><i class="fab fa-github"></i> Code <span class="cs">Soon</span></span>
+      <span class="btn btn-dis"><i class="fas fa-database"></i> Dataset <span class="cs">Soon</span></span>
+      <span class="btn btn-dis">🤗 Models <span class="cs">Soon</span></span>
+    </div>
+    <div class="logos ha a5">
+      <a href="https://eccv.ecva.net/" target="_blank" title="ECCV 2026"><img src="static/images/logos/eccv_logo.png" alt="ECCV"/></a>
+      <a href="https://bharatgen.com/" target="_blank" title="BharatGen"><img src="static/images/logos/bharatgen_logo.png" alt="BharatGen"/></a>
+      <a href="https://www.iiit.ac.in/" target="_blank" title="IIIT Hyderabad"><img src="static/images/logos/iiith_logo.jpg" alt="IIIT Hyderabad"/></a>
+    </div>
+  </div>
+</section>
+
+<!-- TEASER -->
+<div class="teaser-s">
+  <div class="teaser-w rv">
+    <img class="teaser-img" id="teaserImg" src="static/images/teaser.png" alt="DoCoG teaser figure">
+    <p class="fig-cap">
+      <strong>Mask-based Multi-type grounded CoT.</strong>
+      Each example shows a QA pair where the model interleaves <code>[GND]</code> tokens within the CoT
+      (<span class="circ-w">2a</span>, <span class="circ-w">2b</span>) and final answer (<span class="circ-w">2c</span>).
+      Each <code>[GND]</code> predicts a segmentation mask that localizes the evidence used
+      (<span class="circ">1</span>, <span class="circ">2</span>).
+    </p>
+  </div>
+</div>
+
+<!-- ABSTRACT -->
+<section class="section section-alt" id="abstract">
+  <div class="si">
+    <p class="s-lbl rv">Paper</p>
+    <h2 class="s-title rv">Abstract</h2>
+    <div class="abs-body rv">
+      <p>Existing methods for Visual Document Question Answering (DocVQA) often predict answers without explicit intermediate analysis or produce ungrounded intermediate steps. The few approaches which employ grounding produce rectangular bounding boxes which fail to accurately represent complex structures such as pie-chart wedges, flowchart nodes, and curved text. We present <strong>DoCoG</strong>, a mask-based multi-type grounded step-wise Chain-of-Thought architecture for Document QA.</p>
+      <p>The model supports multi-type grounding — it localizes both textual content and fine-grained graphical elements such as legends, pie slices, and flowchart nodes. It generates step-wise intermediate outputs and final answers grounded through precise segmentation masks. DoCoG integrates a Vision-Language Model with a promptable segmenter via a novel <strong>Grounding Interaction Module (GIM)</strong>. During decoding, special <code>[GND]</code> tokens trigger mask prediction, linking each step and the final answer to supporting evidence.</p>
+      <p>We introduce <strong>DoCoG-QA</strong>, a large-scale diverse dataset comprising 325K documents and 1.5M step-wise grounded QA pairs. We further release <strong>DoCoG-PQA</strong> with 20K preference pairs for DPO alignment, and <strong>DoCoG-Bench</strong>, a human-verified benchmark. Experiments show that DoCoG achieves state-of-the-art performance across multiple benchmarks, improving both answer accuracy and grounding precision.</p>
+    </div>
+  </div>
+</section>
+
+<!-- METHOD -->
+<section class="section" id="method">
+  <div class="si">
+    <p class="s-lbl rv">Architecture</p>
+    <h2 class="s-title rv">Method</h2>
+
+    <div class="rv">
+      <img class="method-img" id="methodImg" src="static/images/model_overview.png" alt="DoCoG architecture overview">
+      <p class="fig-cap">
+        <strong>DoCoG architecture:</strong> Given a document image \(I\) and question \(q\), the VLM <span class="circ">1</span> encodes visual features and autoregressively generates step-wise outputs interleaved with <code>[GND]</code> tokens <span class="circ">2</span>. Their hidden states <span class="circ">3</span> pass to GIM <span class="circ">4</span>, which refines them via cross-attention with segmenter features <span class="circ">6</span> from <span class="circ">5</span>, producing prompt embeddings decoded into evidence masks (<span class="circ-w">2c</span>).
+      </p>
+    </div>
+
+    <div class="grid2" style="margin-top:2.5rem">
+      <div class="m-card rv d1">
+        <h4>🔗 Decoupled Language &amp; Spatial Grounding</h4>
+        <p>DoCoG <em>decouples</em> language modeling from spatial prediction. The VLM focuses on step-wise reasoning, while a dedicated segmentation module handles fine-grained, geometry-aware mask localization — yielding cleaner text outputs and more precise evidence masks.</p>
+      </div>
+      <div class="m-card rv d2">
+        <h4>🔄 Grounding Interaction Module (GIM)</h4>
+        <p>GIM refines <code>[GND]</code> token embeddings through self-attention and cross-attention with visual features from the segmenter. This ensures grounding tokens remain mutually consistent and spatially aligned with the correct document regions.</p>
+      </div>
+    </div>
+
+    <h3 class="s-title rv" style="margin-top:3.5rem;font-size:1.5rem;">Step-wise Multi-Type Grounding</h3>
+    <p class="s-sub rv" style="margin-bottom:1.25rem">DoCoG generates intermediate reasoning steps and final answers, each grounded to supporting evidence spanning textual and graphical elements.</p>
+    <div class="grid3 rv">
+      <div class="f-card"><div class="f-em">📝</div><h4>Textual Evidence</h4><p>Words, lines, paragraphs, table cells, headers, and form fields</p></div>
+      <div class="f-card"><div class="f-em">📊</div><h4>Graphical Elements</h4><p>Chart bars, lines, pie slices, legends, axis labels, and plot marks</p></div>
+      <div class="f-card"><div class="f-em">🔀</div><h4>Structural Elements</h4><p>Flowchart nodes, connectors, arrows, and diagram components</p></div>
+    </div>
+    <div class="enc rv">Step-wise CoT with <code>[GND]</code> tokens grounds each reasoning step to pixel-accurate evidence masks</div>
+
+    <!-- ══ QUALITATIVE RESULTS CAROUSEL ══ -->
+    <h3 class="s-title rv" style="margin-top:3.5rem;font-size:1.5rem;">Qualitative Results</h3>
+    <p class="s-sub rv" style="margin-bottom:1rem">Model outputs across charts, flowcharts, tables, and documents — each reasoning step grounded to pixel-level evidence.</p>
+
+    <div class="carousel-outer rv" id="carouselRoot">
+
+      <!-- Stage -->
+      <div class="car-stage" id="carStage">
+        <div class="car-track" id="carTrack">
+          <!-- Slides built by JS -->
+        </div>
+        <div class="car-ctr" id="carCtr">01 / 06</div>
+        <button class="car-btn prev" id="carPrev" aria-label="Previous slide"><i class="fas fa-chevron-left"></i></button>
+        <button class="car-btn next" id="carNext" aria-label="Next slide"><i class="fas fa-chevron-right"></i></button>
+      </div>
+
+      <!-- Caption -->
+      <div class="car-cap-wrap">
+        <div class="car-cap-text" id="carCap"></div>
+      </div>
+
+      <!-- Pill dots -->
+      <div class="car-dots" id="carDots">
+        <div class="car-dot on" data-i="0"></div>
+        <div class="car-dot" data-i="1"></div>
+        <div class="car-dot" data-i="2"></div>
+        <div class="car-dot" data-i="3"></div>
+        <div class="car-dot" data-i="4"></div>
+        <div class="car-dot" data-i="5"></div>
+      </div>
+
+      <!-- Thumbnail strip -->
+      <div class="car-thumbs" id="carThumbs">
+        <!-- Built by JS -->
+      </div>
+
+    </div><!-- /carousel-outer -->
+
+    <!-- ══ INTERACTIVE QUAL DEMO ══ -->
+    <h3 class="s-title rv" style="margin-top:3.5rem;font-size:1.5rem;">Try It Interactively</h3>
+    <p class="s-sub rv" style="margin-bottom:1rem">Step through DoCoG's grounded reasoning — each <code>[GND]</code> token sweeps a mask over the supporting evidence in the image.</p>
+
+    <div class="qual-demo rv" id="qualDemo">
+      <div class="qd-toolbar">
+        <div class="qd-tabs" id="qdTabs"></div>
+        <a href="https://bharatgen.com/" target="_blank" rel="noopener noreferrer" title="BharatGen" class="qd-brand-logo">
+          <img src="static/images/logos/bharatgen_logo.png" alt="BharatGen" style="height:34px;width:auto;">
+        </a>
+      </div>
+      <div class="qd-panel">
+        <div class="qd-img-panel">
+          <div class="qd-img-wrap">
+            <img class="qd-img" id="qdImg" src="" alt="Document image">
+            <svg class="qd-svg" id="qdSvg" viewBox="0 0 100 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+              <defs id="qdDefs"></defs>
+            </svg>
+          </div>
+        </div>
+        <div class="qd-chat-panel">
+          <div class="qd-question-row" id="qdQuestionRow">
+            <div class="qd-bubble" id="qdBubble"></div>
+            <button class="qd-send-btn" id="qdSendBtn"><i class="fas fa-play"></i>&ensp;Send</button>
+          </div>
+          <div class="qd-steps" id="qdSteps"></div>
+          <div class="qd-reset-row" id="qdResetRow" style="display:none">
+            <button class="qd-reset-btn" id="qdResetBtn"><i class="fas fa-redo-alt"></i>&ensp;Reset</button>
+          </div>
+        </div>
+      </div>
+    </div><!-- /qual-demo -->
+
+    <!-- Training -->
+    <h3 class="s-title rv" style="margin-top:4rem;font-size:1.5rem;">Training Objectives</h3>
+    <p class="s-sub rv" style="margin-bottom:.5rem">DoCoG is trained in two stages: SFT on DoCoG-QA, then DPO on DoCoG-PQA.</p>
+    <p class="math-line rv">𝓛<sub>total</sub> = λ<sub>lm</sub>𝓛<sub>lm</sub> + λ<sub>seg</sub>𝓛<sub>seg</sub> + λ<sub>anchor</sub>𝓛<sub>anchor</sub></p>
+    <div class="loss4 rv">
+      <div class="lc navy"><strong>𝓛<sub>lm</sub> — Language Modeling</strong><p>Cross-entropy over all output tokens for accurate step-wise CoT generation and answer prediction.</p></div>
+      <div class="lc green"><strong>𝓛<sub>seg</sub> — Segmentation (Dice + BCE)</strong><p>Supervises mask predictions against pixel-level ground truth for each <code>[GND]</code> token.</p></div>
+      <div class="lc ink"><strong>𝓛<sub>anchor</sub> — Anchor Loss</strong><p>Preserves <code>[GND]</code> token compatibility with the frozen segmenter during DPO, preventing mask degradation.</p></div>
+      <div class="lc gold"><strong>DPO — Preference Optimization</strong><p>Trained on DoCoG-PQA (20K pairs) to align step quality, answer accuracy, and grounding fidelity jointly.</p></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- DATASET -->
+<section class="section section-alt" id="dataset">
+  <div class="si">
+    <p class="s-lbl rv">Data</p>
+    <h2 class="s-title rv">DoCoG-QA Dataset &amp; Benchmark</h2>
+    <div class="coming-note rv"><i class="fas fa-clock"></i><strong>Dataset release coming soon.</strong> We are preparing DoCoG-QA, DoCoG-PQA, and DoCoG-Bench for public release.</div>
+    <div class="ds-grid rv">
+      <div class="ds-card">
+        <h3>📦 DoCoG-QA</h3>
+        <p class="ds-desc">Large-scale training dataset with step-wise grounded Chain-of-Thought, built through a unified data engine across diverse document types with pixel-level mask supervision.</p>
+        <div class="mg">
+          <div class="ms"><div class="n">325K</div><div class="l">Documents</div></div>
+          <div class="ms"><div class="n">1.5M</div><div class="l">QA Pairs</div></div>
+          <div class="ms"><div class="n" style="font-size:.9rem;line-height:1.2">Step</div><div class="l">Wise CoT</div></div>
+          <div class="ms"><div class="n" style="font-size:.9rem;line-height:1.2">Mask</div><div class="l">Grounding</div></div>
+        </div>
+        <div class="tags"><span class="tag">Charts</span><span class="tag">Tables</span><span class="tag">Flowcharts</span><span class="tag">Documents</span><span class="tag">Curved text</span><span class="tag">Forms</span><span class="tag">Reports</span><span class="tag">Webpages</span></div>
+      </div>
+      <div class="ds-card">
+        <h3>📊 DoCoG-Bench</h3>
+        <p class="ds-desc">Human-verified benchmark for jointly evaluating answer accuracy, step-wise CoT quality, and mask-level grounding fidelity across diverse document types.</p>
+        <div class="mg">
+          <div class="ms"><div class="n">3K</div><div class="l">Documents</div></div>
+          <div class="ms"><div class="n">10K</div><div class="l">QA Pairs</div></div>
+          <div class="ms"><div class="n" style="font-size:.9rem;line-height:1.2">Human</div><div class="l">Verified</div></div>
+          <div class="ms"><div class="n">4</div><div class="l">Doc Types</div></div>
+        </div>
+        <div class="tags"><span class="tag bl">AQ (Answer Quality)</span><span class="tag bl">CQ (CoT Quality)</span><span class="tag bl">GQ (Grounding Quality)</span><span class="tag bl">G-Eval</span></div>
+      </div>
+    </div>
+    <div class="ds-solo rv">
+      <h3>🎯 DoCoG-PQA</h3>
+      <p>20K preference pairs for Direct Preference Optimization (DPO), constructed using a reward function combining AQ, CQ, and GQ scores to select chosen/rejected samples for alignment training.</p>
+    </div>
+  </div>
+</section>
+
+<!-- RESULTS -->
+<section class="section" id="results">
+  <div class="siw">
+    <p class="s-lbl rv">Evaluation</p>
+    <h2 class="s-title rv">Results</h2>
+    <p class="s-sub rv" style="max-width:700px;margin-inline:auto">DoCoG consistently outperforms both commercial and open-source baselines. While commercial models achieve competitive answer accuracy, their grounding quality remains substantially lower.</p>
+
+    <div class="chips rv">
+      <div class="chip"><div class="n">85.8</div><div class="l">AQ (All)<br><em>DoCoG-Bench</em></div></div>
+      <div class="chip"><div class="n">82.0</div><div class="l">CQ (All)<br><em>DoCoG-Bench</em></div></div>
+      <div class="chip"><div class="n">81.9</div><div class="l">GQ<sub>fa</sub> (All)<br><em>DoCoG-Bench</em></div></div>
+    </div>
+
+    <!-- Main chart -->
+    <div class="chart-box rv" id="mainChart">
+      <div class="chart-head">
+        <div class="chart-tabs">
+          <button class="c-tab on" data-p="aq">DoCoG-Bench AQ</button>
+          <button class="c-tab" data-p="gq">DoCoG-Bench GQ</button>
+          <button class="c-tab" data-p="cq">DoCoG-Bench CQ</button>
+          <button class="c-tab" data-p="ch">Charts Domain</button>
+          <button class="c-tab" data-p="fl">Flowcharts Domain</button>
+          <button class="c-tab" data-p="tb">Tables Domain</button>
+          <button class="c-tab" data-p="dc">Documents Domain</button>
+        </div>
+      </div>
+      <p class="c-hint">Hover bars for score · Sorted by performance (high → low)</p>
+      <div class="chart-body">
+        <div class="c-pane on" id="pane-aq"></div>
+        <div class="c-pane" id="pane-gq"></div>
+        <div class="c-pane" id="pane-cq"></div>
+        <div class="c-pane" id="pane-ch"></div>
+        <div class="c-pane" id="pane-fl"></div>
+        <div class="c-pane" id="pane-tb"></div>
+        <div class="c-pane" id="pane-dc"></div>
+      </div>
+    </div>
+
+    <!-- Unified table -->
+    <h3 class="s-title rv" style="font-size:1.35rem;margin-bottom:.5rem">Unified Evaluation on DoCoG-Bench</h3>
+    <p style="text-align:center;color:var(--t2);font-size:.85rem;margin-bottom:1rem" class="rv">AQ and GQ<sub>fa</sub> per split. "All" reports AQ, G<sub>eval</sub>, CQ, GQ<sub>all</sub>, and GQ<sub>fa</sub>.</p>
+    <div class="tbl-wrap rv">
+      <table class="rt">
+        <thead>
+          <tr><th rowspan="2">Model</th><th rowspan="2">Params</th><th colspan="2">Charts</th><th colspan="2">Flowcharts</th><th colspan="2">Docs</th><th colspan="2">Tables</th><th colspan="5">All</th></tr>
+          <tr><th>AQ</th><th>GQ<sub>fa</sub></th><th>AQ</th><th>GQ<sub>fa</sub></th><th>AQ</th><th>GQ<sub>fa</sub></th><th>AQ</th><th>GQ<sub>fa</sub></th><th>AQ</th><th>G<sub>eval</sub></th><th>CQ</th><th>GQ<sub>all</sub></th><th>GQ<sub>fa</sub></th></tr>
+        </thead>
+        <tbody>
+          <tr class="comm"><td>GPT-5</td><td>–</td><td>82.4</td><td>3.8</td><td>78.1</td><td>4.0</td><td>86.7</td><td>5.0</td><td>84.3</td><td>6.4</td><td>82.9</td><td><u>84.8</u></td><td><u>76.8</u></td><td>2.4</td><td>4.8</td></tr>
+          <tr class="comm"><td>Sonnet 4.5</td><td>–</td><td>79.1</td><td>5.7</td><td>75.3</td><td><u>13.3</u></td><td>83.8</td><td>6.8</td><td>81.6</td><td>2.6</td><td>79.9</td><td>80.5</td><td>71.3</td><td>3.3</td><td>7.1</td></tr>
+          <tr class="comm"><td>Gemini 3 Pro</td><td>–</td><td><u>83.2</u></td><td>11.2</td><td><u>79.4</u></td><td>10.1</td><td><u>88.1</u></td><td>11.7</td><td><u>86.0</u></td><td>12.6</td><td><u>84.2</u></td><td>84.1</td><td>75.2</td><td>15.4</td><td>11.4</td></tr>
+          <tr class="comm"><td>Gemini 3 Flash</td><td>–</td><td>79.6</td><td><u>12.7</u></td><td>75.8</td><td>12.5</td><td>84.5</td><td><u>35.3</u></td><td>82.4</td><td><u>33.9</u></td><td>80.6</td><td>82.8</td><td>73.4</td><td><u>32.8</u></td><td><u>23.6</u></td></tr>
+          <tr class="oss"><td>InternVL 3.5</td><td>8B</td><td>73.4</td><td>4.1</td><td>67.2</td><td>1.5</td><td>77.1</td><td>7.2</td><td>78.0</td><td>3.2</td><td>73.9</td><td>78.2</td><td>33.2</td><td>2.9</td><td>4.0</td></tr>
+          <tr class="oss"><td>Qwen3-VL</td><td>8B</td><td>75.2</td><td>3.9</td><td>69.4</td><td>11.0</td><td>78.6</td><td>6.3</td><td>79.5</td><td>0.9</td><td>75.7</td><td>77.6</td><td>35.9</td><td>3.5</td><td>5.5</td></tr>
+          <tr class="oss"><td>VisualCoT</td><td>7B</td><td>52.3</td><td>5.5</td><td>44.6</td><td>3.9</td><td>59.7</td><td>3.6</td><td>55.4</td><td>1.0</td><td>53.0</td><td>52.1</td><td>51.2</td><td>2.4</td><td>3.5</td></tr>
+          <tr class="ft"><td>InternVL 3.5 FT</td><td>8B</td><td>74.6</td><td>65.0</td><td>68.8</td><td>67.9</td><td>82.0</td><td>64.3</td><td>79.1</td><td>61.2</td><td>76.1</td><td>80.4</td><td>72.2</td><td>61.4</td><td>64.6</td></tr>
+          <tr class="ft"><td>Qwen3-VL FT</td><td>8B</td><td>75.8</td><td>63.9</td><td>70.2</td><td>66.9</td><td>83.4</td><td>61.2</td><td>80.6</td><td>55.6</td><td>77.5</td><td>79.8</td><td>74.8</td><td>57.8</td><td>61.9</td></tr>
+          <tr class="ours"><td><strong>DoCoG (Ours)</strong></td><td>9B</td><td><strong>83.5</strong></td><td><strong>80.3</strong></td><td><strong>82.2</strong></td><td><strong>79.2</strong></td><td><strong>89.7</strong></td><td><strong>85.4</strong></td><td><strong>87.8</strong></td><td><strong>82.7</strong></td><td><strong>85.8</strong></td><td><strong>85.2</strong></td><td><strong>82.0</strong></td><td><strong>78.2</strong></td><td><strong>81.9</strong><span class="sota">SOTA</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Domain tables -->
+    <h3 class="s-title rv" style="font-size:1.35rem;margin-top:3rem;margin-bottom:.25rem">Domain-Specific Benchmark Results</h3>
+    <p class="s-sub rv" style="margin-bottom:1rem">Click the metric pills to switch charts. Each domain card shows detailed per-benchmark breakdowns.</p>
+
+    <div class="dom-stack">
+
+      <div class="dom-card rv">
+        <div class="dom-head">📊 Charts</div>
+        <div class="mc-wrap" data-mc="charts">
+          <div class="mc-tabs">
+            <button class="mc-tab on" data-d="charts" data-m="chartqa">ChartQA</button>
+            <button class="mc-tab" data-d="charts" data-m="chartbench">ChartBench</button>
+            <button class="mc-tab" data-d="charts" data-m="cqapro">CQA-Pro</button>
+          </div>
+          <p class="mc-hint">Hover for score · sorted high → low</p>
+          <div class="mc-body">
+            <div class="mc-pane on" id="mc-charts-chartqa"></div>
+            <div class="mc-pane" id="mc-charts-chartbench"></div>
+            <div class="mc-pane" id="mc-charts-cqapro"></div>
+          </div>
+        </div>
+        <div class="tbl-wrap">
+          <table class="rt">
+            <thead><tr><th>Model</th><th>ChartQA</th><th>CQA-Pro</th><th>ChartBench</th><th>CharXiv</th><th>Bench AQ</th></tr></thead>
+            <tbody>
+              <tr><td>GPT-5</td><td>89.0</td><td>42.7</td><td>69.4</td><td>76.3</td><td>82.4</td></tr>
+              <tr><td>Chart-R1</td><td>91.0</td><td>44.0</td><td>34.1</td><td>46.2</td><td>74.2</td></tr>
+              <tr><td>InternVL 3.5</td><td>86.7</td><td>34.7</td><td>51.4</td><td>68.8</td><td>73.4</td></tr>
+              <tr><td>Qwen3-VL</td><td>89.6</td><td>32.9</td><td>65.3</td><td>64.7</td><td>75.2</td></tr>
+              <tr class="ours"><td><strong>DoCoG</strong></td><td><strong>92.7</strong></td><td><strong>52.1</strong></td><td><strong>79.4</strong></td><td>73.1</td><td><strong>83.5</strong></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="dom-card rv">
+        <div class="dom-head">🔀 Flowcharts</div>
+        <div class="mc-wrap" data-mc="flowcharts">
+          <div class="mc-tabs">
+            <button class="mc-tab on" data-d="flowcharts" data-m="missqa">MISS-QA</button>
+            <button class="mc-tab" data-d="flowcharts" data-m="flowvqa">FlowVQA</button>
+            <button class="mc-tab" data-d="flowcharts" data-m="gqfa">Bench GQ<sub>fa</sub></button>
+          </div>
+          <p class="mc-hint">Hover for score · sorted high → low</p>
+          <div class="mc-body">
+            <div class="mc-pane on" id="mc-flowcharts-missqa"></div>
+            <div class="mc-pane" id="mc-flowcharts-flowvqa"></div>
+            <div class="mc-pane" id="mc-flowcharts-gqfa"></div>
+          </div>
+        </div>
+        <div class="tbl-wrap">
+          <table class="rt">
+            <thead><tr><th>Model</th><th>FlowVQA</th><th>AI2D</th><th>MISS-QA</th><th>Bench AQ</th><th>Bench GQ<sub>fa</sub></th></tr></thead>
+            <tbody>
+              <tr><td>GPT-5</td><td>91.9</td><td>89.5</td><td>71.7</td><td>78.1</td><td>4.0</td></tr>
+              <tr><td>InternVL 3.5</td><td>78.4</td><td>84.0</td><td>48.5</td><td>67.2</td><td>1.5</td></tr>
+              <tr><td>Qwen3-VL</td><td>81.0</td><td>85.7</td><td>46.2</td><td>69.4</td><td>11.0</td></tr>
+              <tr class="ours"><td><strong>DoCoG</strong></td><td><strong>85.5</strong></td><td>88.3</td><td><strong>78.4</strong></td><td><strong>82.2</strong></td><td><strong>79.2</strong></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="dom-card rv">
+        <div class="dom-head">📋 Tables</div>
+        <div class="mc-wrap" data-mc="tables">
+          <div class="mc-tabs">
+            <button class="mc-tab on" data-d="tables" data-m="tabfact">TabFact</button>
+            <button class="mc-tab" data-d="tables" data-m="wtq">WTQ</button>
+            <button class="mc-tab" data-d="tables" data-m="gqfa">Bench GQ<sub>fa</sub></button>
+          </div>
+          <p class="mc-hint">Hover for score · sorted high → low</p>
+          <div class="mc-body">
+            <div class="mc-pane on" id="mc-tables-tabfact"></div>
+            <div class="mc-pane" id="mc-tables-wtq"></div>
+            <div class="mc-pane" id="mc-tables-gqfa"></div>
+          </div>
+        </div>
+        <div class="tbl-wrap">
+          <table class="rt">
+            <thead><tr><th>Model</th><th>TabFact</th><th>WTQ</th><th>TabMWP</th><th>Bench AQ</th><th>Bench GQ<sub>fa</sub></th></tr></thead>
+            <tbody>
+              <tr><td>GPT-5</td><td>87.7</td><td>78.8</td><td>93.7</td><td>84.3</td><td>6.4</td></tr>
+              <tr><td>InternVL 3.5</td><td>78.1</td><td>55.6</td><td>55.7</td><td>78.0</td><td>3.2</td></tr>
+              <tr><td>Qwen3-VL</td><td>81.8</td><td>57.4</td><td>65.6</td><td>79.5</td><td>0.9</td></tr>
+              <tr class="ours"><td><strong>DoCoG</strong></td><td><strong>89.4</strong></td><td><strong>64.4</strong></td><td>80.7</td><td><strong>87.8</strong></td><td><strong>82.7</strong></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="dom-card rv">
+        <div class="dom-head">📄 Documents</div>
+        <div class="mc-wrap" data-mc="documents">
+          <div class="mc-tabs">
+            <button class="mc-tab on" data-d="documents" data-m="bdf1g">BD F1g</button>
+            <button class="mc-tab" data-d="documents" data-m="dogrf1g">DOGR F1g</button>
+            <button class="mc-tab" data-d="documents" data-m="mmdbiou">MMDB IoU</button>
+          </div>
+          <p class="mc-hint">Hover for score · sorted high → low</p>
+          <div class="mc-body">
+            <div class="mc-pane on" id="mc-documents-bdf1g"></div>
+            <div class="mc-pane" id="mc-documents-dogrf1g"></div>
+            <div class="mc-pane" id="mc-documents-mmdbiou"></div>
+          </div>
+        </div>
+        <div class="tbl-wrap">
+          <table class="rt">
+            <thead><tr><th>Model</th><th>DOGR F1g</th><th>MMDB IoU</th><th>VCoT</th><th>BD F1g</th><th>Bench AQ</th></tr></thead>
+            <tbody>
+              <tr><td>GPT-5</td><td>3.6</td><td>9.3</td><td>89.7</td><td>5.4</td><td>86.7</td></tr>
+              <tr><td>Gemini 3 Pro</td><td>65.3</td><td>55.4</td><td>87.4</td><td>73.5</td><td>88.1</td></tr>
+              <tr><td>Qwen3-VL</td><td>27.6</td><td>28.7</td><td>86.7</td><td>44.5</td><td>78.6</td></tr>
+              <tr class="ours"><td><strong>DoCoG</strong></td><td><strong>75.4</strong></td><td><strong>70.5</strong></td><td>88.9</td><td><strong>85.4</strong></td><td><strong>89.7</strong></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- BIBTEX — commented out until bib text is ready
+<section class="section section-alt" id="bibtex">
+  <div class="si">
+    <p class="s-lbl rv">Citation</p>
+    <h2 class="s-title rv">BibTeX</h2>
+    <p class="s-sub rv">If you find our work useful in your research, please consider citing:</p>
+    <div class="bib-wrap rv">
+      <div class="bib-bar">
+        <span>docog_eccv2026.bib</span>
+        <button id="copyBib"><i class="fas fa-copy"></i>&ensp;Copy</button>
+      </div>
+      <pre class="bib-code" id="bibText">@inproceedings{docog2026eccv,
+  title     = {DoCoG: Mask-based Multi-Type Grounded Chain-of-Thought for Document QA},
+  author    = {Gunda, Sai Madhusudan and Jinka, Jyothi Swaroopa and
+               Rachakonda, Hrithik Sagar and Jain, Aryan and
+               Venna, Venkata Kesav and Srinivasan, Anirudh and
+               Sarvadevabhatla, Ravi Kiran},
+  booktitle = {European Conference on Computer Vision (ECCV)},
+  year      = {2026}
+}</pre>
+    </div>
+  </div>
+</section>
+-->
+
+<!-- FOOTER -->
+<footer>
+  <div class="foot-logos">
+    <a href="https://eccv.ecva.net/" target="_blank" title="ECCV 2026"><img src="static/images/logos/eccv_logo.png" alt="ECCV"/></a>
+  </div>
+  <div style="margin-bottom:2rem">
+    <p style="font-size:.69rem;color:var(--t3);margin-bottom:.45rem;letter-spacing:.07em;text-transform:uppercase;font-weight:600">Visitor Map</p>
+    <a href="https://info.flagcounter.com/8zjF"><img src="https://s01.flagcounter.com/map/8zjF/size_s/txt_000000/border_CCCCCC/pageviews_1/viewers_0/flags_0/" alt="Flag Counter"></a>
+  </div>
+  <p>
+    This page was built using the <a href="https://github.com/eliahuhorwitz/Academic-project-page-template">Academic Project Page Template</a>
+    adopted from the <a href="https://nerfies.github.io">Nerfies</a> project page.<br>
+    Licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>.
+  </p>
+</footer>
+
+<script>
+/* ══════════════════════════════════════
+   CAROUSEL
+══════════════════════════════════════ */
+(function(){
+  const SLIDES = [
+    {
+      img:'static/images/qual_res_1.png',
+      cap:'<strong>Medical Bill Table QA —</strong> DoCoG grounds multi-span evidence across table cells, discount footnotes, and highlighted values simultaneously — tracking "Cost [GND]", "Blood Test [GND]", "5% discount [GND]", and "Claim [GND]" in a single grounded reasoning chain.'
+    },
+    {
+      img:'static/images/qual_res_2.png',
+      cap:'<strong>Infographic Spatial Grounding —</strong> On a Beijing 2022 Olympics venue infographic, DoCoG localizes named locations (Beijing, Yanqing, Zhangjiakou) and spatial connectors (dashed lines) as distinct grounded evidence regions, enabling precise QA over richly structured visual layouts.'
+    },
+    {
+      img:'static/images/qual_res_3.png',
+      cap:'<strong>Geometric Diagram QA —</strong> Mask-based grounding localizes specific labeled sides of a right-angled triangle — the hypotenuse annotation and the unknown length "x cm" — supporting step-wise mathematical reasoning that rectangular bounding boxes cannot express.'
+    },
+    {
+      img:'static/images/qual_res_4.png',
+      cap:'<strong>Financial Table Grounding —</strong> DoCoG distinguishes and grounds individual colored cell values ("Net Sales [GND]", "$20.00 [GND]") and the aggregate totals row ("$150.00 [GND]") within a dense credit card summary table — demonstrating precise intra-table, multi-span localization.'
+    },
+    {
+      img:'static/images/qual_res_5.png',
+      cap:'<strong>Architectural Floor Plan —</strong> DoCoG segments spatially distributed, non-rectangular room regions (Bedroom 1 and Bedroom 2) in a detailed architectural floor plan — a capability that pixel-aligned masks enable but axis-aligned bounding boxes fundamentally cannot.'
+    },
+    {
+      img:'static/images/qual_res_6.png',
+      cap:'<strong>Food Web Diagram —</strong> DoCoG grounds named species nodes (penguins, smaller toothed whales, leopard seal) and their directional arrow relationships in a complex ecological network — demonstrating simultaneous multi-type grounding over both diagram nodes and structural connectors.'
+    },
+  ];
+
+  const track   = document.getElementById('carTrack');
+  const ctr     = document.getElementById('carCtr');
+  const capEl   = document.getElementById('carCap');
+  const dotsEl  = document.querySelectorAll('.car-dot');
+  const thumbsW = document.getElementById('carThumbs');
+  const stage   = document.getElementById('carStage');
+  let cur = 0, touchX = 0;
+
+  /* Build slides — first one gets .cur */
+  track.innerHTML = SLIDES.map((s,i)=>`
+    <div class="car-slide${i===0?' cur':''}" aria-label="Slide ${i+1}">
+      <img src="${s.img}" alt="Qualitative result ${i+1}" loading="${i===0?'eager':'lazy'}">
+    </div>`).join('');
+
+  /* Build thumbnails */
+  thumbsW.innerHTML = SLIDES.map((s,i)=>`
+    <div class="car-thumb${i===0?' on':''}" data-i="${i}" role="button" tabindex="0" aria-label="Go to slide ${i+1}">
+      <img src="${s.img}" alt="Thumbnail ${i+1}" loading="lazy">
+    </div>`).join('');
+  const thumbEls = thumbsW.querySelectorAll('.car-thumb');
+  const slideEls = track.querySelectorAll('.car-slide');
+
+  /* Dark mode image swap */
+  function imgSrc(i){
+    const dark=document.documentElement.dataset.theme==='dark';
+    return dark?`static/images/dark/qual_res_${i+1}.png`:`static/images/qual_res_${i+1}.png`;
+  }
+  new MutationObserver(()=>{
+    slideEls.forEach((el,i)=>el.querySelector('img').src=imgSrc(i));
+    thumbEls.forEach((el,i)=>el.querySelector('img').src=imgSrc(i));
+  }).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+
+  /* Go to slide n */
+  function go(n) {
+    slideEls[cur].classList.remove('cur');
+    cur = ((n % SLIDES.length) + SLIDES.length) % SLIDES.length;
+    slideEls[cur].classList.add('cur');
+
+    const pad = v => String(v).padStart(2,'0');
+    ctr.textContent = `${pad(cur+1)} / ${pad(SLIDES.length)}`;
+
+    capEl.classList.add('fade');
+    setTimeout(()=>{ capEl.innerHTML=SLIDES[cur].cap; capEl.classList.remove('fade'); },240);
+
+    dotsEl.forEach((d,i)=>d.classList.toggle('on',i===cur));
+    thumbEls.forEach((t,i)=>t.classList.toggle('on',i===cur));
+  }
+
+  /* Arrows */
+  document.getElementById('carPrev').addEventListener('click',()=>go(cur-1));
+  document.getElementById('carNext').addEventListener('click',()=>go(cur+1));
+
+  /* Dots */
+  dotsEl.forEach(d=>d.addEventListener('click',()=>go(+d.dataset.i)));
+
+  /* Thumbs */
+  thumbEls.forEach(t=>{
+    t.addEventListener('click',()=>go(+t.dataset.i));
+    t.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' ') go(+t.dataset.i); });
+  });
+
+  /* Keyboard */
+  document.addEventListener('keydown',e=>{
+    if(document.activeElement.closest('#carouselRoot')||e.target===document.body){
+      if(e.key==='ArrowLeft'){go(cur-1);e.preventDefault();}
+      if(e.key==='ArrowRight'){go(cur+1);e.preventDefault();}
+    }
+  });
+
+  /* Swipe */
+  stage.addEventListener('touchstart',e=>{touchX=e.touches[0].clientX;},{passive:true});
+  stage.addEventListener('touchend',  e=>{
+    const dx=e.changedTouches[0].clientX-touchX;
+    if(Math.abs(dx)>40) go(dx>0?cur-1:cur+1);
+  },{passive:true});
+
+  /* Init caption (slide 0 already has .cur from HTML build) */
+  capEl.innerHTML = SLIDES[0].cap;
+})();
+
+/* ══════════════════════════════════════
+   MAIN CHART DATA (7 tabs)
+══════════════════════════════════════ */
+const MAIN = {
+  aq:{ models:[{n:'DoCoG (Ours)',v:85.8,o:1},{n:'Gemini 3 Pro',v:84.2},{n:'GPT-5',v:82.9},{n:'Gemini 3 Flash',v:80.6},{n:'Sonnet 4.5',v:79.9},{n:'Qwen3-VL FT',v:77.5},{n:'InternVL 3.5 FT',v:76.1},{n:'Qwen3-VL',v:75.7},{n:'InternVL 3.5',v:73.9},{n:'VisualCoT',v:53.0}] },
+  gq:{ models:[{n:'DoCoG (Ours)',v:81.9,o:1},{n:'InternVL 3.5 FT',v:64.6},{n:'Qwen3-VL FT',v:61.9},{n:'Gemini 3 Flash',v:23.6},{n:'Gemini 3 Pro',v:11.4},{n:'Sonnet 4.5',v:7.1},{n:'Qwen3-VL',v:5.5},{n:'GPT-5',v:4.8},{n:'InternVL 3.5',v:4.0},{n:'VisualCoT',v:3.5}] },
+  cq:{ models:[{n:'DoCoG (Ours)',v:82.0,o:1},{n:'GPT-5',v:76.8},{n:'Gemini 3 Pro',v:75.2},{n:'Qwen3-VL FT',v:74.8},{n:'Gemini 3 Flash',v:73.4},{n:'InternVL 3.5 FT',v:72.2},{n:'Sonnet 4.5',v:71.3},{n:'VisualCoT',v:51.2},{n:'Qwen3-VL',v:35.9},{n:'InternVL 3.5',v:33.2}] },
+  ch:{ models:[{n:'DoCoG (Ours)',v:83.5,o:1},{n:'Gemini 3 Pro',v:83.2},{n:'GPT-5',v:82.4},{n:'Gemini 3 Flash',v:79.6},{n:'Sonnet 4.5',v:79.1},{n:'Qwen3-VL FT',v:75.8},{n:'Qwen3-VL',v:75.2},{n:'InternVL 3.5 FT',v:74.6},{n:'InternVL 3.5',v:73.4},{n:'VisualCoT',v:52.3}] },
+  fl:{ models:[{n:'DoCoG (Ours)',v:82.2,o:1},{n:'Gemini 3 Pro',v:79.4},{n:'GPT-5',v:78.1},{n:'Gemini 3 Flash',v:75.8},{n:'Sonnet 4.5',v:75.3},{n:'Qwen3-VL FT',v:70.2},{n:'Qwen3-VL',v:69.4},{n:'InternVL 3.5 FT',v:68.8},{n:'InternVL 3.5',v:67.2},{n:'VisualCoT',v:44.6}] },
+  tb:{ models:[{n:'DoCoG (Ours)',v:87.8,o:1},{n:'Gemini 3 Pro',v:86.0},{n:'GPT-5',v:84.3},{n:'Gemini 3 Flash',v:82.4},{n:'Sonnet 4.5',v:81.6},{n:'Qwen3-VL FT',v:80.6},{n:'InternVL 3.5 FT',v:79.1},{n:'Qwen3-VL',v:79.5},{n:'InternVL 3.5',v:78.0},{n:'VisualCoT',v:55.4}] },
+  dc:{ models:[{n:'DoCoG (Ours)',v:89.7,o:1},{n:'Gemini 3 Pro',v:88.1},{n:'GPT-5',v:86.7},{n:'Gemini 3 Flash',v:84.5},{n:'Sonnet 4.5',v:83.8},{n:'Qwen3-VL FT',v:83.4},{n:'InternVL 3.5 FT',v:82.0},{n:'Qwen3-VL',v:78.6},{n:'InternVL 3.5',v:77.1},{n:'VisualCoT',v:59.7}] }
+};
+Object.values(MAIN).forEach(d=>d.models.sort((a,b)=>b.v-a.v));
+
+const MINI = {
+  charts:    { chartqa:{models:[{n:'DoCoG (Ours)',v:92.7,o:1},{n:'Chart-R1',v:91.0},{n:'Qwen3-VL',v:89.6},{n:'GPT-5',v:89.0},{n:'InternVL 3.5',v:86.7}]}, chartbench:{models:[{n:'DoCoG (Ours)',v:79.4,o:1},{n:'GPT-5',v:69.4},{n:'Qwen3-VL',v:65.3},{n:'InternVL 3.5',v:51.4},{n:'Chart-R1',v:34.1}]}, cqapro:{models:[{n:'DoCoG (Ours)',v:52.1,o:1},{n:'Chart-R1',v:44.0},{n:'GPT-5',v:42.7},{n:'InternVL 3.5',v:34.7},{n:'Qwen3-VL',v:32.9}]} },
+  flowcharts:{ missqa:{models:[{n:'DoCoG (Ours)',v:78.4,o:1},{n:'GPT-5',v:71.7},{n:'InternVL 3.5',v:48.5},{n:'Qwen3-VL',v:46.2}]}, flowvqa:{models:[{n:'GPT-5',v:91.9},{n:'DoCoG (Ours)',v:85.5,o:1},{n:'Qwen3-VL',v:81.0},{n:'InternVL 3.5',v:78.4}]}, gqfa:{models:[{n:'DoCoG (Ours)',v:79.2,o:1},{n:'Sonnet 4.5',v:13.3},{n:'Qwen3-VL',v:11.0},{n:'GPT-5',v:4.0},{n:'InternVL 3.5',v:1.5}]} },
+  tables:    { tabfact:{models:[{n:'DoCoG (Ours)',v:89.4,o:1},{n:'GPT-5',v:87.7},{n:'Qwen3-VL',v:81.8},{n:'InternVL 3.5',v:78.1}]}, wtq:{models:[{n:'GPT-5',v:78.8},{n:'DoCoG (Ours)',v:64.4,o:1},{n:'Qwen3-VL',v:57.4},{n:'InternVL 3.5',v:55.6}]}, gqfa:{models:[{n:'DoCoG (Ours)',v:82.7,o:1},{n:'GPT-5',v:6.4},{n:'InternVL 3.5',v:3.2},{n:'Qwen3-VL',v:0.9}]} },
+  documents: { bdf1g:{models:[{n:'DoCoG (Ours)',v:85.4,o:1},{n:'Gemini 3 Pro',v:73.5},{n:'Qwen3-VL',v:44.5},{n:'GPT-5',v:5.4}]}, dogrf1g:{models:[{n:'DoCoG (Ours)',v:75.4,o:1},{n:'Gemini 3 Pro',v:65.3},{n:'Qwen3-VL',v:27.6},{n:'GPT-5',v:3.6}]}, mmdbiou:{models:[{n:'DoCoG (Ours)',v:70.5,o:1},{n:'Gemini 3 Pro',v:55.4},{n:'Qwen3-VL',v:28.7},{n:'GPT-5',v:9.3}]} }
+};
+Object.values(MINI).forEach(d=>Object.values(d).forEach(m=>m.models.sort((a,b)=>b.v-a.v)));
+
+function mkRows(models, pfx) {
+  const isMain = pfx==='bar';
+  return models.map(m=>`
+    <div class="${pfx}-row">
+      <div class="${pfx}-name${m.o?' ours':''}">${m.n}</div>
+      <div class="${pfx}-track" title="${m.n}: ${m.v}">
+        <div class="${pfx}-fill${m.o?' ours':''}" data-pct="${(m.v).toFixed(2)}" style="width:0%">
+          <span class="${pfx}-tip">${m.v}</span>
+        </div>
+      </div>
+      <div class="${pfx}-score${m.o?' ours':''}">${m.v}</div>
+    </div>`).join('');
+}
+
+/* Build main panes */
+Object.entries(MAIN).forEach(([k,d])=>{
+  const el=document.getElementById('pane-'+k); if(!el) return;
+  el.innerHTML=mkRows(d.models,'bar');
+});
+
+/* Build mini panes */
+Object.entries(MINI).forEach(([dom,ms])=>Object.entries(ms).forEach(([met,d])=>{
+  const el=document.getElementById(`mc-${dom}-${met}`); if(!el) return;
+  el.innerHTML=mkRows(d.models,'mc');
+}));
+
+function animBars(sel) {
+  const fills=document.querySelectorAll(sel+' .bar-fill, '+sel+' .mc-fill');
+  fills.forEach(f=>f.style.width='0%');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    fills.forEach((f,i)=>setTimeout(()=>{ f.style.width=f.dataset.pct+'%'; },i*55));
+  }));
+}
+
+function animPane(id) {
+  const el=document.getElementById(id); if(!el||!el.closest('.c-pane,.mc-pane')) return;
+  const fills=el.querySelectorAll('.bar-fill,.mc-fill');
+  fills.forEach(f=>f.style.width='0%');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    fills.forEach((f,i)=>setTimeout(()=>{f.style.width=f.dataset.pct+'%';},i*55));
+  }));
+}
+
+/* Main tabs */
+let activeMain='aq';
+document.querySelectorAll('.c-tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.c-tab').forEach(t=>t.classList.remove('on'));
+    document.querySelectorAll('.c-pane').forEach(p=>p.classList.remove('on'));
+    tab.classList.add('on'); activeMain=tab.dataset.p;
+    const pane=document.getElementById('pane-'+activeMain);
+    pane.classList.add('on'); animPane('pane-'+activeMain);
+  });
+});
+
+/* Mini tabs */
+const activeMini={charts:'chartqa',flowcharts:'missqa',tables:'tabfact',documents:'bdf1g'};
+document.querySelectorAll('.mc-tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    const d=tab.dataset.d, m=tab.dataset.m;
+    document.querySelectorAll(`.mc-tab[data-d="${d}"]`).forEach(t=>t.classList.remove('on'));
+    document.querySelectorAll(`.mc-wrap[data-mc="${d}"] .mc-pane`).forEach(p=>p.classList.remove('on'));
+    tab.classList.add('on'); activeMini[d]=m;
+    const pane=document.getElementById(`mc-${d}-${m}`);
+    if(pane){ pane.classList.add('on'); animPane(`mc-${d}-${m}`); }
+  });
+});
+
+/* Scroll reveal + trigger charts */
+const rvObs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(!e.isIntersecting) return;
+    e.target.classList.add('in');
+    if(e.target.id==='mainChart') setTimeout(()=>animPane('pane-'+activeMain),350);
+  });
+},{threshold:0.1,rootMargin:'0px 0px -40px 0px'});
+document.querySelectorAll('.rv').forEach(el=>rvObs.observe(el));
+
+/* Mini chart scroll trigger */
+const mcObs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(!e.isIntersecting) return;
+    const d=e.target.dataset.mc;
+    if(d) { setTimeout(()=>animPane(`mc-${d}-${activeMini[d]}`),200); mcObs.unobserve(e.target); }
+  });
+},{threshold:0.2});
+document.querySelectorAll('.mc-wrap').forEach(w=>mcObs.observe(w));
+
+/* Mobile nav */
+document.getElementById('navBurger').addEventListener('click',()=>
+  document.getElementById('navLinks').classList.toggle('open'));
+document.querySelectorAll('#navLinks a').forEach(a=>
+  a.addEventListener('click',()=>document.getElementById('navLinks').classList.remove('open')));
+
+/* Active nav on scroll */
+const navAs=document.querySelectorAll('.nav-links a');
+const navObs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      navAs.forEach(a=>a.style.color='');
+      const l=document.querySelector(`.nav-links a[href="#${e.target.id}"]`);
+      if(l) l.style.color='var(--ink)';
+    }
+  });
+},{threshold:0.4});
+['abstract','method','dataset','results'].forEach(id=>{
+  const el=document.getElementById(id); if(el) navObs.observe(el);
+});
+
+/* ── Theme toggle ── */
+(function(){
+  const btn=document.getElementById('themeBtn');
+  const icon=document.getElementById('themeIcon');
+  const html=document.documentElement;
+  const teaserImg=document.getElementById('teaserImg');
+  const methodImg=document.getElementById('methodImg');
+
+  function applyTheme(dark){
+    html.dataset.theme=dark?'dark':'light';
+    icon.className=dark?'fas fa-sun':'fas fa-moon';
+    teaserImg.src=dark?'static/images/dark/teaser_dark.png':'static/images/teaser.png';
+    methodImg.src=dark?'static/images/dark/method_diagram_dark.png':'static/images/model_overview.png';
+  }
+
+  const saved=localStorage.getItem('docog-theme');
+  const sysDark=window.matchMedia('(prefers-color-scheme:dark)').matches;
+  if(saved==='dark'||(saved===null&&sysDark)) applyTheme(true);
+
+  btn.addEventListener('click',()=>{
+    const dark=html.dataset.theme!=='dark';
+    applyTheme(dark);
+    localStorage.setItem('docog-theme',dark?'dark':'light');
+  });
+})();
+</script>
+<script src="static/js/qual-data.js"></script>
+<script src="static/js/qual-engine.js"></script>
+</body>
+</html>

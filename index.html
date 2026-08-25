@@ -117,6 +117,8 @@ code {
 .btn { display:inline-flex; align-items:center; gap:.4rem; padding:.5rem 1.15rem; border-radius:100px; font-size:.875rem; font-weight:600; font-family:inherit; text-decoration:none; cursor:pointer; border:none; transition:transform .2s var(--e1),box-shadow .2s var(--e1); }
 .btn:hover:not(.btn-dis) { transform:translateY(-1px); }
 .btn-dis { opacity:.5; cursor:not-allowed; background:#fff; color:var(--t2); border:1.5px solid var(--b0); }
+.btn-live { background:var(--ink); color:#fff; box-shadow:0 4px 14px rgba(79,70,229,.32); }
+.btn-live:hover { box-shadow:0 6px 20px rgba(79,70,229,.4); }
 .cs { font-size:.61rem; font-weight:700; background:#f3f4f6; color:var(--t2); padding:.1rem .4rem; border-radius:4px; text-transform:uppercase; letter-spacing:.05em; }
 
 .logos { display:flex; align-items:center; justify-content:center; gap:2.5rem; flex-wrap:wrap; padding:1.5rem 2rem; margin-top:2.5rem; background:var(--ink50); border:1px solid var(--ink200); border-radius:var(--rc); }
@@ -163,6 +165,21 @@ code {
 
 .enc { text-align:center; background:var(--ink50); border:1px solid var(--ink200); border-radius:var(--rb); padding:.95rem 2rem; font-size:.95rem; color:var(--ink); font-weight:600; margin:1.5rem 0; }
 .enc code { background:rgba(79,70,229,.1); color:var(--ink700); }
+
+/* ── Demo CTA ── */
+.demo-cta { display:grid; grid-template-columns:1.1fr .9fr; gap:2.5rem; align-items:center; background:#fff; border:1.5px solid var(--b1); border-radius:var(--rc); padding:2.5rem; box-shadow:var(--s2); }
+.demo-cta-badges { display:flex; flex-wrap:wrap; align-items:center; gap:.6rem; margin-bottom:.9rem; }
+.demo-cta-copy h3 { font-size:1.35rem; font-weight:800; color:var(--t1); letter-spacing:-.01em; margin-bottom:.6rem; }
+.demo-cta-copy > p { font-size:.92rem; color:var(--t2); line-height:1.75; margin-bottom:1.1rem; }
+.demo-cta-list { list-style:none; margin-bottom:1.6rem; }
+.demo-cta-list li { font-size:.85rem; color:var(--t2); display:flex; align-items:center; gap:.6rem; padding:.3rem 0; }
+.demo-cta-list li i { color:var(--ink); font-size:.72rem; width:1em; text-align:center; }
+.demo-cta-visual { position:relative; border-radius:var(--rb); overflow:hidden; border:1.5px solid var(--b1); box-shadow:var(--s1); aspect-ratio:4/3; }
+.demo-cta-visual img { display:block; width:100%; height:100%; object-fit:cover; }
+.demo-cta-visual::after { content:'\f04b'; font-family:'Font Awesome 6 Free'; font-weight:900; position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:1.4rem; color:#fff; background:rgba(17,17,20,.28); opacity:0; transition:opacity .25s var(--e1); }
+.demo-cta-visual:hover::after { opacity:1; }
+@media(max-width:768px){ .demo-cta{grid-template-columns:1fr; padding:1.75rem;} }
+[data-theme="dark"] .demo-cta{ background:var(--bg2); border-color:var(--b1); }
 
 /* ── Interactive architecture embed ── */
 .arch-demo { max-width:980px; margin:0 auto; background:#fff; border:1.5px solid var(--b1); border-radius:var(--rc); box-shadow:var(--s2); overflow:hidden; }
@@ -515,6 +532,7 @@ footer a:hover { color:var(--ink); }
     <ul class="nav-links" id="navLinks">
       <li><a href="#abstract">Abstract</a></li>
       <li><a href="#method">Method</a></li>
+      <li><a href="#demo">Demo</a></li>
       <li><a href="#dataset">Dataset</a></li>
       <li><a href="#results">Results</a></li>
     </ul>
@@ -546,6 +564,7 @@ footer a:hover { color:var(--ink); }
       <span style="font-size:.82rem;color:var(--t3)"><sup>*</sup> Equal contribution</span>
     </div>
     <div class="btn-row ha a4">
+      <a href="demo.html" class="btn btn-live"><i class="fas fa-bolt"></i> Live Demo</a>
       <span class="btn btn-dis"><i class="fas fa-newspaper"></i> arXiv <span class="cs">Soon</span></span>
       <span class="btn btn-dis"><i class="fab fa-github"></i> Code <span class="cs">Soon</span></span>
       <span class="btn btn-dis"><i class="fas fa-database"></i> Dataset <span class="cs">Soon</span></span>
@@ -708,6 +727,34 @@ footer a:hover { color:var(--ink); }
       <div class="lc gold"><strong>DPO — Preference Optimization</strong><p>Trained on DoCoG-PQA (20K pairs) to align step quality, answer accuracy, and grounding fidelity jointly.</p></div>
     </div>
 
+  </div>
+</section>
+
+<!-- DEMO CTA -->
+<section class="section section-alt" id="demo">
+  <div class="si">
+    <p class="s-lbl rv">Interactive</p>
+    <h2 class="s-title rv">Try DoCoG</h2>
+    <p class="s-sub rv">A Spaces-style playground — upload a document, ask a question, and watch the grounded reasoning unfold.</p>
+
+    <div class="demo-cta rv">
+      <div class="demo-cta-copy">
+        <div class="demo-cta-badges">
+          <span class="badge" style="margin-bottom:0"><i class="fas fa-bolt"></i>&ensp;Live Model</span>
+        </div>
+        <h3>Grounded QA, end to end</h3>
+        <p>Upload a document (or try a sample), ask a question in natural language, and get a real step-wise Chain-of-Thought answer from DoCoG — each <code>[GND]</code> token grounded to a segmentation mask over the exact evidence it used.</p>
+        <ul class="demo-cta-list">
+          <li><i class="fas fa-check"></i> Runs the real trained model, not a scripted preview</li>
+          <li><i class="fas fa-check"></i> Upload your own scan or screenshot</li>
+          <li><i class="fas fa-check"></i> Multi-type grounding across text, charts, and diagrams</li>
+        </ul>
+        <a href="demo.html" class="btn btn-live"><i class="fas fa-rocket"></i> Launch Interactive Demo</a>
+      </div>
+      <a class="demo-cta-visual" href="demo.html" aria-label="Launch interactive demo">
+        <img src="static/images/qual/originals/qual_res_6_foodweb.png" alt="DoCoG demo preview">
+      </a>
+    </div>
   </div>
 </section>
 
@@ -1214,7 +1261,7 @@ const navObs=new IntersectionObserver(entries=>{
     }
   });
 },{threshold:0.4});
-['abstract','method','dataset','results'].forEach(id=>{
+['abstract','method','demo','dataset','results'].forEach(id=>{
   const el=document.getElementById(id); if(el) navObs.observe(el);
 });
 

@@ -269,6 +269,22 @@ code {
 .ds-solo p  { font-size:.875rem; color:var(--t2); max-width:580px; margin:0 auto; }
 .coming-note { background:#f8faff; border:1px solid var(--ink200); border-radius:var(--rb); padding:.85rem 1.25rem; font-size:.88rem; color:var(--ink700); display:flex; align-items:center; gap:.5rem; margin-bottom:1.5rem; }
 
+/* ── Workshops ── */
+.workshop-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin-top:1.5rem; }
+.workshop-card { background:#fff; border:1.5px solid var(--b1); border-radius:var(--rb); padding:1.35rem; box-shadow:var(--s1); display:flex; flex-direction:column; gap:.85rem; transition:transform .28s var(--e1),box-shadow .28s var(--e1); }
+.workshop-card:hover { transform:translateY(-3px); box-shadow:var(--s2); }
+.workshop-kicker { display:flex; align-items:center; justify-content:space-between; gap:.75rem; color:var(--ink); font-size:.74rem; font-weight:800; letter-spacing:.07em; text-transform:uppercase; }
+.workshop-date { background:var(--ink50); border:1px solid var(--ink200); border-radius:100px; color:var(--ink700); padding:.15rem .55rem; white-space:nowrap; }
+.workshop-card h3 { font-size:1rem; line-height:1.35; color:var(--t1); font-weight:800; }
+.workshop-card p { color:var(--t2); font-size:.84rem; line-height:1.65; }
+.workshop-meta { display:flex; flex-direction:column; gap:.35rem; margin-top:auto; color:var(--t2); font-size:.78rem; line-height:1.5; }
+.workshop-meta span { display:flex; align-items:flex-start; gap:.4rem; }
+.workshop-links { display:flex; flex-wrap:wrap; gap:.45rem; padding-top:.2rem; }
+.workshop-links a { text-decoration:none; background:var(--bg2); border:1px solid var(--b1); border-radius:100px; color:var(--t1); font-size:.76rem; font-weight:700; padding:.3rem .65rem; transition:color .18s,border-color .18s,background .18s; }
+.workshop-links a:hover { color:var(--ink); border-color:var(--ink200); background:var(--ink50); }
+.acceptance-note { max-width:720px; margin:0 auto 1.5rem; text-align:center; background:#fff; border:1.5px solid var(--b1); border-radius:var(--rb); padding:.85rem 1.2rem; color:var(--t2); font-size:.9rem; box-shadow:var(--s1); }
+.acceptance-note strong { color:var(--ink); }
+
 /* ── Results chips ── */
 .chips { display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; margin-bottom:3rem; }
 .chip { background:#fff; border:1.5px solid var(--b1); border-radius:var(--rb); padding:1.25rem 1.75rem; text-align:center; box-shadow:var(--s1); min-width:140px; transition:transform .28s var(--e1),box-shadow .28s var(--e1); }
@@ -381,7 +397,7 @@ footer a:hover { color:var(--ink); }
   .nav-links{display:none} .nav-burger{display:block}
   .nav-links.open{display:flex;flex-direction:column;position:absolute;top:52px;left:0;right:0;background:rgba(255,255,255,.97);backdrop-filter:blur(20px);padding:1rem;border-bottom:1px solid var(--b1);z-index:99;}
   .nav-links.open a{padding:.6rem .75rem}
-  .grid2,.loss4,.ds-grid,.grid3{grid-template-columns:1fr}
+  .grid2,.loss4,.ds-grid,.grid3,.workshop-grid{grid-template-columns:1fr}
   .mg{grid-template-columns:repeat(2,1fr)}
   .hero-title{font-size:1.85rem}
   .logos{gap:1.5rem;padding:1.25rem} .logos img{height:48px}
@@ -413,7 +429,8 @@ footer a:hover { color:var(--ink); }
 [data-theme="dark"] .m-card,[data-theme="dark"] .f-card,[data-theme="dark"] .ds-card,
 [data-theme="dark"] .ds-solo,[data-theme="dark"] .chart-box,[data-theme="dark"] .chip,
 [data-theme="dark"] .dom-card,[data-theme="dark"] .car-stage,
-[data-theme="dark"] .arch-demo{background:var(--bg2);border-color:var(--b1);}
+[data-theme="dark"] .arch-demo,[data-theme="dark"] .workshop-card,
+[data-theme="dark"] .acceptance-note{background:var(--bg2);border-color:var(--b1);}
 [data-theme="dark"] .rt tr.comm{background:#16162a;}
 [data-theme="dark"] .rt tr.oss{background:#161622;}
 [data-theme="dark"] .rt tr.ft{background:#18162e;}
@@ -513,6 +530,7 @@ footer a:hover { color:var(--ink); }
     <a class="nav-brand" href="#">Do<span>Co</span>G</a>
     <button class="nav-burger" id="navBurger" aria-label="menu"><i class="fas fa-bars"></i></button>
     <ul class="nav-links" id="navLinks">
+      <li><a href="#workshops">Workshops</a></li>
       <li><a href="#abstract">Abstract</a></li>
       <li><a href="#method">Method</a></li>
       <li><a href="#dataset">Dataset</a></li>
@@ -556,6 +574,65 @@ footer a:hover { color:var(--ink); }
       <a href="https://eccv.ecva.net/" target="_blank" title="ECCV 2026"><img src="static/images/logos/eccv_logo.png" alt="ECCV"/></a>
       <a href="https://bharatgen.com/" target="_blank" title="BharatGen"><img src="static/images/logos/bharatgen_logo.png" alt="BharatGen"/></a>
       <a href="https://www.iiit.ac.in/" target="_blank" title="IIIT Hyderabad"><img src="static/images/logos/iiith_logo.jpg" alt="IIIT Hyderabad"/></a>
+    </div>
+  </div>
+</section>
+
+<!-- WORKSHOPS -->
+<section class="section section-alt" id="workshops">
+  <div class="siw">
+    <p class="s-lbl rv">ECCV 2026 Workshops</p>
+    <h2 class="s-title rv">DoCoG at Three ECCV Workshops</h2>
+    <p class="acceptance-note rv"><strong>Confirmed workshop acceptances:</strong> eXCV, MUCG, and UniWorld.</p>
+    <div class="workshop-grid rv">
+      <article class="workshop-card">
+        <div class="workshop-kicker">
+          <span>eXCV</span>
+          <span class="workshop-date">Sep 8, 2026</span>
+        </div>
+        <h3>3rd Workshop on Explainable Computer Vision</h3>
+        <p>Challenges and Opportunities in the Era of Foundation Models.</p>
+        <div class="workshop-meta">
+          <span><i class="fas fa-layer-group"></i> Track: Nectar / non-proceedings</span>
+          <span><i class="fas fa-check-circle"></i> DoCoG is listed in the accepted papers.</span>
+        </div>
+        <div class="workshop-links">
+          <a href="https://excv-workshop.github.io/" target="_blank" rel="noopener noreferrer">Workshop site</a>
+        </div>
+      </article>
+
+      <article class="workshop-card">
+        <div class="workshop-kicker">
+          <span>MUCG</span>
+          <span class="workshop-date">Sep 8, 2026</span>
+        </div>
+        <h3>Multimodal LLMs for Unified Comprehension and Generation</h3>
+        <p>DoCoG appears as accepted paper #24.</p>
+        <div class="workshop-meta">
+          <span><i class="fas fa-location-dot"></i> Venue: Malmömässan A</span>
+          <span><i class="fas fa-clock"></i> Poster session: 15:00-16:00</span>
+        </div>
+        <div class="workshop-links">
+          <a href="https://mllm-mucg.github.io/ECCV2026/" target="_blank" rel="noopener noreferrer">Workshop site</a>
+          <a href="https://openreview.net/forum?id=bRGkVlTMnD" target="_blank" rel="noopener noreferrer">OpenReview</a>
+        </div>
+      </article>
+
+      <article class="workshop-card">
+        <div class="workshop-kicker">
+          <span>UniWorld</span>
+          <span class="workshop-date">Sep 9, 2026</span>
+        </div>
+        <h3>Universal Representations for Perception, Reasoning, and World Modeling</h3>
+        <p>DoCoG appears as accepted paper #16, with all accepted papers presented as posters.</p>
+        <div class="workshop-meta">
+          <span><i class="fas fa-person-chalkboard"></i> Presentation format: poster</span>
+          <span><i class="fas fa-check-circle"></i> Included in the official accepted paper list.</span>
+        </div>
+        <div class="workshop-links">
+          <a href="https://uniworld-ai.github.io/" target="_blank" rel="noopener noreferrer">Workshop site</a>
+        </div>
+      </article>
     </div>
   </div>
 </section>

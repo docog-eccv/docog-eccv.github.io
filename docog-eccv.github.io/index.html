@@ -542,9 +542,9 @@ footer a:hover { color:var(--ink); }
       for Document QA
     </h1>
     <div class="authors ha a3">
-      <a href="https://www.linkedin.com/in/sai-madhusudan-gunda-45bab4223/" target="_blank">Sai&nbsp;Madhusudan&nbsp;Gunda</a><sup>2,*</sup>,&ensp;
-      <a href="https://www.linkedin.com/in/jyothi-swaroopa-jinka-339320200/" target="_blank">Jyothi&nbsp;Swaroopa&nbsp;Jinka</a><sup>2,*</sup>,&ensp;
-      <a href="https://www.linkedin.com/in/hrithiksagar/" target="_blank">Hrithik&nbsp;Sagar&nbsp;Rachakonda</a><sup>2,*</sup>,&ensp;
+      <a href="https://www.linkedin.com/in/sai-madhusudan-gunda-45bab4223/" target="_blank"><strong>Sai&nbsp;Madhusudan&nbsp;Gunda</strong></a><sup>2,*</sup>,&ensp;
+      <a href="https://www.linkedin.com/in/jyothi-swaroopa-jinka-339320200/" target="_blank"><strong>Jyothi&nbsp;Swaroopa&nbsp;Jinka</strong></a><sup>2,*</sup>,&ensp;
+      <a href="https://www.linkedin.com/in/hrithiksagar/" target="_blank"><strong>Hrithik&nbsp;Sagar&nbsp;Rachakonda</strong></a><sup>2,*</sup>,&ensp;
       <a href="https://www.linkedin.com/in/aryan23132/" target="_blank">Aryan&nbsp;Jain</a><sup>2</sup>,&ensp;
       <a href="https://www.linkedin.com/in/venkata-kesav-venna-8a489b20b/" target="_blank">Venkat&nbsp;Kesav&nbsp;Venna</a><sup>1</sup>,&ensp;
       <a href="https://www.linkedin.com/in/anirudh-srini/" target="_blank">Anirudh&nbsp;Srinivasan</a><sup>1</sup>,&ensp;
@@ -1301,14 +1301,9 @@ document.getElementById('copyBib').addEventListener('click',async function(){
     methodImg.src=dark?'static/images/dark/method_diagram_dark.png':'static/images/model_overview.png';
   }
 
-  const saved=localStorage.getItem('docog-theme');
-  const sysDark=window.matchMedia('(prefers-color-scheme:dark)').matches;
-  if(saved==='dark'||(saved===null&&sysDark)) applyTheme(true);
-
   btn.addEventListener('click',()=>{
     const dark=html.dataset.theme!=='dark';
     applyTheme(dark);
-    localStorage.setItem('docog-theme',dark?'dark':'light');
   });
 })();
 </script>

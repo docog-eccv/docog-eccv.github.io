@@ -535,6 +535,7 @@ footer a:hover { color:var(--ink); }
       <li><a href="#method">Method</a></li>
       <li><a href="#dataset">Dataset</a></li>
       <li><a href="#results">Results</a></li>
+      <li><a href="#bibtex">BibTeX</a></li>
     </ul>
     <button class="theme-btn" id="themeBtn" aria-label="Toggle dark mode"><i class="fas fa-moon" id="themeIcon"></i></button>
   </div>
@@ -565,7 +566,8 @@ footer a:hover { color:var(--ink); }
     </div>
     <div class="btn-row ha a4">
       <a href="slides/" target="_blank" class="btn" style="background:var(--ink);color:#fff"><i class="fas fa-person-chalkboard"></i> Slides</a>
-      <span class="btn btn-dis"><i class="fas fa-newspaper"></i> arXiv <span class="cs">Soon</span></span>
+      <a href="https://link.springer.com/chapter/10.1007/978-3-032-37271-0_17" target="_blank" rel="noopener noreferrer" class="btn"><i class="fas fa-file-lines"></i> Paper</a>
+      <a href="https://scholar.googleusercontent.com/scholar.bib?q=info:1FSQG-loA7sJ:scholar.google.com/&amp;output=citation&amp;scisdr=CoF2_g5WEMOq0Hqo2uY:AIVdB-wAAAAAaquuwuZxehVPhy7A-Kj_3taOpho&amp;scisig=AIVdB-wAAAAAaquuwpxy2X2s5IeTeELXe6_u0OQ&amp;scisf=4&amp;ct=citation&amp;cd=-1&amp;hl=en" target="_blank" rel="noopener noreferrer" class="btn"><i class="fas fa-quote-right"></i> BibTeX</a>
       <span class="btn btn-dis"><i class="fab fa-github"></i> Code <span class="cs">Soon</span></span>
       <span class="btn btn-dis"><i class="fas fa-database"></i> Dataset <span class="cs">Soon</span></span>
       <span class="btn btn-dis">🤗 Models <span class="cs">Soon</span></span>
@@ -1011,7 +1013,7 @@ footer a:hover { color:var(--ink); }
   </div>
 </section>
 
-<!-- BIBTEX — commented out until bib text is ready
+<!-- BIBTEX -->
 <section class="section section-alt" id="bibtex">
   <div class="si">
     <p class="s-lbl rv">Citation</p>
@@ -1022,20 +1024,17 @@ footer a:hover { color:var(--ink); }
         <span>docog_eccv2026.bib</span>
         <button id="copyBib"><i class="fas fa-copy"></i>&ensp;Copy</button>
       </div>
-      <pre class="bib-code" id="bibText">@inproceedings{docog2026eccv,
-  title     = {DoCoG: Mask-based Multi-Type Grounded Chain-of-Thought for Document QA},
-  author    = {Gunda, Sai Madhusudan and Jinka, Jyothi Swaroopa and
-               Rachakonda, Hrithik Sagar and Jain, Aryan and
-               Venna, Venkata Kesav and Srinivasan, Anirudh and
-               Sarvadevabhatla, Ravi Kiran},
-  booktitle = {European Conference on Computer Vision (ECCV)},
-  year      = {2026},
-  note      = {Spotlight}
+      <pre class="bib-code" id="bibText">@inproceedings{gunda2026docog,
+  title={DoCoG: Mask-Based Multi-type Grounded Chain-of-Thought for Document QA},
+  author={Gunda, Sai Madhusudan and Jinka, Jyothi Swaroopa and Rachakonda, Hrithik Sagar and Jain, Aryan and Venna, Venkata Kesav and Srinivasan, Anirudh and Sarvadevabhatla, Ravi Kiran},
+  booktitle={European Conference on Computer Vision},
+  pages={308--327},
+  year={2026},
+  organization={Springer}
 }</pre>
     </div>
   </div>
 </section>
--->
 
 <!-- FOOTER -->
 <footer>
@@ -1292,8 +1291,16 @@ const navObs=new IntersectionObserver(entries=>{
     }
   });
 },{threshold:0.4});
-['abstract','method','dataset','results'].forEach(id=>{
+['abstract','method','dataset','results','bibtex'].forEach(id=>{
   const el=document.getElementById(id); if(el) navObs.observe(el);
+});
+
+/* Copy BibTeX */
+document.getElementById('copyBib').addEventListener('click',async function(){
+  await navigator.clipboard.writeText(document.getElementById('bibText').textContent);
+  const original=this.innerHTML;
+  this.innerHTML='<i class="fas fa-check"></i>&ensp;Copied';
+  setTimeout(()=>{ this.innerHTML=original; },1600);
 });
 
 /* ── Theme toggle ── */
